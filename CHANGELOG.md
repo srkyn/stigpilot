@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+
+- Added `stigpilot packet` for one-command full workflow packet generation from two STIG XML files.
+- The packet command writes the change brief, manager summary, remediation backlog, evidence checklist, Jira CSV, ServiceNow CSV, and GitHub issue drafts.
+- Added CLI regression coverage for complete packet generation.
+
 ## 0.4.0
 
 - Added `stigpilot batch` for folder-to-folder STIG release comparisons.

@@ -104,6 +104,30 @@ def test_cli_diff_rejects_unknown_impact_filter(tmp_path: Path):
     assert "--impact must be one of" in result.output
 
 
+def test_cli_packet_generates_complete_packet(tmp_path: Path):
+    out = tmp_path / "packet"
+
+    result = runner.invoke(
+        app,
+        [
+            "packet",
+            str(ROOT / "examples" / "sample_input" / "old.xml"),
+            str(ROOT / "examples" / "sample_input" / "new.xml"),
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "Start here" in result.output
+    assert (out / "change-brief.md").exists()
+    assert (out / "manager-summary.md").exists()
+    assert (out / "remediation-backlog.csv").exists()
+    assert (out / "jira-import.csv").exists()
+    assert (out / "servicenow-import.csv").exists()
+    assert (out / "github-issues.md").exists()
+
+
 def test_cli_batch_generates_portfolio_packet(tmp_path: Path):
     old_dir = tmp_path / "old"
     new_dir = tmp_path / "new"

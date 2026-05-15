@@ -371,6 +371,32 @@ def manager(
 
 
 @app.command()
+def packet(
+    old_xml: Path = typer.Argument(..., exists=True, readable=True, help="Old STIG XCCDF/XML file."),
+    new_xml: Path = typer.Argument(..., exists=True, readable=True, help="New STIG XCCDF/XML file."),
+    out: Path = typer.Option(Path("output/packet"), "--out", help="Directory for the generated comparison packet."),
+    impact_filter: Optional[str] = typer.Option(None, "--impact", help="Only include one impact category, such as high_priority_review."),
+    owner_filter: Optional[str] = typer.Option(None, "--owner", help='Only include changes for one suggested owner, such as "Endpoint/Windows Admin".'),
+    config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
+) -> None:
+    """Generate a complete local workflow packet for one STIG comparison."""
+
+    config = _load_config(config_path)
+    old_doc = _load(old_xml, config)
+    new_doc = _load(new_xml, config)
+    _warn_same_inputs(old_xml, new_xml, old_doc, new_doc)
+    for source_name, duplicates in (("old", duplicate_keys(old_doc.controls)), ("new", duplicate_keys(new_doc.controls))):
+        if duplicates:
+            console.print(f"[yellow]Warning:[/yellow] duplicate stable keys in {source_name} file: {duplicates}")
+    all_changes = compare_documents(old_doc, new_doc)
+    changes = _filter_changes(all_changes, impact_filter, owner_filter, config)
+    outputs = _write_comparison_packet(old_doc, new_doc, changes, out, config)
+    _print_outputs_table("STIGPilot Packet Generated", outputs)
+    _print_change_summary(changes, list(outputs.values()))
+    console.print(f"[bold]Start here:[/bold] {outputs['Change brief']}")
+
+
+@app.command()
 def batch(
     old_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of old STIG XCCDF/XML files."),
     new_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of new STIG XCCDF/XML files."),

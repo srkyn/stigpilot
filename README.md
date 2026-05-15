@@ -186,6 +186,12 @@ Compare two STIG versions:
 stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv
 ```
 
+Generate a complete local workflow packet from two STIG files:
+
+```bash
+stigpilot packet examples/sample_input/old.xml examples/sample_input/new.xml --out output/packet
+```
+
 Generate workflow exports:
 
 ```bash
@@ -253,6 +259,8 @@ Committed sample outputs in `examples/sample_output/`:
 - `jira-import.csv`
 - `servicenow-import.csv`
 - `github-issues.md`
+
+One-command packet outputs are committed in `examples/packet_output/`.
 
 Folder comparison sample outputs are committed in `examples/portfolio_output/`.
 - `controls.csv`
