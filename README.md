@@ -10,6 +10,8 @@ STIGPilot is a local Python CLI that compares official DISA STIG XCCDF releases 
 
 Official tools are authoritative for viewing, scanning, checklist work, and formal compliance. STIGPilot focuses on the workflow gap after a new STIG release drops: what changed, what matters, who owns it, what tickets should be created, and what evidence needs refreshing.
 
+I built this after learning about STIGs and asking a practical question: if someone is responsible for applying these controls or comparing releases, what would make their day easier? The answer was not another viewer or scanner. It was a fast local helper that turns a dense XML release into a short brief, a backlog, and evidence requests people can actually act on.
+
 ## 30-second demo
 
 ```bash
@@ -291,6 +293,7 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 
 ## Portfolio value
 
+- Built from a practical security-automation question: how can STIG comparison and follow-up work be made less painful for the people doing it?
 - Defensive security product judgment
 - XCCDF/XML parsing with namespace resilience
 - STIG release change analysis
