@@ -1,0 +1,33 @@
+from pathlib import Path
+
+from stigpilot.parser import parse_stig
+
+
+FIXTURE = Path(__file__).parent / "fixtures_old.xml"
+
+
+def test_parse_stig_extracts_core_fields():
+    document = parse_stig(FIXTURE)
+
+    assert document.title == "Synthetic Application STIG"
+    assert document.version == "V1R1"
+    assert document.release == "Release 1 (2026-01-01)"
+    assert len(document.controls) == 3
+
+    control = document.controls[0]
+    assert control.vuln_id == "V-100001"
+    assert control.rule_id == "SV-100001r1_rule"
+    assert control.group_id == "V-100001"
+    assert control.stig_id == "APP-STIG-000001"
+    assert control.severity == "medium"
+    assert control.cci_refs == ["CCI-000001"]
+    assert "Local Security Policy" in control.check_text
+    assert "GPO" in control.fix_text
+
+
+def test_parser_tolerates_namespaced_new_fixture():
+    document = parse_stig(Path(__file__).parent / "fixtures_new.xml")
+
+    assert len(document.controls) == 3
+    assert document.controls[0].vuln_id == "V-100001"
+    assert document.controls[2].severity == "high"

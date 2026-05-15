@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xccdf:Benchmark xmlns:xccdf="http://checklists.nist.gov/xccdf/1.1" id="synthetic_new">
+  <xccdf:title>Synthetic Application STIG</xccdf:title>
+  <xccdf:status date="2026-03-01">Release 2</xccdf:status>
+  <xccdf:version>V1R2</xccdf:version>
+  <xccdf:Group id="V-100001">
+    <xccdf:Rule id="SV-100001r2_rule" severity="high">
+      <xccdf:title>Windows audit policy must be configured and reviewed</xccdf:title>
+      <xccdf:ident system="http://cyber.mil/cci">CCI-000001</xccdf:ident>
+      <xccdf:check><xccdf:check-content>Review Windows audit policy settings in Local Security Policy and export applied GPO evidence.</xccdf:check-content></xccdf:check>
+      <xccdf:fixtext>Configure Windows audit policy through GPO and document the applied baseline.</xccdf:fixtext>
+    </xccdf:Rule>
+  </xccdf:Group>
+  <xccdf:Group id="V-100004">
+    <xccdf:Rule id="SV-100004r1_rule" severity="high">
+      <xccdf:title>Firewall management access must be restricted</xccdf:title>
+      <xccdf:ident system="http://cyber.mil/cci">CCI-000004</xccdf:ident>
+      <xccdf:check><xccdf:check-content>Review firewall management network restrictions.</xccdf:check-content></xccdf:check>
+      <xccdf:fixtext>Restrict firewall management access to approved networks.</xccdf:fixtext>
+    </xccdf:Rule>
+  </xccdf:Group>
+</xccdf:Benchmark>

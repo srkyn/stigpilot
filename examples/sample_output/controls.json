@@ -1,0 +1,38 @@
+{
+  "title": "Synthetic Application STIG",
+  "version": "V1R2",
+  "release": "Release 2 (2026-03-01)",
+  "source_file": "examples\\sample_input\\synthetic_new.xml",
+  "controls": [
+    {
+      "vuln_id": "V-100001",
+      "rule_id": "SV-100001r2_rule",
+      "group_id": "V-100001",
+      "stig_id": "",
+      "title": "Windows audit policy must be configured and reviewed",
+      "severity": "high",
+      "check_text": "Review Windows audit policy settings in Local Security Policy and export applied GPO evidence.",
+      "fix_text": "Configure Windows audit policy through GPO and document the applied baseline.",
+      "cci_refs": [
+        "CCI-000001"
+      ],
+      "references": [],
+      "raw_id": "SV-100001r2_rule"
+    },
+    {
+      "vuln_id": "V-100004",
+      "rule_id": "SV-100004r1_rule",
+      "group_id": "V-100004",
+      "stig_id": "",
+      "title": "Firewall management access must be restricted",
+      "severity": "high",
+      "check_text": "Review firewall management network restrictions.",
+      "fix_text": "Restrict firewall management access to approved networks.",
+      "cci_refs": [
+        "CCI-000004"
+      ],
+      "references": [],
+      "raw_id": "SV-100004r1_rule"
+    }
+  ]
+}

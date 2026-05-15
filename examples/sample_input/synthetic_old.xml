@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Benchmark xmlns="http://checklists.nist.gov/xccdf/1.2" id="synthetic_old">
+  <title>Synthetic Application STIG</title>
+  <status date="2026-01-01">Release 1</status>
+  <version>V1R1</version>
+  <Group id="V-100001">
+    <Rule id="SV-100001r1_rule" severity="medium">
+      <title>Windows audit policy must be configured</title>
+      <ident system="http://cyber.mil/cci">CCI-000001</ident>
+      <check><check-content>Review Windows audit policy settings in Local Security Policy.</check-content></check>
+      <fixtext>Configure Windows audit policy through GPO.</fixtext>
+    </Rule>
+  </Group>
+  <Group id="V-100002">
+    <Rule id="SV-100002r1_rule" severity="low">
+      <title>Linux SSH banner must be configured</title>
+      <ident system="http://cyber.mil/cci">CCI-000002</ident>
+      <check><check-content>Run sshd -T and review the banner setting.</check-content></check>
+      <fixtext>Configure the sshd Banner directive.</fixtext>
+    </Rule>
+  </Group>
+</Benchmark>
