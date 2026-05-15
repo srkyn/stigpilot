@@ -49,3 +49,18 @@ def test_compare_documents_preserves_duplicate_fallback_keys():
 
     assert len(changes) == 2
     assert [change.new_control.title for change in changes] == ["First new", "Second new"]
+
+
+def test_official_chrome_windows_example_diff_stays_useful():
+    old = parse_stig(Path(__file__).parents[1] / "examples" / "chrome_windows_input" / "old.xml")
+    new = parse_stig(Path(__file__).parents[1] / "examples" / "chrome_windows_input" / "new.xml")
+
+    changes = compare_documents(old, new)
+    impacts = {change.impact for change in changes}
+
+    assert len(old.controls) == 42
+    assert len(new.controls) == 46
+    assert len(changes) == 9
+    assert sum(1 for change in changes if change.change_type == "added") == 6
+    assert sum(1 for change in changes if change.change_type == "removed") == 2
+    assert "implementation_change_likely" in impacts
