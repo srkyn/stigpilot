@@ -238,7 +238,7 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 - HTML report output.
 - Optional Streamlit dashboard after the CLI remains strong.
 
-## What This Demonstrates
+## Portfolio Value
 
 - Defensive security product judgment
 - XCCDF/XML parsing with namespace resilience
