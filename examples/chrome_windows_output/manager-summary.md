@@ -2,36 +2,34 @@
 
 Old source: `old.xml`
 New source: `new.xml`
-Old controls: 42
-New controls: 46
+Old controls: 3
+New controls: 3
 
 ## Executive Readout
 
-9 control change(s) were detected. 6 change(s) are likely to require priority review, implementation work, or evidence refresh. The most affected owner group(s) are Endpoint/Windows Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.
+4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The most affected owner group(s) are Endpoint/Windows Admin, Security/GRC Analyst. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.
 
 ## Workload Snapshot
 
-- Total changes: 9
-- High-priority review: 0
-- Implementation change likely: 6
-- Evidence update likely: 0
-- Review recommended: 3
+- Total changes: 4
+- High-priority review: 2
+- Implementation change likely: 0
+- Evidence update likely: 1
+- Review recommended: 1
 - No action likely: 0
 
 ## Owner Impact
 
 | Owner | Changes | High Priority | Implementation Likely | Evidence Updates |
 | --- | ---: | ---: | ---: | ---: |
-| Endpoint/Windows Admin | 9 | 0 | 6 | 0 |
+| Endpoint/Windows Admin | 3 | 2 | 0 | 1 |
+| Security/GRC Analyst | 1 | 0 | 0 | 0 |
 
 ## Top Actions
 
-- V-275780: Create Themes with AI must be disabled. (implementation_change_likely; Endpoint/Windows Admin)
-- V-275781: DevTools Generative AI features must be disabled. (implementation_change_likely; Endpoint/Windows Admin)
-- V-275782: GenAI local foundational model must be disabled. (implementation_change_likely; Endpoint/Windows Admin)
-- V-275783: Help Me Write must be disabled. (implementation_change_likely; Endpoint/Windows Admin)
-- V-275784: AI-powered History Search must be disabled. (implementation_change_likely; Endpoint/Windows Admin)
-- V-275785: Tab Compare Settings must be disabled. (implementation_change_likely; Endpoint/Windows Admin)
+- V-CHROME-004: Chrome extension installation must be restricted (high_priority_review; Endpoint/Windows Admin)
+- V-CHROME-001: Chrome Safe Browsing enhanced protection must be enabled (high_priority_review; Endpoint/Windows Admin)
+- V-CHROME-002: Chrome password manager must be disabled (evidence_update_likely; Endpoint/Windows Admin)
 
 ## Recommended Next Steps
 

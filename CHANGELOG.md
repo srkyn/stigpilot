@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0
+
+- Added first-class `stigpilot chrome-demo` workflow.
+- Removed vendored official Chrome STIG XML files; official XMLs are now user-supplied.
+- Added sanitized Chrome sample fixtures so the Chrome demo works immediately.
+- Added official Chrome file placement instructions under `examples/chrome_windows_input/`.
+- Added release checklist documentation.
+- Added CLI regression coverage for Chrome demo missing-file fallback.
+
 ## 0.2.1
 
 - Added an official DoD Cyber Exchange Google Chrome for Windows V2R10-to-V2R11 comparison example.

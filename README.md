@@ -58,6 +58,41 @@ implementation work, or evidence refresh. Prioritize high-severity additions or
 severity increases, then review remediation text changes before reusing old tickets.
 ```
 
+## Real-world Chrome demo
+
+Google Chrome for Windows is the best first real-world scenario because it is familiar, endpoint-security relevant, and smaller than a full operating system STIG.
+
+Run the built-in sanitized Chrome workflow:
+
+```bash
+stigpilot chrome-demo
+```
+
+Generated files:
+
+```text
+output/chrome/change-brief.md
+output/chrome/manager-summary.md
+output/chrome/remediation-backlog.csv
+output/chrome/evidence-checklist.md
+output/chrome/jira-import.csv
+output/chrome/servicenow-import.csv
+output/chrome/github-issues.md
+```
+
+To run against official DoD Cyber Exchange Google Chrome Current Windows STIG V2R10 and V2R11 files, download the public ZIPs, extract the XCCDF XML files, and place them here:
+
+```text
+examples/chrome_windows_input/old.xml
+examples/chrome_windows_input/new.xml
+```
+
+Then rerun:
+
+```bash
+stigpilot chrome-demo
+```
+
 ## What STIGPilot is good at
 
 - Release-to-release STIG change triage
@@ -199,37 +234,16 @@ Committed sample outputs in `examples/sample_output/`:
 - `controls.json`
 - `tickets.csv`
 
-## Chrome for Windows example
+## Chrome for Windows official inputs
 
-The repo also includes an official DoD Cyber Exchange Google Chrome for Windows comparison using:
+Official Google Chrome Current Windows STIG XML files are not vendored in this repository. The Chrome demo uses sanitized sample files unless you provide official XMLs under `examples/chrome_windows_input/`.
 
-- `U_Google_Chrome_V2R10_STIG.zip`
-- `U_Google_Chrome_V2R11_STIG.zip`
-
-Source ZIPs:
+Suggested source ZIPs:
 
 - `https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Google_Chrome_V2R10_STIG.zip`
 - `https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Google_Chrome_V2R11_STIG.zip`
 
-The extracted XCCDF files are committed under `examples/chrome_windows_input/` so users can immediately see STIGPilot run against a real STIG release-to-release change set without downloading anything first.
-
-```bash
-stigpilot diff examples/chrome_windows_input/old.xml examples/chrome_windows_input/new.xml --out examples/chrome_windows_output/change-brief.md --csv examples/chrome_windows_output/remediation-backlog.csv --jira-csv examples/chrome_windows_output/jira-import.csv --servicenow-csv examples/chrome_windows_output/servicenow-import.csv --github-md examples/chrome_windows_output/github-issues.md
-stigpilot manager examples/chrome_windows_input/old.xml examples/chrome_windows_input/new.xml --out examples/chrome_windows_output/manager-summary.md
-stigpilot evidence examples/chrome_windows_input/new.xml --out examples/chrome_windows_output/evidence-checklist.md
-```
-
-This example shows the workflow STIGPilot is built for: official Chrome STIG controls are added, removed, and changed between releases, then turned into analyst summaries, backlog rows, evidence requests, and ticket-ready exports.
-
-## Screenshots
-
-Screenshots can be added after running the demo locally. Useful captures for a portfolio page:
-
-- Terminal output from `stigpilot demo`
-- Terminal output from `stigpilot summary examples/sample_input/new.xml`
-- `examples/sample_output/change-brief.md`
-- `examples/sample_output/manager-summary.md`
-- `examples/sample_output/remediation-backlog.csv`
+This keeps the project useful immediately while avoiding unclear redistribution of official STIG XML files.
 
 ## Impact rules
 
@@ -317,4 +331,5 @@ python -m stigpilot.cli manager examples/sample_input/old.xml examples/sample_in
 python -m stigpilot.cli parse examples/sample_input/new.xml --csv examples/sample_output/controls.csv --json examples/sample_output/controls.json
 python -m stigpilot.cli tickets examples/sample_input/new.xml --out examples/sample_output/tickets.csv
 python -m stigpilot.cli evidence examples/sample_input/new.xml --out examples/sample_output/evidence-checklist.md
+python -m stigpilot.cli chrome-demo --out examples/chrome_windows_output --input-dir examples/chrome_windows_input
 ```

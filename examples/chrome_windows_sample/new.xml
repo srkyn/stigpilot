@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xccdf:Benchmark xmlns:xccdf="http://checklists.nist.gov/xccdf/1.1" id="chrome-windows-sample-new">
+  <xccdf:title>Sanitized Chrome for Windows STIG-Style Example</xccdf:title>
+  <xccdf:status date="2026-04-20">Sample Release 2</xccdf:status>
+  <xccdf:version>Sample V1R2</xccdf:version>
+  <xccdf:Group id="V-CHROME-001">
+    <xccdf:Rule id="SV-CHROME-001r2_rule" severity="high">
+      <xccdf:version>CHRM-WN-000001</xccdf:version>
+      <xccdf:title>Chrome Safe Browsing enhanced protection must be enabled</xccdf:title>
+      <xccdf:description>
+        <xccdf:VulnDiscussion>Browser protections help reduce exposure to known malicious sites, suspicious downloads, and unsafe extensions.</xccdf:VulnDiscussion>
+        <xccdf:Mitigations>Document any approved exception to the enterprise browser policy baseline.</xccdf:Mitigations>
+      </xccdf:description>
+      <xccdf:ident system="http://cyber.mil/cci">CCI-001242</xccdf:ident>
+      <xccdf:check>
+        <xccdf:check-content>Review Chrome enterprise policy in GPO or registry and export evidence showing SafeBrowsingProtectionLevel is set to enhanced protection.</xccdf:check-content>
+      </xccdf:check>
+      <xccdf:fixtext>Configure Chrome Safe Browsing enhanced protection through Group Policy or the registry policy path and document the applied baseline.</xccdf:fixtext>
+      <xccdf:reference href="https://chromeenterprise.google/policies/">Chrome Enterprise policy reference</xccdf:reference>
+    </xccdf:Rule>
+  </xccdf:Group>
+  <xccdf:Group id="V-CHROME-002">
+    <xccdf:Rule id="SV-CHROME-002r2_rule" severity="medium">
+      <xccdf:version>CHRM-WN-000010</xccdf:version>
+      <xccdf:title>Chrome password manager must be disabled</xccdf:title>
+      <xccdf:ident system="http://cyber.mil/cci">CCI-000366</xccdf:ident>
+      <xccdf:check>
+        <xccdf:check-content>Review Chrome enterprise policy in GPO or registry and export evidence showing PasswordManagerEnabled is disabled for managed users.</xccdf:check-content>
+      </xccdf:check>
+      <xccdf:fixtext>Disable Chrome Password Manager using enterprise policy.</xccdf:fixtext>
+    </xccdf:Rule>
+  </xccdf:Group>
+  <xccdf:Group id="V-CHROME-004">
+    <xccdf:Rule id="SV-CHROME-004r1_rule" severity="high">
+      <xccdf:version>CHRM-WN-000030</xccdf:version>
+      <xccdf:title>Chrome extension installation must be restricted</xccdf:title>
+      <xccdf:ident system="http://cyber.mil/cci">CCI-001764</xccdf:ident>
+      <xccdf:check>
+        <xccdf:check-content>Review Chrome enterprise extension policy and confirm unapproved extension installation is blocked or allowlisted.</xccdf:check-content>
+      </xccdf:check>
+      <xccdf:fixtext>Configure Chrome ExtensionInstallBlocklist and ExtensionInstallAllowlist policies through GPO or registry.</xccdf:fixtext>
+      <xccdf:reference href="https://chromeenterprise.google/policies/">Chrome Enterprise extension policy reference</xccdf:reference>
+    </xccdf:Rule>
+  </xccdf:Group>
+</xccdf:Benchmark>

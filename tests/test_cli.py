@@ -82,3 +82,17 @@ def test_cli_config_example_writes_file(tmp_path: Path):
 
     assert result.exit_code == 0
     assert "owner_rules" in out.read_text(encoding="utf-8")
+
+
+def test_cli_chrome_demo_missing_official_files_uses_sample(tmp_path: Path):
+    out = tmp_path / "chrome"
+    missing_inputs = tmp_path / "missing-official"
+
+    result = runner.invoke(app, ["chrome-demo", "--out", str(out), "--input-dir", str(missing_inputs)])
+
+    assert result.exit_code == 0
+    assert "Official Chrome STIG files were not found" in result.output
+    assert "Start here" in result.output
+    assert (out / "change-brief.md").exists()
+    assert (out / "manager-summary.md").exists()
+    assert (out / "remediation-backlog.csv").exists()

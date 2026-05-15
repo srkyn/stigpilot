@@ -95,6 +95,55 @@ def _print_change_summary(changes, outputs: list[Path]) -> None:
             console.print(f"- {output}")
 
 
+def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigPilotConfig | None = None) -> dict[str, Path]:
+    out.mkdir(parents=True, exist_ok=True)
+    outputs = {
+        "Change brief": out / "change-brief.md",
+        "Manager summary": out / "manager-summary.md",
+        "Remediation backlog": out / "remediation-backlog.csv",
+        "Evidence checklist": out / "evidence-checklist.md",
+        "Jira import": out / "jira-import.csv",
+        "ServiceNow import": out / "servicenow-import.csv",
+        "GitHub issues": out / "github-issues.md",
+    }
+    write_text_report(outputs["Change brief"], change_brief(old_doc, new_doc, changes, config))
+    write_text_report(outputs["Manager summary"], manager_summary_report(old_doc, new_doc, changes, config))
+    write_backlog_csv(changes, outputs["Remediation backlog"], config)
+    write_text_report(outputs["Evidence checklist"], evidence_checklist(new_doc, config=config))
+    write_jira_csv(changes, outputs["Jira import"], config)
+    write_servicenow_csv(changes, outputs["ServiceNow import"], config)
+    write_text_report(outputs["GitHub issues"], github_issue_markdown(changes, config))
+    return outputs
+
+
+def _print_outputs_table(title: str, outputs: dict[str, Path]) -> None:
+    table = Table(title=title)
+    table.add_column("Report")
+    table.add_column("Path")
+    for name, path in outputs.items():
+        table.add_row(name, str(path))
+    console.print(table)
+
+
+def _print_chrome_missing_message(input_dir: Path, sample_old: Path, sample_new: Path) -> None:
+    console.print("[yellow]Official Chrome STIG files were not found.[/yellow]")
+    console.print(f"Missing expected files under: {input_dir}")
+    console.print("- old.xml  (Google Chrome Current Windows STIG V2R10 XCCDF)")
+    console.print("- new.xml  (Google Chrome Current Windows STIG V2R11 XCCDF)")
+    console.print("")
+    console.print("Download official public STIG ZIPs from DoD Cyber Exchange:")
+    console.print("- https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Google_Chrome_V2R10_STIG.zip")
+    console.print("- https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Google_Chrome_V2R11_STIG.zip")
+    console.print("")
+    console.print("Extract the XCCDF XML files and place them as:")
+    console.print(f"- {input_dir / 'old.xml'}")
+    console.print(f"- {input_dir / 'new.xml'}")
+    console.print("")
+    console.print("For now, STIGPilot will run the bundled sanitized Chrome sample:")
+    console.print(f"- {sample_old}")
+    console.print(f"- {sample_new}")
+
+
 @app.command()
 def parse(
     input_xml: Path = typer.Argument(..., exists=True, readable=True, help="STIG XCCDF/XML input file."),
@@ -299,6 +348,64 @@ def demo(
     console.print(f"- Open {outputs['Change brief']}")
     console.print(f"- Open {outputs['Manager summary']}")
     console.print(f"- Open {outputs['Remediation backlog']}")
+
+
+@app.command("chrome-demo")
+def chrome_demo(
+    out: Path = typer.Option(Path("output/chrome"), "--out", help="Directory for generated Chrome demo reports."),
+    input_dir: Path = typer.Option(
+        Path("examples/chrome_windows_input"),
+        "--input-dir",
+        help="Directory containing official Chrome old.xml and new.xml XCCDF files.",
+    ),
+    config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
+) -> None:
+    """Generate a Chrome for Windows STIG comparison packet."""
+
+    root = Path(__file__).resolve().parents[1]
+    official_old = input_dir / "old.xml"
+    official_new = input_dir / "new.xml"
+    sample_old = root / "examples" / "chrome_windows_sample" / "old.xml"
+    sample_new = root / "examples" / "chrome_windows_sample" / "new.xml"
+
+    using_official = official_old.exists() and official_new.exists()
+    if using_official:
+        old_xml = official_old
+        new_xml = official_new
+        source_label = "Official/user-supplied Chrome STIG files"
+    else:
+        _print_chrome_missing_message(input_dir, sample_old, sample_new)
+        old_xml = sample_old
+        new_xml = sample_new
+        source_label = "Bundled sanitized Chrome sample"
+
+    config = _load_config(config_path)
+    old_doc = _load(old_xml, config)
+    new_doc = _load(new_xml, config)
+    changes = compare_documents(old_doc, new_doc)
+    outputs = _write_comparison_packet(old_doc, new_doc, changes, out, config)
+
+    counts = change_summary_counts(changes)
+    table = Table(title="Chrome STIG Demo")
+    table.add_column("Metric")
+    table.add_column("Value")
+    table.add_row("Source", source_label)
+    table.add_row("STIG name", new_doc.title or old_doc.title or "Google Chrome for Windows")
+    table.add_row("Old release", old_doc.release or old_doc.version or "Unknown")
+    table.add_row("New release", new_doc.release or new_doc.version or "Unknown")
+    table.add_row("Old control count", str(len(old_doc.controls)))
+    table.add_row("New control count", str(len(new_doc.controls)))
+    table.add_row("Added", str(counts["added"]))
+    table.add_row("Removed", str(counts["removed"]))
+    table.add_row("Modified", str(counts["modified"]))
+    table.add_row("Severity increased", str(sum(1 for change in changes if change.change_type == "severity_increased")))
+    table.add_row("High-priority review", str(counts["high_priority_review"]))
+    table.add_row("Implementation change likely", str(counts["implementation_change_likely"]))
+    table.add_row("Evidence update likely", str(counts["evidence_update_likely"]))
+    table.add_row("Output directory", str(out))
+    console.print(table)
+    _print_outputs_table("Chrome Reports Generated", outputs)
+    console.print(f"[bold]Start here:[/bold] {outputs['Change brief']}")
 
 
 @app.command("config-example")
