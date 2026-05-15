@@ -27,7 +27,7 @@ I built this after learning about STIGs and asking a practical question: if some
 ```bash
 git clone https://github.com/srkyn/stigpilot.git
 cd stigpilot
-python -m pip install -e .
+python -m pip install -e ".[dev]"
 stigpilot demo
 ```
 
