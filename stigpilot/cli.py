@@ -21,7 +21,7 @@ from .exporters import (
     write_ticket_csv,
 )
 from .parser import StigParseError, parse_stig
-from .reports import change_brief, evidence_checklist, filter_by_severity, single_stig_brief, write_text_report
+from .reports import change_brief, evidence_checklist, filter_by_severity, manager_summary_report, single_stig_brief, write_text_report
 from .taxonomy import suggested_owner
 
 app = typer.Typer(help="STIGPilot: STIG change intelligence and remediation workflow assistance.")
@@ -118,6 +118,24 @@ def diff(
 
 
 @app.command()
+def manager(
+    old_xml: Path = typer.Argument(..., exists=True, readable=True),
+    new_xml: Path = typer.Argument(..., exists=True, readable=True),
+    out: Path = typer.Option(..., "--out", help="Manager-facing Markdown summary output path."),
+    config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
+) -> None:
+    """Generate a concise manager-facing summary for a STIG version comparison."""
+
+    config = _load_config(config_path)
+    old_doc = _load(old_xml, config)
+    new_doc = _load(new_xml, config)
+    changes = compare_documents(old_doc, new_doc)
+    write_text_report(out, manager_summary_report(old_doc, new_doc, changes, config))
+    console.print(f"[green]Wrote manager summary:[/green] {out}")
+    console.print(f"Detected {len(changes)} changes.")
+
+
+@app.command()
 def tickets(
     input_xml: Path = typer.Argument(..., exists=True, readable=True),
     out: Path = typer.Option(..., "--out", help="Ticket-friendly CSV output path."),
@@ -204,6 +222,7 @@ def demo(
     write_controls_json(new_doc, out / "controls.json")
     write_text_report(out / "brief.md", single_stig_brief(new_doc, config=config))
     write_text_report(out / "change-brief.md", change_brief(old_doc, new_doc, changes, config))
+    write_text_report(out / "manager-summary.md", manager_summary_report(old_doc, new_doc, changes, config))
     write_backlog_csv(changes, out / "remediation-backlog.csv", config)
     write_text_report(out / "evidence-checklist.md", evidence_checklist(new_doc, config=config))
     write_jira_csv(changes, out / "jira-import.csv", config)

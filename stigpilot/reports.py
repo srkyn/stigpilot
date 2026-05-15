@@ -116,6 +116,74 @@ def change_brief(
     return "\n".join(lines) + "\n"
 
 
+def manager_summary_report(
+    old_doc: StigDocument,
+    new_doc: StigDocument,
+    changes: list[ControlChange],
+    config: StigPilotConfig | None = None,
+) -> str:
+    """Generate a concise manager-facing Markdown report."""
+
+    impacts = Counter(change.impact for change in changes)
+    owners = Counter(suggested_owner(change.current_control, config) for change in changes)
+    priority_changes = [
+        change
+        for change in changes
+        if change.impact in {"high_priority_review", "implementation_change_likely", "evidence_update_likely"}
+    ][:10]
+    lines = [
+        "# STIGPilot Manager Summary",
+        "",
+        f"Old source: `{Path(old_doc.source_file).name}`",
+        f"New source: `{Path(new_doc.source_file).name}`",
+        f"Old controls: {len(old_doc.controls)}",
+        f"New controls: {len(new_doc.controls)}",
+        "",
+        "## Executive Readout",
+        "",
+        manager_summary(changes, config),
+        "",
+        "## Workload Snapshot",
+        "",
+        f"- Total changes: {len(changes)}",
+        f"- High-priority review: {impacts.get('high_priority_review', 0)}",
+        f"- Implementation change likely: {impacts.get('implementation_change_likely', 0)}",
+        f"- Evidence update likely: {impacts.get('evidence_update_likely', 0)}",
+        f"- Review recommended: {impacts.get('review_recommended', 0)}",
+        f"- No action likely: {impacts.get('no_action_likely', 0)}",
+        "",
+        "## Owner Impact",
+        "",
+    ]
+    if owners:
+        for owner, count in owners.most_common():
+            lines.append(f"- {owner}: {count}")
+    else:
+        lines.append("- No owner impact detected.")
+
+    lines.extend(["", "## Top Actions", ""])
+    if not priority_changes:
+        lines.append("- No high-priority implementation or evidence actions were detected.")
+    for change in priority_changes:
+        control = change.current_control or StigControl()
+        lines.append(
+            f"- {control.vuln_id or control.rule_id or 'Control'}: {control.title or 'Untitled'} "
+            f"({change.impact}; {suggested_owner(control, config)})"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Recommended Next Steps",
+            "",
+            "- Assign high-priority and implementation-likely changes to the suggested owner groups.",
+            "- Use the remediation backlog CSV for ticket import or queue grooming.",
+            "- Use the evidence checklist to refresh validation requests where check guidance changed.",
+        ]
+    )
+    return "\n".join(lines) + "\n"
+
+
 def evidence_checklist(document: StigDocument, severity: str | None = None, config: StigPilotConfig | None = None) -> str:
     controls = filter_by_severity(document.controls, severity)
     lines = [

@@ -114,6 +114,12 @@ Generate workflow exports:
 stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --jira-csv output/jira.csv --servicenow-csv output/servicenow.csv --github-md output/github-issues.md
 ```
 
+Generate a manager-facing summary:
+
+```powershell
+stigpilot manager examples/sample_input/old.xml examples/sample_input/new.xml --out output/manager-summary.md
+```
+
 Generate ticket-ready export from one STIG:
 
 ```powershell
@@ -145,6 +151,7 @@ Synthetic fixtures are included in `examples/sample_input/`. They are fake and s
 The committed sample outputs in `examples/sample_output/` include:
 
 - `change-brief.md`
+- `manager-summary.md`
 - `remediation-backlog.csv`
 - `evidence-checklist.md`
 - `jira-import.csv`

@@ -40,3 +40,29 @@ def test_parser_extracts_rule_version_as_stig_id_from_demo_fixture():
 
     assert document.controls[0].stig_id == "APP-AU-000001"
     assert any("VulnDiscussion" in ref for ref in document.controls[0].references)
+
+
+def test_parser_extracts_nested_description_metadata(tmp_path: Path):
+    xml_path = tmp_path / "nested-description.xml"
+    xml_path.write_text(
+        """
+<Benchmark xmlns="http://checklists.nist.gov/xccdf/1.2">
+  <title>Nested Description STIG</title>
+  <Group id="V-200001">
+    <Rule id="SV-200001r1_rule" severity="medium">
+      <title>Nested metadata rule</title>
+      <description>
+        <VulnDiscussion>Nested discussion text should be retained.</VulnDiscussion>
+        <Mitigations>Nested mitigation text should be retained.</Mitigations>
+      </description>
+    </Rule>
+  </Group>
+</Benchmark>
+""".strip(),
+        encoding="utf-8",
+    )
+
+    document = parse_stig(xml_path)
+
+    assert "VulnDiscussion: Nested discussion text should be retained." in document.controls[0].references
+    assert "Mitigations: Nested mitigation text should be retained." in document.controls[0].references

@@ -145,14 +145,21 @@ def _extract_references(rule: ET.Element) -> list[str]:
 
 def _extract_description_references(rule: ET.Element) -> list[str]:
     refs: list[str] = []
-    description = _first_text(rule, "description")
-    if not description:
+    description = _first_child(rule, "description")
+    if description is None:
         return refs
+
     for label in ("VulnDiscussion", "FalsePositives", "FalseNegatives", "Documentable", "Mitigations", "SeverityOverrideGuidance"):
-        match = re.search(rf"<{label}>(.*?)</{label}>", description, re.IGNORECASE)
+        for node in description.iter():
+            if _local_name(node.tag).lower() == label.lower():
+                text = clean_text(" ".join(node.itertext()))
+                if text:
+                    refs.append(f"{label}: {text}")
+        description_text = clean_text("".join(description.itertext()))
+        match = re.search(rf"<{label}>(.*?)</{label}>", description_text, re.IGNORECASE | re.DOTALL)
         if match:
             refs.append(f"{label}: {clean_text(match.group(1))}")
-    return refs
+    return norm_list(refs)
 
 
 def _extract_check_text(rule: ET.Element) -> str:
