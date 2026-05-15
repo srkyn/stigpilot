@@ -1,0 +1,45 @@
+﻿short_description,description,assignment_group,priority,u_stig_vuln_id,u_stig_rule_id,u_stig_impact,u_stig_tags
+Review STIG change V-CHROME-004: Chrome extension installation must be restricted,"Change type: added
+Impact: High-priority review (high_priority_review)
+Reason: A new high-severity control was added, so it should be triaged before lower-risk backlog work.
+Changed fields: added
+Vuln ID: V-CHROME-004
+Rule ID: SV-CHROME-004r1_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: GPO, Registry, Browser Security
+Check summary: Review Chrome enterprise extension policy and confirm unapproved extension installation is blocked or allowlisted.
+Fix summary: Configure Chrome ExtensionInstallBlocklist and ExtensionInstallAllowlist policies through GPO or registry.
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes",Endpoint/Windows Admin,High,V-CHROME-004,SV-CHROME-004r1_rule,high_priority_review,GPO; Registry; Browser Security
+Review STIG change V-CHROME-003: Deprecated Chrome cleanup policy must be reviewed,"Change type: removed
+Impact: Review recommended (review_recommended)
+Reason: The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
+Changed fields: removed
+Vuln ID: V-CHROME-003
+Rule ID: SV-CHROME-003r1_rule
+Suggested owner: Security/GRC Analyst
+Tags: Browser Security
+Check summary: Review legacy Chrome cleanup policy settings.
+Fix summary: Remove or disable legacy Chrome cleanup configuration.
+Evidence needed: Screenshot or export of the relevant setting; Date/time of validation; System or asset name; Reviewer notes",Security/GRC Analyst,Low,V-CHROME-003,SV-CHROME-003r1_rule,review_recommended,Browser Security
+Review STIG change V-CHROME-001: Chrome Safe Browsing enhanced protection must be enabled,"Change type: severity_increased
+Impact: High-priority review (high_priority_review)
+Reason: The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.
+Changed fields: title, severity, check_text, fix_text, references
+Vuln ID: V-CHROME-001
+Rule ID: SV-CHROME-001r2_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Endpoint Security, GPO, Registry, Browser Security
+Check summary: Review Chrome enterprise policy in GPO or registry and export evidence showing SafeBrowsingProtectionLevel is set to enhanced protection.
+Fix summary: Configure Chrome Safe Browsing enhanced protection through Group Policy or the registry policy path and document the applied baseline.
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes",Endpoint/Windows Admin,High,V-CHROME-001,SV-CHROME-001r2_rule,high_priority_review,IAM; Endpoint Security; GPO; Registry; Browser Security
+Review STIG change V-CHROME-002: Chrome password manager must be disabled,"Change type: check_changed
+Impact: Evidence update likely (evidence_update_likely)
+Reason: The check procedure changed enough that evidence requests or validation steps may need to be refreshed.
+Changed fields: check_text
+Vuln ID: V-CHROME-002
+Rule ID: SV-CHROME-002r2_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: Password Policy, GPO, Registry, Browser Security
+Check summary: Review Chrome enterprise policy in GPO or registry and export evidence showing PasswordManagerEnabled is disabled for managed users.
+Fix summary: Disable Chrome Password Manager using enterprise policy.
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes",Endpoint/Windows Admin,Medium,V-CHROME-002,SV-CHROME-002r2_rule,evidence_update_likely,Password Policy; GPO; Registry; Browser Security

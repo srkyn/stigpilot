@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Benchmark xmlns="http://checklists.nist.gov/xccdf/1.2" id="chrome-windows-sample-old">
+  <title>Sanitized Chrome for Windows STIG-Style Example</title>
+  <status date="2026-01-15">Sample Release 1</status>
+  <version>Sample V1R1</version>
+  <Group id="V-CHROME-001">
+    <Rule id="SV-CHROME-001r1_rule" severity="medium">
+      <version>CHRM-WN-000001</version>
+      <title>Chrome Safe Browsing must be enabled</title>
+      <description>&lt;VulnDiscussion&gt;Browser protections help reduce exposure to known malicious sites and downloads.&lt;/VulnDiscussion&gt;</description>
+      <ident system="http://cyber.mil/cci">CCI-001242</ident>
+      <check>
+        <check-content>Review Chrome enterprise policy in GPO or registry and confirm SafeBrowsingProtectionLevel is configured.</check-content>
+      </check>
+      <fixtext>Configure Chrome Safe Browsing through Group Policy or the registry policy path.</fixtext>
+      <reference href="https://chromeenterprise.google/policies/">Chrome Enterprise policy reference</reference>
+    </Rule>
+  </Group>
+  <Group id="V-CHROME-002">
+    <Rule id="SV-CHROME-002r1_rule" severity="medium">
+      <version>CHRM-WN-000010</version>
+      <title>Chrome password manager must be disabled</title>
+      <ident system="http://cyber.mil/cci">CCI-000366</ident>
+      <check>
+        <check-content>Review Chrome policy and confirm PasswordManagerEnabled is set to disabled.</check-content>
+      </check>
+      <fixtext>Disable Chrome Password Manager using enterprise policy.</fixtext>
+    </Rule>
+  </Group>
+  <Group id="V-CHROME-003">
+    <Rule id="SV-CHROME-003r1_rule" severity="low">
+      <version>CHRM-WN-000020</version>
+      <title>Deprecated Chrome cleanup policy must be reviewed</title>
+      <check>
+        <check-content>Review legacy Chrome cleanup policy settings.</check-content>
+      </check>
+      <fixtext>Remove or disable legacy Chrome cleanup configuration.</fixtext>
+    </Rule>
+  </Group>
+</Benchmark>

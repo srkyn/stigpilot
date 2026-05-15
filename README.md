@@ -106,6 +106,7 @@ stigpilot chrome-demo
 ## What STIGPilot is good at
 
 - Release-to-release STIG change triage
+- Folder-to-folder portfolio comparisons for multiple STIG updates
 - Identifying severity increases and implementation-impacting changes
 - Generating remediation backlog CSVs
 - Preparing owner-focused evidence requests
@@ -191,6 +192,12 @@ Generate workflow exports:
 stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --jira-csv output/jira-import.csv --servicenow-csv output/servicenow-import.csv --github-md output/github-issues.md
 ```
 
+Compare folders of old/new STIG XML files:
+
+```bash
+stigpilot batch examples/portfolio_input/old examples/portfolio_input/new --out output/portfolio
+```
+
 Generate a focused packet for one impact category or owner group:
 
 ```bash
@@ -246,6 +253,8 @@ Committed sample outputs in `examples/sample_output/`:
 - `jira-import.csv`
 - `servicenow-import.csv`
 - `github-issues.md`
+
+Folder comparison sample outputs are committed in `examples/portfolio_output/`.
 - `controls.csv`
 - `controls.json`
 - `tickets.csv`

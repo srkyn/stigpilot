@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 from pathlib import Path
 from typing import Optional
@@ -149,6 +150,103 @@ def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigP
     return outputs
 
 
+def _xml_files(directory: Path) -> list[Path]:
+    return sorted(path for path in directory.rglob("*.xml") if path.is_file())
+
+
+def _match_key(document, path: Path) -> str:
+    basis = document.title or path.stem
+    key = re.sub(r"[^a-z0-9]+", " ", basis.casefold()).strip()
+    return re.sub(r"\s+", " ", key)
+
+
+def _slug(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.casefold()).strip("-")
+    return slug or "stig-comparison"
+
+
+def _index_documents(documents: dict[Path, object]) -> tuple[dict[str, tuple[Path, object]], dict[str, list[Path]]]:
+    index: dict[str, tuple[Path, object]] = {}
+    duplicates: dict[str, list[Path]] = {}
+    for path, document in documents.items():
+        key = _match_key(document, path)
+        if key in index:
+            duplicates.setdefault(key, [index[key][0]]).append(path)
+            continue
+        index[key] = (path, document)
+    return index, duplicates
+
+
+def _portfolio_summary(
+    rows: list[dict[str, object]],
+    unmatched_old: list[Path],
+    unmatched_new: list[Path],
+    out: Path,
+) -> str:
+    total_changes = sum(int(row["total"]) for row in rows)
+    high_priority = sum(int(row["high_priority_review"]) for row in rows)
+    implementation = sum(int(row["implementation_change_likely"]) for row in rows)
+    evidence = sum(int(row["evidence_update_likely"]) for row in rows)
+    lines = [
+        "# STIGPilot Portfolio Summary",
+        "",
+        "## Executive Summary",
+        "",
+        (
+            f"{len(rows)} STIG comparison(s) were matched and analyzed. "
+            f"{total_changes} total control change(s) were detected across the compared files. "
+            f"{high_priority} change(s) need high-priority review, {implementation} likely need implementation review, "
+            f"and {evidence} likely need refreshed evidence requests."
+        ),
+        "",
+        "## At-a-Glance",
+        "",
+        "| Metric | Count |",
+        "| --- | ---: |",
+        f"| STIGs compared | {len(rows)} |",
+        f"| Total changes | {total_changes} |",
+        f"| High-priority review | {high_priority} |",
+        f"| Implementation change likely | {implementation} |",
+        f"| Evidence update likely | {evidence} |",
+        f"| Unmatched old files | {len(unmatched_old)} |",
+        f"| Unmatched new files | {len(unmatched_new)} |",
+        "",
+        "## Compared STIGs",
+        "",
+        "| STIG | Old Controls | New Controls | Changes | High Priority | Implementation Likely | Evidence Updates | Packet |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
+    ]
+    for row in rows:
+        packet = Path(str(row["packet"])).relative_to(out)
+        lines.append(
+            f"| {row['title']} | {row['old_controls']} | {row['new_controls']} | {row['total']} | "
+            f"{row['high_priority_review']} | {row['implementation_change_likely']} | {row['evidence_update_likely']} | "
+            f"[change brief]({packet.as_posix()}/change-brief.md) |"
+        )
+    if unmatched_old or unmatched_new:
+        lines.extend(["", "## Unmatched Files", ""])
+        if unmatched_old:
+            lines.append("Old-only files:")
+            lines.extend(f"- `{path}`" for path in unmatched_old)
+            lines.append("")
+        if unmatched_new:
+            lines.append("New-only files:")
+            lines.extend(f"- `{path}`" for path in unmatched_new)
+            lines.append("")
+    lines.extend(
+        [
+            "",
+            "## How to Use This",
+            "",
+            "- Open the per-STIG change brief for analyst triage.",
+            "- Use each remediation backlog CSV for ticket queue grooming or imports.",
+            "- Use each evidence checklist when validation procedures or evidence requests changed.",
+            "- Treat this as change intelligence and planning support, not formal compliance validation.",
+        ]
+    )
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _print_outputs_table(title: str, outputs: dict[str, Path]) -> None:
     table = Table(title=title)
     table.add_column("Report")
@@ -270,6 +368,77 @@ def manager(
     changes = _filter_changes(all_changes, impact_filter, owner_filter, config)
     _safe_write(lambda: write_text_report(out, manager_summary_report(old_doc, new_doc, changes, config)), out, "manager summary")
     _print_change_summary(changes, [out])
+
+
+@app.command()
+def batch(
+    old_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of old STIG XCCDF/XML files."),
+    new_dir: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True, readable=True, help="Directory of new STIG XCCDF/XML files."),
+    out: Path = typer.Option(Path("output/portfolio"), "--out", help="Directory for portfolio comparison reports."),
+    impact_filter: Optional[str] = typer.Option(None, "--impact", help="Only include one impact category, such as high_priority_review."),
+    owner_filter: Optional[str] = typer.Option(None, "--owner", help='Only include changes for one suggested owner, such as "Endpoint/Windows Admin".'),
+    config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
+) -> None:
+    """Compare folders of old/new STIG XML files and generate a portfolio packet."""
+
+    config = _load_config(config_path)
+    old_files = _xml_files(old_dir)
+    new_files = _xml_files(new_dir)
+    if not old_files:
+        console.print(f"[red]Error:[/red] no XML files found in old directory: {old_dir}")
+        raise typer.Exit(1)
+    if not new_files:
+        console.print(f"[red]Error:[/red] no XML files found in new directory: {new_dir}")
+        raise typer.Exit(1)
+
+    old_docs = {path: _load(path, config) for path in old_files}
+    new_docs = {path: _load(path, config) for path in new_files}
+    old_index, old_duplicates = _index_documents(old_docs)
+    new_index, new_duplicates = _index_documents(new_docs)
+    for source_name, duplicates in (("old", old_duplicates), ("new", new_duplicates)):
+        if duplicates:
+            console.print(f"[yellow]Warning:[/yellow] duplicate STIG titles in {source_name} directory; using the first file for each title.")
+            for key, paths in duplicates.items():
+                console.print(f"- {key}: " + ", ".join(str(path) for path in paths))
+    matched_keys = sorted(set(old_index) & set(new_index))
+    unmatched_old = [path for key, (path, _) in old_index.items() if key not in new_index]
+    unmatched_new = [path for key, (path, _) in new_index.items() if key not in old_index]
+
+    if not matched_keys:
+        console.print("[red]Error:[/red] no matching STIG titles were found between the old and new directories.")
+        console.print("Tip: STIGPilot matches folder comparisons by parsed Benchmark title.")
+        raise typer.Exit(1)
+
+    out.mkdir(parents=True, exist_ok=True)
+    rows: list[dict[str, object]] = []
+    all_changes = []
+    for key in matched_keys:
+        old_path, old_doc = old_index[key]
+        new_path, new_doc = new_index[key]
+        changes = compare_documents(old_doc, new_doc)
+        changes = _filter_changes(changes, impact_filter, owner_filter, config)
+        packet_dir = out / _slug(new_doc.title or key)
+        outputs = _write_comparison_packet(old_doc, new_doc, changes, packet_dir, config)
+        counts = change_summary_counts(changes)
+        rows.append(
+            {
+                "title": new_doc.title or old_doc.title or new_path.stem,
+                "old_controls": len(old_doc.controls),
+                "new_controls": len(new_doc.controls),
+                "packet": packet_dir,
+                **counts,
+            }
+        )
+        all_changes.extend(changes)
+        console.print(f"[green]Compared:[/green] {old_path.name} -> {new_path.name}")
+        _print_outputs_table("Generated Packet", outputs)
+
+    summary_path = out / "portfolio-summary.md"
+    _safe_write(lambda: write_text_report(summary_path, _portfolio_summary(rows, unmatched_old, unmatched_new, out)), summary_path, "portfolio summary")
+    _print_change_summary(all_changes, [summary_path])
+    if unmatched_old or unmatched_new:
+        console.print("[yellow]Note:[/yellow] unmatched XML files are listed in the portfolio summary.")
+    console.print(f"[bold]Start here:[/bold] {summary_path}")
 
 
 @app.command()

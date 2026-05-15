@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0
+
+- Added `stigpilot batch` for folder-to-folder STIG release comparisons.
+- Added portfolio summary generation with per-STIG report packets.
+- Added sanitized portfolio input fixtures and committed generated portfolio outputs.
+- Added CLI regression coverage for batch comparisons and unmatched-folder handling.
+
 ## 0.3.2
 
 - Added focused `diff` and `manager` filters for impact category and suggested owner.

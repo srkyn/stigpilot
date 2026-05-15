@@ -1,4 +1,5 @@
 from pathlib import Path
+import shutil
 
 from typer.testing import CliRunner
 
@@ -101,6 +102,38 @@ def test_cli_diff_rejects_unknown_impact_filter(tmp_path: Path):
 
     assert result.exit_code == 1
     assert "--impact must be one of" in result.output
+
+
+def test_cli_batch_generates_portfolio_packet(tmp_path: Path):
+    old_dir = tmp_path / "old"
+    new_dir = tmp_path / "new"
+    out = tmp_path / "portfolio"
+    old_dir.mkdir()
+    new_dir.mkdir()
+    shutil.copy(ROOT / "examples" / "sample_input" / "old.xml", old_dir / "synthetic.xml")
+    shutil.copy(ROOT / "examples" / "sample_input" / "new.xml", new_dir / "synthetic.xml")
+
+    result = runner.invoke(app, ["batch", str(old_dir), str(new_dir), "--out", str(out)])
+
+    assert result.exit_code == 0
+    assert "Start here" in result.output
+    assert (out / "portfolio-summary.md").exists()
+    assert (out / "synthetic-windows-and-linux-stig" / "change-brief.md").exists()
+
+
+def test_cli_batch_requires_matching_titles(tmp_path: Path):
+    old_dir = tmp_path / "old"
+    new_dir = tmp_path / "new"
+    out = tmp_path / "portfolio"
+    old_dir.mkdir()
+    new_dir.mkdir()
+    shutil.copy(ROOT / "examples" / "sample_input" / "old.xml", old_dir / "synthetic.xml")
+    shutil.copy(ROOT / "examples" / "chrome_windows_sample" / "new.xml", new_dir / "chrome.xml")
+
+    result = runner.invoke(app, ["batch", str(old_dir), str(new_dir), "--out", str(out)])
+
+    assert result.exit_code == 1
+    assert "no matching STIG titles" in result.output
 
 
 def test_cli_invalid_xml_gives_clean_error(tmp_path: Path):
