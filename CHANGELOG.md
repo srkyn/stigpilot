@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Added an official DoD Cyber Exchange Google Chrome for Windows V2R10-to-V2R11 comparison example.
+- Added generated Chrome example change brief, manager summary, evidence checklist, backlog CSV, Jira CSV, ServiceNow CSV, GitHub issue drafts, and parsed controls.
+- Added Browser Security keyword tagging.
+
 ## 0.2.0
 
 - Reworked README for a stronger 60-second demo and clearer positioning.

@@ -24,6 +24,7 @@ DEFAULT_TAG_RULES: dict[str, tuple[str, ...]] = {
     "Defender/AV": ("defender", "windows defender", "antivirus", "anti-virus", "malware", "real-time protection", "tamper protection"),
     "Cloud": ("cloud", "azure", "aws", "gcp", "entra", "iam role", "security group", "conditional access"),
     "Container/Kubernetes": ("container", "kubernetes", "kubelet", "docker", "pod", "namespace", "kubectl", "helm"),
+    "Browser Security": ("chrome", "browser", "safe browsing", "extension", "password manager", "remote debugging", "enterprise policy"),
 }
 
 DEFAULT_OWNER_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (

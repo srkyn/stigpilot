@@ -1,0 +1,100 @@
+﻿Summary,Issue Type,Priority,Labels,Assignee,Description
+added: V-275780 - Create Themes with AI must be disabled.,Task,Medium,"stigpilot,implementation_change_likely,iam,windows,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: added
+Impact: implementation_change_likely
+Reason: A new control includes configuration language, so an implementation owner should review it.
+Changed fields: added
+Vuln ID: V-275780
+Rule ID: SV-275780r1106603_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Windows, GPO, Registry, Browser Security
+Check summary: Universal method: 1. In the omnibox (address bar) type ""chrome:// policy"". 2. If ""CreateThemesSettings"" is not displayed under the ""Policy Name"" column or it is not set to ""2"" under the ""Policy Value"" column, this is a finding. Windows method: 1. Start ""regedit"". 2. Navigate to ""HKLM\Software\Policies\Google\Chrome\"". 3. If the ""CreateThemesSettings"" value name does not exist or its value data...
+Fix summary: Windows group policy: 1. Open the group policy editor tool with gpedit.msc. 2. Navigate to Policy Path: Computer Configuration\Administrative Templates\Google\Google Chrome\Generative AI Policy Name: Settings for Create Themes with AI Policy State: Enabled Policy Value: Do not allow Create Themes
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
+added: V-275781 - DevTools Generative AI features must be disabled.,Task,Medium,"stigpilot,implementation_change_likely,iam,endpoint-security,network-security,windows,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: added
+Impact: implementation_change_likely
+Reason: A new control includes configuration language, so an implementation owner should review it.
+Changed fields: added
+Vuln ID: V-275781
+Rule ID: SV-275781r1106671_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Endpoint Security, Network Security, Windows, GPO, Registry, Browser Security
+Check summary: Universal method: 1. In the omnibox (address bar) type ""chrome:// policy"". 2. If ""DevToolsGenAiSettings"" is not displayed under the ""Policy Name"" column or it is not set to ""2"" under the ""Policy Value"" column, this is a finding. Windows method: 1. Start ""regedit"". 2. Navigate to ""HKLM\Software\Policies\Google\Chrome\"". 3. If the ""DevToolsGenAiSettings"" value name does not exist or its value dat...
+Fix summary: Windows group policy: 1. Open the group policy editor tool with gpedit.msc. 2. Navigate to Policy Path: Computer Configuration\Administrative Templates\Google\Google Chrome\Generative AI Policy Name: Settings for DevTools Generative AI Features Policy State: Enabled Policy Value: Do not allow DevTools Generative AI Features
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
+added: V-275782 - GenAI local foundational model must be disabled.,Task,Medium,"stigpilot,implementation_change_likely,iam,windows,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: added
+Impact: implementation_change_likely
+Reason: A new control includes configuration language, so an implementation owner should review it.
+Changed fields: added
+Vuln ID: V-275782
+Rule ID: SV-275782r1106672_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Windows, GPO, Registry, Browser Security
+Check summary: Universal method: 1. In the omnibox (address bar) type ""chrome:// policy"". 2. If ""GenAILocalFoundationalModelSettings"" is not displayed under the ""Policy Name"" column or it is not set to ""1"" under the ""Policy Value"" column, this is a finding. Windows method: 1. Start ""regedit"". 2. Navigate to ""HKLM\Software\Policies\Google\Chrome\"". 3. If the ""GenAILocalFoundationalModelSettings"" value name doe...
+Fix summary: Windows group policy: 1. Open the group policy editor tool with gpedit.msc. 2. Navigate to Policy Path: Computer Configuration\Administrative Templates\Google\Google Chrome\Generative AI Policy Name: Settings for GenAI local foundational model Policy State: Enabled Policy Value: Do not download model
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
+added: V-275783 - Help Me Write must be disabled.,Task,Medium,"stigpilot,implementation_change_likely,iam,windows,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: added
+Impact: implementation_change_likely
+Reason: A new control includes configuration language, so an implementation owner should review it.
+Changed fields: added
+Vuln ID: V-275783
+Rule ID: SV-275783r1106612_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Windows, GPO, Registry, Browser Security
+Check summary: Universal method: 1. In the omnibox (address bar) type ""chrome:// policy"". 2. If ""HelpMeWriteSettings"" is not displayed under the ""Policy Name"" column or it is not set to ""2"" under the ""Policy Value"" column, this is a finding. Windows method: 1. Start ""regedit"". 2. Navigate to ""HKLM\Software\Policies\Google\Chrome\"". 3. If the ""HelpMeWriteSettings"" value name does not exist or its value data is...
+Fix summary: Windows group policy: 1. Open the group policy editor tool with gpedit.msc. 2. Navigate to Policy Path: Computer Configuration\Administrative Templates\Google\Google Chrome\Generative AI Policy Name: Settings forSettings for Help Me Write Policy State: Enabled Policy Value: Do not allow Help Me Write
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
+added: V-275784 - AI-powered History Search must be disabled.,Task,Medium,"stigpilot,implementation_change_likely,iam,windows,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: added
+Impact: implementation_change_likely
+Reason: A new control includes configuration language, so an implementation owner should review it.
+Changed fields: added
+Vuln ID: V-275784
+Rule ID: SV-275784r1106615_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Windows, GPO, Registry, Browser Security
+Check summary: Universal method: 1. In the omnibox (address bar) type ""chrome:// policy"". 2. If ""HistorySearchSettings"" is not displayed under the ""Policy Name"" column or it is not set to ""2"" under the ""Policy Value"" column, this is a finding. Windows method: 1. Start ""regedit"". 2. Navigate to ""HKLM\Software\Policies\Google\Chrome\"". 3. If the ""HistorySearchSettings"" value name does not exist or its value dat...
+Fix summary: Windows group policy: 1. Open the group policy editor tool with gpedit.msc. 2. Navigate to Policy Path: Computer Configuration\Administrative Templates\Google\Google Chrome\Generative AI Policy Name: Settings for AI-powered History Search Policy State: Enabled Policy Value: Do not allow AI History Search
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
+added: V-275785 - Tab Compare Settings must be disabled.,Task,Medium,"stigpilot,implementation_change_likely,iam,windows,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: added
+Impact: implementation_change_likely
+Reason: A new control includes configuration language, so an implementation owner should review it.
+Changed fields: added
+Vuln ID: V-275785
+Rule ID: SV-275785r1106673_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Windows, GPO, Registry, Browser Security
+Check summary: Universal method: 1. In the omnibox (address bar) type ""chrome:// policy"". 2. If ""TabCompareSettings"" is not displayed under the ""Policy Name"" column or it is not set to ""2"" under the ""Policy Value"" column, this is a finding. Windows method: 1. Start ""regedit"". 2. Navigate to ""HKLM\Software\Policies\Google\Chrome\"". 3. If the ""TabCompareSettings"" value name does not exist or its value data is n...
+Fix summary: Windows group policy: 1. Open the group policy editor tool with gpedit.msc. 2. Navigate to Policy Path: Computer Configuration\Administrative Templates\Google\Google Chrome\Generative AI Policy Name: Tab Compare settings Policy State: Enabled Policy Value: Do not allow Tab Compare
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
+removed: V-221592 - Chrome Cleanup must be disabled.,Task,Low,"stigpilot,review_recommended,iam,windows,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: removed
+Impact: review_recommended
+Reason: The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
+Changed fields: removed
+Vuln ID: V-221592
+Rule ID: SV-221592r960879_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Windows, GPO, Registry, Browser Security
+Check summary: Universal method: 1. In the omnibox (address bar) type chrome://policy 2. If ""ChromeCleanupEnabled"" is not displayed under the ""Policy Name"" column or it is not set to ""False"", this is a finding. Windows method: 1. Start regedit. 2. Navigate to HKLM\Software\Policies\Google\Chrome\ 3. If the ""ChromeCleanupEnabled"" value name does not exist or its value data is not set to ""0"", this is a finding.
+Fix summary: Windows group policy: 1. Open the ""group policy editor"" tool with gpedit.msc. 2. Navigate to Policy Path: Computer Configuration\Administrative Templates\Google\Google Chrome Policy Name: Enable Chrome Cleanup on Windows Policy State: Disabled Policy Value: N/A
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
+removed: V-221593 - Chrome Cleanup reporting must be disabled.,Task,Low,"stigpilot,review_recommended,iam,windows,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: removed
+Impact: review_recommended
+Reason: The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
+Changed fields: removed
+Vuln ID: V-221593
+Rule ID: SV-221593r960879_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Windows, GPO, Registry, Browser Security
+Check summary: Universal method: 1. In the omnibox (address bar) type chrome://policy 2. If ""ChromeCleanupReportingEnabled"" is not displayed under the ""Policy Name"" column or it is not set to ""False"", this is a finding. Windows method: 1. Start regedit 2. Navigate to HKLM\Software\Policies\Google\Chrome\ 3. If the ""ChromeCleanupReportingEnabled"" value name does not exist or its value data is not set to ""0"", t...
+Fix summary: Windows group policy: 1. Open the “group policy editor” tool with gpedit.msc 2. Navigate to Policy Path: Computer Configuration\Administrative Templates\Google\Google Chrome Policy Name: Control how Chrome Cleanup reports data to Google Policy State: Disabled Policy Value: N/A
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
+fix_changed: V-221588 - Download restrictions must be configured.,Task,Low,"stigpilot,review_recommended,iam,endpoint-security,windows,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: fix_changed
+Impact: review_recommended
+Reason: The remediation wording changed, but it appears similar enough that a quick review is likely sufficient.
+Changed fields: check_text, fix_text, references
+Vuln ID: V-221588
+Rule ID: SV-221588r1106670_rule
+Suggested owner: Endpoint/Windows Admin
+Tags: IAM, Endpoint Security, Windows, GPO, Registry, Browser Security
+Check summary: If the system is on the SIPRNet, this requirement is Not Applicable. Universal method: 1. In the omnibox (address bar) type ""chrome:// policy"". 2. If ""DownloadRestrictions"" is not displayed under the ""Policy Name"" column or it is set to ""0"", this is a finding. Windows method: 1. Start ""regedit"". 2. Navigate to ""HKLM\Software\Policies\Google\Chrome\"". 3. If the ""DownloadRestrictions"" value name...
+Fix summary: If the system is on the SIPRNet, this requirement is Not Applicable. Windows group policy: 1. Open the group policy editor tool with gpedit.msc. 2. Navigate to Policy Path: Computer Configuration\Administrative Templates\Google\Google Chrome\ Policy Name: Allow download restrictions Policy State: 1, 2, or 4 Policy Value: N/A
+Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
