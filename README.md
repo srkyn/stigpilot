@@ -263,6 +263,9 @@ Committed sample outputs in `examples/sample_output/`:
 One-command packet outputs are committed in `examples/packet_output/`.
 
 Folder comparison sample outputs are committed in `examples/portfolio_output/`.
+
+Additional parsed-control and ticket-export examples:
+
 - `controls.csv`
 - `controls.json`
 - `tickets.csv`
@@ -318,6 +321,8 @@ keywords = ["authentication", "privileged account"]
 "Privileged Access" = ["privileged account", "sudoers"]
 ```
 
+See [docs/configuration.md](docs/configuration.md) for owner routing examples, tag rules, and config validation notes.
+
 ## Limitations
 
 - STIGPilot does not validate host compliance.
@@ -333,9 +338,10 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 
 ## Roadmap
 
-- Folder-level old/new STIG comparison for release bundles
-- Implementation-only and evidence-only filtered reports
-- HTML report output
+- PyPI packaging and publish workflow
+- HTML report output for easier sharing
+- More parser fixtures from official-but-user-supplied STIG variants
+- Optional screenshot assets for README examples
 - Optional Streamlit dashboard after the CLI remains strong
 
 ## Portfolio value
