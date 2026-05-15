@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 from xml.etree import ElementTree as ET
 
 from .models import StigControl, StigDocument
+from .taxonomy import tags_for_control
 from .utils import clean_text, norm_list
 
 
@@ -36,6 +38,10 @@ def _first_text(element: ET.Element, local_name: str) -> str:
     if child is None:
         return ""
     return clean_text("".join(child.itertext()))
+
+
+def _all_text(element: ET.Element) -> str:
+    return clean_text(" ".join(element.itertext()))
 
 
 def _descendants(element: ET.Element, local_name: str) -> list[ET.Element]:
@@ -83,6 +89,10 @@ def _extract_vuln_id(group: ET.Element, rule: ET.Element) -> str:
     group_id = clean_text(group.attrib.get("id", ""))
     if group_id.upper().startswith("V-"):
         return group_id
+    for source in (_first_text(group, "title"), _all_text(group), _all_text(rule)):
+        match = re.search(r"\bV-\d+\b", source, re.IGNORECASE)
+        if match:
+            return match.group(0).upper()
     for ident in _descendants(rule, "ident"):
         text = clean_text("".join(ident.itertext()))
         if text.upper().startswith("V-"):
@@ -91,6 +101,9 @@ def _extract_vuln_id(group: ET.Element, rule: ET.Element) -> str:
 
 
 def _extract_stig_id(rule: ET.Element) -> str:
+    version = _first_text(rule, "version")
+    if version:
+        return version
     for ident in _descendants(rule, "ident"):
         system = clean_text(ident.attrib.get("system", "")).lower()
         text = clean_text("".join(ident.itertext()))
@@ -129,6 +142,18 @@ def _extract_references(rule: ET.Element) -> list[str]:
     return norm_list(refs)
 
 
+def _extract_description_references(rule: ET.Element) -> list[str]:
+    refs: list[str] = []
+    description = _first_text(rule, "description")
+    if not description:
+        return refs
+    for label in ("VulnDiscussion", "FalsePositives", "FalseNegatives", "Documentable", "Mitigations", "SeverityOverrideGuidance"):
+        match = re.search(rf"<{label}>(.*?)</{label}>", description, re.IGNORECASE)
+        if match:
+            refs.append(f"{label}: {clean_text(match.group(1))}")
+    return refs
+
+
 def _extract_check_text(rule: ET.Element) -> str:
     for check in _descendants(rule, "check"):
         content = _first_text(check, "check-content")
@@ -151,6 +176,17 @@ def _extract_fix_text(rule: ET.Element) -> str:
     return ""
 
 
+def _raw_id(group: ET.Element, rule: ET.Element) -> str:
+    candidates = [
+        clean_text(rule.attrib.get("id", "")),
+        clean_text(rule.attrib.get("idref", "")),
+        clean_text(group.attrib.get("id", "")),
+        _first_text(rule, "version"),
+        _first_text(rule, "title"),
+    ]
+    return next((candidate for candidate in candidates if candidate), "")
+
+
 def _iter_group_rules(benchmark: ET.Element) -> list[tuple[ET.Element, ET.Element]]:
     pairs: list[tuple[ET.Element, ET.Element]] = []
     for group in _descendants(benchmark, "Group"):
@@ -171,21 +207,21 @@ def parse_stig(path: str | Path) -> StigDocument:
     for group, rule in _iter_group_rules(benchmark):
         group_id = clean_text(group.attrib.get("id", ""))
         rule_id = clean_text(rule.attrib.get("id", ""))
-        controls.append(
-            StigControl(
-                vuln_id=_extract_vuln_id(group, rule),
-                rule_id=rule_id,
-                group_id=group_id,
-                stig_id=_extract_stig_id(rule),
-                title=_first_text(rule, "title") or _first_text(group, "title"),
-                severity=clean_text(rule.attrib.get("severity", "")),
-                check_text=_extract_check_text(rule),
-                fix_text=_extract_fix_text(rule),
-                cci_refs=_extract_cci_refs(rule),
-                references=_extract_references(rule),
-                raw_id=rule_id or group_id,
-            )
+        control = StigControl(
+            vuln_id=_extract_vuln_id(group, rule),
+            rule_id=rule_id,
+            group_id=group_id,
+            stig_id=_extract_stig_id(rule),
+            title=_first_text(rule, "title") or _first_text(group, "title"),
+            severity=clean_text(rule.attrib.get("severity", "")),
+            check_text=_extract_check_text(rule),
+            fix_text=_extract_fix_text(rule),
+            cci_refs=_extract_cci_refs(rule),
+            references=norm_list(_extract_references(rule) + _extract_description_references(rule)),
+            raw_id=_raw_id(group, rule),
         )
+        control.tags = tags_for_control(control)
+        controls.append(control)
 
     return StigDocument(
         title=_first_text(benchmark, "title"),

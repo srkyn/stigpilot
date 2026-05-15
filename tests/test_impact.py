@@ -29,3 +29,14 @@ def test_owner_and_evidence_are_rule_based():
 
     assert suggested_owner(control) == "Linux Admin"
     assert any("Command output" in item for item in evidence_requests(control))
+
+
+def test_minor_check_wording_change_is_no_action_likely():
+    change = ControlChange(
+        change_type="modified",
+        old_control=StigControl(check_text="Review the configured audit policy setting."),
+        new_control=StigControl(check_text="Review the configured audit policy setting carefully."),
+        changed_fields=["check_text"],
+    )
+
+    assert classify_change(change)[0] == "no_action_likely"

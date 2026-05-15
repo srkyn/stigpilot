@@ -19,6 +19,7 @@ class StigControl:
     fix_text: str = ""
     cci_refs: list[str] = field(default_factory=list)
     references: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     raw_id: str = ""
 
     @property

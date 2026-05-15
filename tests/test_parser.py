@@ -23,6 +23,8 @@ def test_parse_stig_extracts_core_fields():
     assert control.cci_refs == ["CCI-000001"]
     assert "Local Security Policy" in control.check_text
     assert "GPO" in control.fix_text
+    assert "Windows" in control.tags
+    assert "GPO" in control.tags
 
 
 def test_parser_tolerates_namespaced_new_fixture():
@@ -31,3 +33,10 @@ def test_parser_tolerates_namespaced_new_fixture():
     assert len(document.controls) == 3
     assert document.controls[0].vuln_id == "V-100001"
     assert document.controls[2].severity == "high"
+
+
+def test_parser_extracts_rule_version_as_stig_id_from_demo_fixture():
+    document = parse_stig(Path(__file__).parents[1] / "examples" / "sample_input" / "new.xml")
+
+    assert document.controls[0].stig_id == "APP-AU-000001"
+    assert any("VulnDiscussion" in ref for ref in document.controls[0].references)

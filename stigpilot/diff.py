@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from .impact import apply_impact
 from .models import ControlChange, StigControl, StigDocument
 from .utils import clean_text, norm_list
@@ -12,9 +14,23 @@ DIFF_FIELDS = ("title", "severity", "check_text", "fix_text", "cci_refs", "refer
 def _index_controls(controls: list[StigControl]) -> dict[str, StigControl]:
     indexed: dict[str, StigControl] = {}
     for idx, control in enumerate(controls):
-        key = control.comparison_key or f"control-{idx}"
+        key = _stable_key(control) or f"control-{idx}"
         indexed[key] = control
     return indexed
+
+
+def _stable_key(control: StigControl) -> str:
+    """Return a release-stable key, stripping common DISA rule revision suffixes."""
+
+    if control.vuln_id:
+        return control.vuln_id
+    if control.stig_id:
+        return control.stig_id
+    if control.group_id:
+        return control.group_id
+    if control.rule_id:
+        return re.sub(r"r\d+(_rule)?$", "", control.rule_id, flags=re.IGNORECASE)
+    return control.raw_id
 
 
 def _field_changed(old: StigControl, new: StigControl, field: str) -> bool:

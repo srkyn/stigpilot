@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "STIG change intelligence and remediation workflow assistant."
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = "MIT"
 authors = [{name = "STIGPilot Contributors"}]
 dependencies = [
   "typer>=0.12",
@@ -24,3 +24,7 @@ stigpilot = "stigpilot.cli:app"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+include = ["stigpilot*"]
+exclude = ["output*", "examples*", "tests*"]

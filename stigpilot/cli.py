@@ -10,9 +10,18 @@ from rich.console import Console
 from rich.table import Table
 
 from .diff import compare_documents
-from .exporters import write_backlog_csv, write_controls_csv, write_controls_json, write_ticket_csv
+from .exporters import (
+    github_issue_markdown,
+    write_backlog_csv,
+    write_controls_csv,
+    write_controls_json,
+    write_jira_csv,
+    write_servicenow_csv,
+    write_ticket_csv,
+)
 from .parser import StigParseError, parse_stig
 from .reports import change_brief, evidence_checklist, filter_by_severity, single_stig_brief, write_text_report
+from .taxonomy import suggested_owner
 
 app = typer.Typer(help="STIGPilot: STIG change intelligence and remediation workflow assistance.")
 console = Console()
@@ -64,6 +73,9 @@ def diff(
     new_xml: Path = typer.Argument(..., exists=True, readable=True),
     out: Path = typer.Option(..., "--out", help="Markdown change brief output path."),
     csv_out: Optional[Path] = typer.Option(None, "--csv", help="Remediation backlog CSV output path."),
+    jira_csv: Optional[Path] = typer.Option(None, "--jira-csv", help="Jira-friendly CSV output path."),
+    servicenow_csv: Optional[Path] = typer.Option(None, "--servicenow-csv", help="ServiceNow-friendly CSV output path."),
+    github_md: Optional[Path] = typer.Option(None, "--github-md", help="GitHub issue draft Markdown output path."),
 ) -> None:
     """Compare two STIG versions and generate a change brief."""
 
@@ -75,6 +87,15 @@ def diff(
     if csv_out:
         write_backlog_csv(changes, csv_out)
         console.print(f"[green]Wrote backlog CSV:[/green] {csv_out}")
+    if jira_csv:
+        write_jira_csv(changes, jira_csv)
+        console.print(f"[green]Wrote Jira CSV:[/green] {jira_csv}")
+    if servicenow_csv:
+        write_servicenow_csv(changes, servicenow_csv)
+        console.print(f"[green]Wrote ServiceNow CSV:[/green] {servicenow_csv}")
+    if github_md:
+        write_text_report(github_md, github_issue_markdown(changes))
+        console.print(f"[green]Wrote GitHub issue drafts:[/green] {github_md}")
     console.print(f"Detected {len(changes)} changes.")
 
 
@@ -123,6 +144,44 @@ def summary(input_xml: Path = typer.Argument(..., exists=True, readable=True)) -
     console.print(f"Source: {input_xml}")
     console.print(f"Version: {document.version or 'Unknown'} | Release: {document.release or 'Unknown'}")
     console.print(f"Controls: {len(document.controls)}")
+
+    owner_table = Table(title="Suggested Owner Summary")
+    owner_table.add_column("Owner")
+    owner_table.add_column("Controls", justify="right")
+    owners: dict[str, int] = {}
+    for control in document.controls:
+        owner = suggested_owner(control)
+        owners[owner] = owners.get(owner, 0) + 1
+    for owner, count in sorted(owners.items()):
+        owner_table.add_row(owner, str(count))
+    console.print(owner_table)
+
+
+@app.command()
+def demo(out: Path = typer.Option(Path("output/demo"), "--out", help="Directory for generated demo reports.")) -> None:
+    """Generate sample STIGPilot reports from sanitized demo fixtures."""
+
+    root = Path(__file__).resolve().parents[1]
+    old_xml = root / "examples" / "sample_input" / "old.xml"
+    new_xml = root / "examples" / "sample_input" / "new.xml"
+    out.mkdir(parents=True, exist_ok=True)
+
+    new_doc = _load(new_xml)
+    old_doc = _load(old_xml)
+    changes = compare_documents(old_doc, new_doc)
+
+    write_controls_csv(new_doc, out / "controls.csv")
+    write_controls_json(new_doc, out / "controls.json")
+    write_text_report(out / "brief.md", single_stig_brief(new_doc))
+    write_text_report(out / "change-brief.md", change_brief(old_doc, new_doc, changes))
+    write_backlog_csv(changes, out / "remediation-backlog.csv")
+    write_text_report(out / "evidence-checklist.md", evidence_checklist(new_doc))
+    write_jira_csv(changes, out / "jira-import.csv")
+    write_servicenow_csv(changes, out / "servicenow-import.csv")
+    write_text_report(out / "github-issues.md", github_issue_markdown(changes))
+
+    console.print(f"[green]Demo reports generated:[/green] {out}")
+    console.print("Open change-brief.md, remediation-backlog.csv, and evidence-checklist.md first.")
 
 
 if __name__ == "__main__":

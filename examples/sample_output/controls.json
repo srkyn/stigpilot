@@ -1,14 +1,14 @@
 {
-  "title": "Synthetic Application STIG",
+  "title": "Synthetic Windows and Linux STIG",
   "version": "V1R2",
   "release": "Release 2 (2026-03-01)",
-  "source_file": "examples\\sample_input\\synthetic_new.xml",
+  "source_file": "examples\\sample_input\\new.xml",
   "controls": [
     {
       "vuln_id": "V-100001",
       "rule_id": "SV-100001r2_rule",
       "group_id": "V-100001",
-      "stig_id": "",
+      "stig_id": "APP-AU-000001",
       "title": "Windows audit policy must be configured and reviewed",
       "severity": "high",
       "check_text": "Review Windows audit policy settings in Local Security Policy and export applied GPO evidence.",
@@ -16,22 +16,53 @@
       "cci_refs": [
         "CCI-000001"
       ],
-      "references": [],
+      "references": [
+        "VulnDiscussion: Audit policy gaps reduce investigation quality and may require updated evidence exports.",
+        "https://example.invalid/audit-r2 | Audit policy reference R2"
+      ],
+      "tags": [
+        "Audit Logging",
+        "Endpoint Security",
+        "Windows",
+        "GPO"
+      ],
       "raw_id": "SV-100001r2_rule"
+    },
+    {
+      "vuln_id": "V-100002",
+      "rule_id": "SV-100002r2_rule",
+      "group_id": "V-100002",
+      "stig_id": "APP-LX-000010",
+      "title": "Linux SSH banner must be configured",
+      "severity": "low",
+      "check_text": "Run sshd -T and review the banner setting and file permissions.",
+      "fix_text": "Configure the sshd Banner directive in /etc/ssh/sshd_config.",
+      "cci_refs": [
+        "CCI-000002"
+      ],
+      "references": [],
+      "tags": [
+        "Remote Access",
+        "Linux"
+      ],
+      "raw_id": "SV-100002r2_rule"
     },
     {
       "vuln_id": "V-100004",
       "rule_id": "SV-100004r1_rule",
       "group_id": "V-100004",
-      "stig_id": "",
+      "stig_id": "APP-NW-000030",
       "title": "Firewall management access must be restricted",
       "severity": "high",
-      "check_text": "Review firewall management network restrictions.",
+      "check_text": "Review firewall management network restrictions and approved admin source ranges.",
       "fix_text": "Restrict firewall management access to approved networks.",
       "cci_refs": [
         "CCI-000004"
       ],
       "references": [],
+      "tags": [
+        "Network Security"
+      ],
       "raw_id": "SV-100004r1_rule"
     }
   ]
