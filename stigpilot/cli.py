@@ -31,6 +31,13 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 console = Console()
+VALID_IMPACTS = {
+    "high_priority_review",
+    "implementation_change_likely",
+    "evidence_update_likely",
+    "review_recommended",
+    "no_action_likely",
+}
 
 
 def _load_config(config_path: Path | None) -> StigPilotConfig | None:
@@ -93,6 +100,32 @@ def _print_change_summary(changes, outputs: list[Path]) -> None:
         console.print("[bold]Written files:[/bold]")
         for output in outputs:
             console.print(f"- {output}")
+
+
+def _filter_changes(
+    changes,
+    impact_filter: str | None = None,
+    owner_filter: str | None = None,
+    config: StigPilotConfig | None = None,
+):
+    filtered = list(changes)
+    if impact_filter:
+        impact = impact_filter.strip()
+        if impact not in VALID_IMPACTS:
+            console.print(
+                "[red]Filter error:[/red] --impact must be one of "
+                + ", ".join(sorted(VALID_IMPACTS))
+            )
+            raise typer.Exit(1)
+        filtered = [change for change in filtered if change.impact == impact]
+    if owner_filter:
+        owner = owner_filter.strip().casefold()
+        filtered = [
+            change
+            for change in filtered
+            if suggested_owner(change.current_control, config).casefold() == owner
+        ]
+    return filtered
 
 
 def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigPilotConfig | None = None) -> dict[str, Path]:
@@ -186,6 +219,8 @@ def diff(
     jira_csv: Optional[Path] = typer.Option(None, "--jira-csv", help="Jira-friendly CSV output path."),
     servicenow_csv: Optional[Path] = typer.Option(None, "--servicenow-csv", help="ServiceNow-friendly CSV output path."),
     github_md: Optional[Path] = typer.Option(None, "--github-md", help="GitHub issue draft Markdown output path."),
+    impact_filter: Optional[str] = typer.Option(None, "--impact", help="Only include one impact category, such as high_priority_review."),
+    owner_filter: Optional[str] = typer.Option(None, "--owner", help='Only include changes for one suggested owner, such as "Endpoint/Windows Admin".'),
     config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
 ) -> None:
     """Compare two STIG versions and generate a change brief."""
@@ -197,7 +232,8 @@ def diff(
     for source_name, duplicates in (("old", duplicate_keys(old_doc.controls)), ("new", duplicate_keys(new_doc.controls))):
         if duplicates:
             console.print(f"[yellow]Warning:[/yellow] duplicate stable keys in {source_name} file: {duplicates}")
-    changes = compare_documents(old_doc, new_doc)
+    all_changes = compare_documents(old_doc, new_doc)
+    changes = _filter_changes(all_changes, impact_filter, owner_filter, config)
     outputs = [out]
     _safe_write(lambda: write_text_report(out, change_brief(old_doc, new_doc, changes, config)), out, "change brief")
     if csv_out:
@@ -220,6 +256,8 @@ def manager(
     old_xml: Path = typer.Argument(..., exists=True, readable=True),
     new_xml: Path = typer.Argument(..., exists=True, readable=True),
     out: Path = typer.Option(..., "--out", help="Manager-facing Markdown summary output path."),
+    impact_filter: Optional[str] = typer.Option(None, "--impact", help="Only include one impact category, such as high_priority_review."),
+    owner_filter: Optional[str] = typer.Option(None, "--owner", help='Only include changes for one suggested owner, such as "Endpoint/Windows Admin".'),
     config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
 ) -> None:
     """Generate a concise manager-facing summary for a STIG version comparison."""
@@ -228,7 +266,8 @@ def manager(
     old_doc = _load(old_xml, config)
     new_doc = _load(new_xml, config)
     _warn_same_inputs(old_xml, new_xml, old_doc, new_doc)
-    changes = compare_documents(old_doc, new_doc)
+    all_changes = compare_documents(old_doc, new_doc)
+    changes = _filter_changes(all_changes, impact_filter, owner_filter, config)
     _safe_write(lambda: write_text_report(out, manager_summary_report(old_doc, new_doc, changes, config)), out, "manager summary")
     _print_change_summary(changes, [out])
 

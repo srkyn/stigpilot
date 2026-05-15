@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+- Added focused `diff` and `manager` filters for impact category and suggested owner.
+- Documented focused packet generation for analyst and owner-specific workflows.
+- Added CLI regression coverage for impact/owner filtering and invalid impact filters.
+
 ## 0.3.1
 
 - Replaced internal impact enum values with analyst-friendly labels in generated Markdown reports.

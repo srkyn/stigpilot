@@ -191,6 +191,12 @@ Generate workflow exports:
 stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --jira-csv output/jira-import.csv --servicenow-csv output/servicenow-import.csv --github-md output/github-issues.md
 ```
 
+Generate a focused packet for one impact category or owner group:
+
+```bash
+stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/windows-high-priority.md --csv output/windows-high-priority.csv --impact high_priority_review --owner "Endpoint/Windows Admin"
+```
+
 Generate a manager-facing summary:
 
 ```bash

@@ -58,6 +58,51 @@ def test_cli_diff_writes_markdown_and_csv(tmp_path: Path):
     assert backlog.exists()
 
 
+def test_cli_diff_can_filter_by_impact_and_owner(tmp_path: Path):
+    report = tmp_path / "endpoint-high.md"
+    backlog = tmp_path / "endpoint-high.csv"
+
+    result = runner.invoke(
+        app,
+        [
+            "diff",
+            str(ROOT / "examples" / "sample_input" / "old.xml"),
+            str(ROOT / "examples" / "sample_input" / "new.xml"),
+            "--out",
+            str(report),
+            "--csv",
+            str(backlog),
+            "--impact",
+            "high_priority_review",
+            "--owner",
+            "Endpoint/Windows Admin",
+        ],
+    )
+
+    assert result.exit_code == 0
+    text = report.read_text(encoding="utf-8")
+    assert "Windows audit policy" in text
+    assert "Firewall management access" not in text
+
+
+def test_cli_diff_rejects_unknown_impact_filter(tmp_path: Path):
+    result = runner.invoke(
+        app,
+        [
+            "diff",
+            str(ROOT / "examples" / "sample_input" / "old.xml"),
+            str(ROOT / "examples" / "sample_input" / "new.xml"),
+            "--out",
+            str(tmp_path / "report.md"),
+            "--impact",
+            "urgent_magic",
+        ],
+    )
+
+    assert result.exit_code == 1
+    assert "--impact must be one of" in result.output
+
+
 def test_cli_invalid_xml_gives_clean_error(tmp_path: Path):
     bad_xml = tmp_path / "bad.xml"
     bad_xml.write_text("<Benchmark><Group></Benchmark>", encoding="utf-8")
