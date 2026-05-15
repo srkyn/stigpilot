@@ -1,14 +1,24 @@
+![STIGPilot banner](docs/assets/stigpilot-banner.svg)
+
 # STIGPilot
+
+STIGPilot is a local Python CLI that compares DISA STIG XCCDF releases and turns the changes into impact summaries, remediation backlogs, evidence checklists, manager summaries, and ticket-ready exports.
 
 [![Tests](https://github.com/srkyn/stigpilot/actions/workflows/tests.yml/badge.svg)](https://github.com/srkyn/stigpilot/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-STIGPilot is a local Python CLI that compares official DISA STIG XCCDF releases and turns the changes into impact summaries, remediation backlogs, evidence checklists, and ticket-ready exports.
-
 ## Why this exists
 
-Official tools are authoritative for viewing, scanning, checklist work, and formal compliance. STIGPilot focuses on the workflow gap after a new STIG release drops: what changed, what matters, who owns it, what tickets should be created, and what evidence needs refreshing.
+Official tools are authoritative for viewing, scanning, checklist work, and formal compliance. STIGPilot focuses on the workflow gap after a new STIG release drops:
+
+- What changed?
+- What matters?
+- What got more severe?
+- What likely needs implementation work?
+- What evidence needs to be refreshed?
+- What tickets should be created?
+- What should a manager know?
 
 I built this after learning about STIGs and asking a practical question: if someone is responsible for applying these controls or comparing releases, what would make their day easier? The answer was not another viewer or scanner. It was a fast local helper that turns a dense XML release into a short brief, a backlog, and evidence requests people can actually act on.
 
