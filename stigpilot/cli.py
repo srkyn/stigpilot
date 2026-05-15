@@ -592,6 +592,8 @@ def chrome_demo(
         "--input-dir",
         help="Directory containing official Chrome old.xml and new.xml XCCDF files.",
     ),
+    impact_filter: Optional[str] = typer.Option(None, "--impact", help="Only include one impact category, such as high_priority_review."),
+    owner_filter: Optional[str] = typer.Option(None, "--owner", help='Only include changes for one suggested owner, such as "Endpoint/Windows Admin".'),
     config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
 ) -> None:
     """Generate a Chrome for Windows STIG comparison packet."""
@@ -616,7 +618,8 @@ def chrome_demo(
     config = _load_config(config_path)
     old_doc = _load(old_xml, config)
     new_doc = _load(new_xml, config)
-    changes = compare_documents(old_doc, new_doc)
+    all_changes = compare_documents(old_doc, new_doc)
+    changes = _filter_changes(all_changes, impact_filter, owner_filter, config)
     outputs = _write_comparison_packet(old_doc, new_doc, changes, out, config)
 
     counts = change_summary_counts(changes)

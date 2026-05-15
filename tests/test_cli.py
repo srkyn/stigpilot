@@ -198,3 +198,28 @@ def test_cli_chrome_demo_missing_official_files_uses_sample(tmp_path: Path):
     assert (out / "change-brief.md").exists()
     assert (out / "manager-summary.md").exists()
     assert (out / "remediation-backlog.csv").exists()
+
+
+def test_cli_chrome_demo_can_filter_by_impact_and_owner(tmp_path: Path):
+    out = tmp_path / "chrome-filtered"
+    missing_inputs = tmp_path / "missing-official"
+
+    result = runner.invoke(
+        app,
+        [
+            "chrome-demo",
+            "--out",
+            str(out),
+            "--input-dir",
+            str(missing_inputs),
+            "--impact",
+            "evidence_update_likely",
+            "--owner",
+            "Endpoint/Windows Admin",
+        ],
+    )
+
+    assert result.exit_code == 0
+    text = (out / "change-brief.md").read_text(encoding="utf-8")
+    assert "Chrome password manager must be disabled" in text
+    assert "Chrome Safe Browsing enhanced protection" not in text

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1
+
+- Added `--impact` and `--owner` filtering to `stigpilot chrome-demo`.
+- Documented focused Chrome demo packets for team-specific review.
+- Added CLI regression coverage for filtered Chrome demo output.
+
 ## 0.5.0
 
 - Added `stigpilot packet` for one-command full workflow packet generation from two STIG XML files.

@@ -78,6 +78,12 @@ Run the built-in sanitized Chrome workflow:
 stigpilot chrome-demo
 ```
 
+Generate a Chrome packet for only one team or impact category:
+
+```bash
+stigpilot chrome-demo --impact evidence_update_likely --owner "Endpoint/Windows Admin"
+```
+
 Generated files:
 
 ```text
