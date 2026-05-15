@@ -22,6 +22,7 @@ def test_evidence_checklist_contains_checkboxes():
     report = evidence_checklist(document)
 
     assert "- [ ] Asset/System:" in report
+    assert "- [ ] Environment:" in report
     assert "- [ ] Screenshot or export of the relevant setting" in report
 
 

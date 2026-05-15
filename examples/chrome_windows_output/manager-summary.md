@@ -27,12 +27,18 @@ New controls: 3
 
 ## Top Actions
 
-- V-CHROME-004: Chrome extension installation must be restricted (high_priority_review; Endpoint/Windows Admin)
-- V-CHROME-001: Chrome Safe Browsing enhanced protection must be enabled (high_priority_review; Endpoint/Windows Admin)
-- V-CHROME-002: Chrome password manager must be disabled (evidence_update_likely; Endpoint/Windows Admin)
+- V-CHROME-004: Chrome extension installation must be restricted (High-priority review; Endpoint/Windows Admin)
+- V-CHROME-001: Chrome Safe Browsing enhanced protection must be enabled (High-priority review; Endpoint/Windows Admin)
+- V-CHROME-002: Chrome password manager must be disabled (Evidence update likely; Endpoint/Windows Admin)
 
 ## Recommended Next Steps
 
 - Assign high-priority and implementation-likely changes to the suggested owner groups.
 - Use the remediation backlog CSV for ticket import or queue grooming.
 - Use the evidence checklist to refresh validation requests where check guidance changed.
+
+## Assumptions and Limitations
+
+- This is change triage and remediation planning support, not formal compliance validation.
+- Official DISA tooling and organizational review remain authoritative.
+- Owner and impact suggestions are transparent keyword/rule matches and should be reviewed by the team.

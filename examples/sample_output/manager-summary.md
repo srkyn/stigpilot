@@ -29,12 +29,18 @@ New controls: 3
 
 ## Top Actions
 
-- V-100004: Firewall management access must be restricted (high_priority_review; Network/Security Engineering)
-- V-100001: Windows audit policy must be configured and reviewed (high_priority_review; Endpoint/Windows Admin)
-- V-100002: Linux SSH banner must be configured (evidence_update_likely; Linux Admin)
+- V-100004: Firewall management access must be restricted (High-priority review; Network/Security Engineering)
+- V-100001: Windows audit policy must be configured and reviewed (High-priority review; Endpoint/Windows Admin)
+- V-100002: Linux SSH banner must be configured (Evidence update likely; Linux Admin)
 
 ## Recommended Next Steps
 
 - Assign high-priority and implementation-likely changes to the suggested owner groups.
 - Use the remediation backlog CSV for ticket import or queue grooming.
 - Use the evidence checklist to refresh validation requests where check guidance changed.
+
+## Assumptions and Limitations
+
+- This is change triage and remediation planning support, not formal compliance validation.
+- Official DISA tooling and organizational review remain authoritative.
+- Owner and impact suggestions are transparent keyword/rule matches and should be reviewed by the team.

@@ -15,6 +15,7 @@ Controls included: 3
 Validation metadata:
 
 - [ ] Asset/System:
+- [ ] Environment:
 - [ ] Validated by:
 - [ ] Date:
 - [ ] Notes:
@@ -38,6 +39,7 @@ Evidence requested:
 Validation metadata:
 
 - [ ] Asset/System:
+- [ ] Environment:
 - [ ] Validated by:
 - [ ] Date:
 - [ ] Notes:
@@ -62,6 +64,7 @@ Evidence requested:
 Validation metadata:
 
 - [ ] Asset/System:
+- [ ] Environment:
 - [ ] Validated by:
 - [ ] Date:
 - [ ] Notes:

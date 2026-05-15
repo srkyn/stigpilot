@@ -1,6 +1,6 @@
 ﻿Summary,Issue Type,Priority,Labels,Assignee,Description
 added: V-100004 - Firewall management access must be restricted,Task,High,"stigpilot,high_priority_review,network-security",Network/Security Engineering,"Change type: added
-Impact: high_priority_review
+Impact: High-priority review (high_priority_review)
 Reason: A new high-severity control was added, so it should be triaged before lower-risk backlog work.
 Changed fields: added
 Vuln ID: V-100004
@@ -11,7 +11,7 @@ Check summary: Review firewall management network restrictions and approved admi
 Fix summary: Restrict firewall management access to approved networks.
 Evidence needed: Screenshot or export of the relevant setting; Network device configuration excerpt or management console export; Date/time of validation; System or asset name; Reviewer notes"
 removed: V-100003 - Removed database audit control,Task,Low,"stigpilot,review_recommended,audit-logging,database",Database Admin,"Change type: removed
-Impact: review_recommended
+Impact: Review recommended (review_recommended)
 Reason: The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
 Changed fields: removed
 Vuln ID: V-100003
@@ -22,7 +22,7 @@ Check summary: Review SQL audit settings.
 Fix summary: Configure SQL audit settings.
 Evidence needed: Screenshot or export of the relevant setting; Database configuration query output or parameter export; Date/time of validation; System or asset name; Reviewer notes"
 severity_increased: V-100001 - Windows audit policy must be configured and reviewed,Task,High,"stigpilot,high_priority_review,audit-logging,endpoint-security,windows,gpo",Endpoint/Windows Admin,"Change type: severity_increased
-Impact: high_priority_review
+Impact: High-priority review (high_priority_review)
 Reason: The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.
 Changed fields: title, severity, check_text, fix_text, references
 Vuln ID: V-100001
@@ -33,7 +33,7 @@ Check summary: Review Windows audit policy settings in Local Security Policy and
 Fix summary: Configure Windows audit policy through GPO and document the applied baseline.
 Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
 check_changed: V-100002 - Linux SSH banner must be configured,Task,Medium,"stigpilot,evidence_update_likely,remote-access,linux",Linux Admin,"Change type: check_changed
-Impact: evidence_update_likely
+Impact: Evidence update likely (evidence_update_likely)
 Reason: The check procedure changed enough that evidence requests or validation steps may need to be refreshed.
 Changed fields: check_text
 Vuln ID: V-100002

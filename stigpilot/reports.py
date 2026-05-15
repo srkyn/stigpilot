@@ -13,6 +13,24 @@ from .taxonomy import suggested_owner
 from .utils import ensure_parent, summarize
 
 
+IMPACT_LABELS = {
+    "high_priority_review": "High-priority review",
+    "implementation_change_likely": "Implementation change likely",
+    "evidence_update_likely": "Evidence update likely",
+    "review_recommended": "Review recommended",
+    "no_action_likely": "No action likely",
+}
+
+
+IMPACT_MEANINGS = {
+    "high_priority_review": "Review first because severity or new high-risk scope changed.",
+    "implementation_change_likely": "Remediation steps may need updates before reusing old tickets.",
+    "evidence_update_likely": "Check procedure changed enough that evidence requests may need refresh.",
+    "review_recommended": "Traceability, cleanup, or analyst review is recommended.",
+    "no_action_likely": "Likely wording or metadata only; keep awareness but avoid noisy tickets.",
+}
+
+
 def write_text_report(path: str | Path, content: str) -> None:
     ensure_parent(path)
     Path(path).write_text(content, encoding="utf-8")
@@ -85,11 +103,16 @@ def change_brief(
     ]
     if not top:
         lines.append("- No high-priority implementation or evidence changes detected.")
-    for change in top:
+    for idx, change in enumerate(top, start=1):
         control = change.current_control or StigControl()
+        owner = suggested_owner(control, config)
+        control_id = control.vuln_id or control.rule_id or "Control"
         lines.append(
-            f"- **{control.vuln_id or control.rule_id or 'Control'}**: {control.title or 'Untitled'} - {change.reason}"
+            f"{idx}. **{control_id} - {control.title or 'Untitled'}**"
         )
+        lines.append(f"   - Impact: {impact_label(change.impact)}")
+        lines.append(f"   - Owner: {owner}")
+        lines.append(f"   - Why it matters: {change.reason}")
     lines.extend(
         [
             "",
@@ -115,7 +138,7 @@ def change_brief(
         ]
     )
     for impact, meaning in IMPACT_MEANINGS.items():
-        lines.append(f"| {impact} | {impacts.get(impact, 0)} | {meaning} |")
+        lines.append(f"| {impact_label(impact)} | {impacts.get(impact, 0)} | {meaning} |")
     lines.extend(
         [
             "",
@@ -128,7 +151,7 @@ def change_brief(
     for change in top:
         control = change.current_control or StigControl()
         lines.append(
-            f"| {change.impact} | {control.severity or 'unspecified'} | {control.vuln_id or change.vuln_id} | "
+            f"| {impact_label(change.impact)} | {control.severity or 'unspecified'} | {control.vuln_id or change.vuln_id} | "
             f"{control.rule_id or change.rule_id} | {_md(control.title)} | {suggested_owner(control, config)} | {_md(change.reason)} |"
         )
     lines.extend(
@@ -143,20 +166,11 @@ def change_brief(
     for change in changes:
         control = change.current_control or StigControl()
         lines.append(
-            f"| {change.change_type} | {change.impact} | {control.severity or 'unspecified'} | "
+            f"| {change.change_type} | {impact_label(change.impact)} | {control.severity or 'unspecified'} | "
             f"{control.vuln_id or change.vuln_id} | {control.rule_id or change.rule_id} | "
             f"{', '.join(change.changed_fields) or '-'} | {suggested_owner(control, config)} | {_md(change.reason)} |"
         )
     return "\n".join(lines) + "\n"
-
-
-IMPACT_MEANINGS = {
-    "high_priority_review": "Review first because severity or new high-risk scope changed.",
-    "implementation_change_likely": "Remediation steps may need updates before reusing old tickets.",
-    "evidence_update_likely": "Check procedure changed enough that evidence requests may need refresh.",
-    "review_recommended": "Traceability, cleanup, or analyst review is recommended.",
-    "no_action_likely": "Likely wording or metadata only; keep awareness but avoid noisy tickets.",
-}
 
 
 def executive_summary(changes: list[ControlChange], config: StigPilotConfig | None = None) -> str:
@@ -259,7 +273,7 @@ def manager_summary_report(
         control = change.current_control or StigControl()
         lines.append(
             f"- {control.vuln_id or control.rule_id or 'Control'}: {control.title or 'Untitled'} "
-            f"({change.impact}; {suggested_owner(control, config)})"
+            f"({impact_label(change.impact)}; {suggested_owner(control, config)})"
         )
 
     lines.extend(
@@ -270,6 +284,12 @@ def manager_summary_report(
             "- Assign high-priority and implementation-likely changes to the suggested owner groups.",
             "- Use the remediation backlog CSV for ticket import or queue grooming.",
             "- Use the evidence checklist to refresh validation requests where check guidance changed.",
+            "",
+            "## Assumptions and Limitations",
+            "",
+            "- This is change triage and remediation planning support, not formal compliance validation.",
+            "- Official DISA tooling and organizational review remain authoritative.",
+            "- Owner and impact suggestions are transparent keyword/rule matches and should be reviewed by the team.",
         ]
     )
     return "\n".join(lines) + "\n"
@@ -302,6 +322,7 @@ def evidence_checklist(document: StigDocument, severity: str | None = None, conf
                     "Validation metadata:",
                     "",
                     "- [ ] Asset/System:",
+                    "- [ ] Environment:",
                     "- [ ] Validated by:",
                     "- [ ] Date:",
                     "- [ ] Notes:",
@@ -341,3 +362,7 @@ def manager_summary(changes: list[ControlChange], config: StigPilotConfig | None
 
 def _md(value: str) -> str:
     return value.replace("|", "\\|").replace("\n", " ")
+
+
+def impact_label(value: str) -> str:
+    return IMPACT_LABELS.get(value, value.replace("_", " ").title())

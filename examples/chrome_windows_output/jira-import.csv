@@ -1,6 +1,6 @@
 ﻿Summary,Issue Type,Priority,Labels,Assignee,Description
 added: V-CHROME-004 - Chrome extension installation must be restricted,Task,High,"stigpilot,high_priority_review,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: added
-Impact: high_priority_review
+Impact: High-priority review (high_priority_review)
 Reason: A new high-severity control was added, so it should be triaged before lower-risk backlog work.
 Changed fields: added
 Vuln ID: V-CHROME-004
@@ -11,7 +11,7 @@ Check summary: Review Chrome enterprise extension policy and confirm unapproved 
 Fix summary: Configure Chrome ExtensionInstallBlocklist and ExtensionInstallAllowlist policies through GPO or registry.
 Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
 removed: V-CHROME-003 - Deprecated Chrome cleanup policy must be reviewed,Task,Low,"stigpilot,review_recommended,browser-security",Security/GRC Analyst,"Change type: removed
-Impact: review_recommended
+Impact: Review recommended (review_recommended)
 Reason: The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
 Changed fields: removed
 Vuln ID: V-CHROME-003
@@ -22,7 +22,7 @@ Check summary: Review legacy Chrome cleanup policy settings.
 Fix summary: Remove or disable legacy Chrome cleanup configuration.
 Evidence needed: Screenshot or export of the relevant setting; Date/time of validation; System or asset name; Reviewer notes"
 severity_increased: V-CHROME-001 - Chrome Safe Browsing enhanced protection must be enabled,Task,High,"stigpilot,high_priority_review,iam,endpoint-security,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: severity_increased
-Impact: high_priority_review
+Impact: High-priority review (high_priority_review)
 Reason: The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.
 Changed fields: title, severity, check_text, fix_text, references
 Vuln ID: V-CHROME-001
@@ -33,7 +33,7 @@ Check summary: Review Chrome enterprise policy in GPO or registry and export evi
 Fix summary: Configure Chrome Safe Browsing enhanced protection through Group Policy or the registry policy path and document the applied baseline.
 Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes"
 check_changed: V-CHROME-002 - Chrome password manager must be disabled,Task,Medium,"stigpilot,evidence_update_likely,password-policy,gpo,registry,browser-security",Endpoint/Windows Admin,"Change type: check_changed
-Impact: evidence_update_likely
+Impact: Evidence update likely (evidence_update_likely)
 Reason: The check procedure changed enough that evidence requests or validation steps may need to be refreshed.
 Changed fields: check_text
 Vuln ID: V-CHROME-002

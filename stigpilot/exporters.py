@@ -30,6 +30,14 @@ CONTROL_FIELDS = [
     "Raw ID",
 ]
 
+IMPACT_LABELS = {
+    "high_priority_review": "High-priority review",
+    "implementation_change_likely": "Implementation change likely",
+    "evidence_update_likely": "Evidence update likely",
+    "review_recommended": "Review recommended",
+    "no_action_likely": "No action likely",
+}
+
 
 def write_controls_csv(document: StigDocument, path: str | Path) -> None:
     ensure_parent(path)
@@ -208,7 +216,7 @@ def github_issue_markdown(changes: Iterable[ControlChange], config: StigPilotCon
                 "",
                 f"- Severity: {control.severity or 'unspecified'}",
                 f"- Suggested owner: {suggested_owner(control, config)}",
-                f"- Impact: {change.impact}",
+                f"- Impact: {_impact_label(change.impact)} (`{change.impact}`)",
                 f"- Reason: {change.reason}",
                 f"- Changed fields: {', '.join(change.changed_fields) or change.change_type}",
                 "",
@@ -242,7 +250,7 @@ def _ticket_description(change: ControlChange, config: StigPilotConfig | None = 
     return "\n".join(
         [
             f"Change type: {change.change_type}",
-            f"Impact: {change.impact}",
+            f"Impact: {_impact_label(change.impact)} ({change.impact})",
             f"Reason: {change.reason}",
             f"Changed fields: {', '.join(change.changed_fields) or change.change_type}",
             f"Vuln ID: {control.vuln_id or change.vuln_id}",
@@ -262,3 +270,7 @@ def _priority(change: ControlChange) -> str:
     if change.impact in {"implementation_change_likely", "evidence_update_likely"}:
         return "Medium"
     return "Low"
+
+
+def _impact_label(value: str) -> str:
+    return IMPACT_LABELS.get(value, value.replace("_", " ").title())

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1
+
+- Replaced internal impact enum values with analyst-friendly labels in generated Markdown reports.
+- Improved change brief priority actions with owner and "why it matters" context.
+- Added manager-summary assumptions and limitations language to reinforce that STIGPilot supports triage, not formal validation.
+- Added `Environment` metadata to evidence checklists.
+- Regenerated sample and Chrome demo outputs with the polished report language.
+
 ## 0.3.0
 
 - Added first-class `stigpilot chrome-demo` workflow.
