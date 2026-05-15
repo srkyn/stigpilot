@@ -13,8 +13,11 @@ DIFF_FIELDS = ("title", "severity", "check_text", "fix_text", "cci_refs", "refer
 
 def _index_controls(controls: list[StigControl]) -> dict[str, StigControl]:
     indexed: dict[str, StigControl] = {}
+    seen: dict[str, int] = {}
     for idx, control in enumerate(controls):
-        key = _stable_key(control) or f"control-{idx}"
+        base_key = _stable_key(control) or f"control-{idx}"
+        seen[base_key] = seen.get(base_key, 0) + 1
+        key = base_key if seen[base_key] == 1 else f"{base_key}#duplicate-{seen[base_key]}"
         indexed[key] = control
     return indexed
 

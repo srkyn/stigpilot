@@ -1,0 +1,16 @@
+# Optional local STIGPilot config.
+#
+# Rules extend the built-in keyword mappings. They are intentionally simple
+# and transparent so teams can see why work is routed or tagged.
+
+[[owner_rules]]
+owner = "Identity/IAM Team"
+keywords = ["authentication", "authorization", "account lifecycle", "privileged account"]
+
+[[owner_rules]]
+owner = "Windows Platform Team"
+keywords = ["windows audit policy", "local security policy", "defender baseline"]
+
+[tag_rules]
+"Privileged Access" = ["privileged account", "sudoers", "domain admin"]
+"Evidence Refresh" = ["export applied", "validation artifact", "evidence package"]

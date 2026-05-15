@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 from xml.etree import ElementTree as ET
 
+from .config import StigPilotConfig
 from .models import StigControl, StigDocument
 from .taxonomy import tags_for_control
 from .utils import clean_text, norm_list
@@ -197,7 +198,7 @@ def _iter_group_rules(benchmark: ET.Element) -> list[tuple[ET.Element, ET.Elemen
     return [(benchmark, rule) for rule in _descendants(benchmark, "Rule")]
 
 
-def parse_stig(path: str | Path) -> StigDocument:
+def parse_stig(path: str | Path, config: StigPilotConfig | None = None) -> StigDocument:
     """Parse a STIG XCCDF/XML file into a normalized document model."""
 
     root = _parse_xml(path)
@@ -220,7 +221,7 @@ def parse_stig(path: str | Path) -> StigDocument:
             references=norm_list(_extract_references(rule) + _extract_description_references(rule)),
             raw_id=_raw_id(group, rule),
         )
-        control.tags = tags_for_control(control)
+        control.tags = tags_for_control(control, config)
         controls.append(control)
 
     return StigDocument(

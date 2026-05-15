@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from pathlib import Path
 
+from .config import StigPilotConfig
 from .impact import evidence_requests
 from .models import ControlChange, StigControl, StigDocument
 from .taxonomy import suggested_owner
@@ -16,7 +17,7 @@ def write_text_report(path: str | Path, content: str) -> None:
     Path(path).write_text(content, encoding="utf-8")
 
 
-def single_stig_brief(document: StigDocument, severity: str | None = None) -> str:
+def single_stig_brief(document: StigDocument, severity: str | None = None, config: StigPilotConfig | None = None) -> str:
     controls = filter_by_severity(document.controls, severity)
     counts = Counter((control.severity or "unspecified").lower() for control in controls)
     lines = [
@@ -37,12 +38,17 @@ def single_stig_brief(document: StigDocument, severity: str | None = None) -> st
     for control in controls:
         lines.append(
             f"| {control.severity or ''} | {control.vuln_id or ''} | {control.rule_id or ''} | "
-            f"{_md(control.title)} | {suggested_owner(control)} | {_md(', '.join(control.tags))} |"
+            f"{_md(control.title)} | {suggested_owner(control, config)} | {_md(', '.join(control.tags))} |"
         )
     return "\n".join(lines) + "\n"
 
 
-def change_brief(old_doc: StigDocument, new_doc: StigDocument, changes: list[ControlChange]) -> str:
+def change_brief(
+    old_doc: StigDocument,
+    new_doc: StigDocument,
+    changes: list[ControlChange],
+    config: StigPilotConfig | None = None,
+) -> str:
     counts = Counter(change.change_type for change in changes)
     impacts = Counter(change.impact for change in changes)
     severity_changed_count = sum(1 for change in changes if "severity" in change.changed_fields)
@@ -77,7 +83,7 @@ def change_brief(old_doc: StigDocument, new_doc: StigDocument, changes: list[Con
         "",
         "## Manager Summary",
         "",
-        manager_summary(changes),
+        manager_summary(changes, config),
         "",
         "## Top Priority Actions",
         "",
@@ -104,13 +110,13 @@ def change_brief(old_doc: StigDocument, new_doc: StigDocument, changes: list[Con
         lines.append(
             f"| {change.change_type} | {change.impact} | {control.severity or ''} | "
             f"{control.vuln_id or change.vuln_id} | {control.rule_id or change.rule_id} | "
-            f"{', '.join(change.changed_fields) or '-'} | {suggested_owner(control)} | "
+            f"{', '.join(change.changed_fields) or '-'} | {suggested_owner(control, config)} | "
             f"{_md(', '.join(control.tags))} | {_md(change.reason)} |"
         )
     return "\n".join(lines) + "\n"
 
 
-def evidence_checklist(document: StigDocument, severity: str | None = None) -> str:
+def evidence_checklist(document: StigDocument, severity: str | None = None, config: StigPilotConfig | None = None) -> str:
     controls = filter_by_severity(document.controls, severity)
     lines = [
         "# STIGPilot Evidence Checklist",
@@ -125,7 +131,7 @@ def evidence_checklist(document: StigDocument, severity: str | None = None) -> s
                 f"## {control.vuln_id or control.rule_id or 'Control'} - {control.title or 'Untitled'}",
                 "",
                 f"- Severity: {control.severity or 'unspecified'}",
-                f"- Suggested owner: {suggested_owner(control)}",
+                f"- Suggested owner: {suggested_owner(control, config)}",
                 f"- Tags: {', '.join(control.tags)}",
                 f"- Check summary: {summarize(control.check_text)}",
                 "- Evidence requested:",
@@ -144,11 +150,11 @@ def filter_by_severity(controls: list[StigControl], severity: str | None) -> lis
     return [control for control in controls if control.severity.lower() == wanted]
 
 
-def manager_summary(changes: list[ControlChange]) -> str:
+def manager_summary(changes: list[ControlChange], config: StigPilotConfig | None = None) -> str:
     if not changes:
         return "No STIG control changes were detected between the compared files."
     impacts = Counter(change.impact for change in changes)
-    owners = Counter(suggested_owner(change.current_control) for change in changes)
+    owners = Counter(suggested_owner(change.current_control, config) for change in changes)
     top_count = owners.most_common(1)[0][1]
     top_owners = sorted(owner for owner, count in owners.items() if count == top_count)
     owner_phrase = ", ".join(top_owners) if len(top_owners) <= 3 else "multiple owner groups"

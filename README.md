@@ -45,6 +45,7 @@ STIGPilot does not claim compliance, certification, endorsement, or validation.
 - Generate remediation backlog CSVs, evidence checklists, Jira-friendly CSVs, ServiceNow-friendly CSVs, GitHub issue draft Markdown, and ticket-friendly CSVs.
 - Assign keyword-based tags such as Windows, Linux, GPO, Registry, Audit Logging, IAM, Remote Access, Network Security, Database, Cloud, and Container/Kubernetes.
 - Suggest likely owners using transparent keyword rules.
+- Extend owner and tag mappings with an optional local TOML config.
 
 ## Install
 
@@ -131,6 +132,12 @@ Show a terminal summary:
 stigpilot summary examples/sample_input/new.xml
 ```
 
+Use a local owner/tag mapping config:
+
+```powershell
+stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --config examples/stigpilot.toml
+```
+
 ## Example Output
 
 Synthetic fixtures are included in `examples/sample_input/`. They are fake and sanitized.
@@ -180,6 +187,19 @@ Tags and suggested owners are keyword-based and explainable. Examples:
 
 Everything else defaults to Security/GRC Analyst.
 
+Teams can extend these mappings with a local TOML file. Custom owner rules are checked before the built-in defaults, and custom tag rules are merged with built-in tags.
+
+```toml
+[[owner_rules]]
+owner = "Identity/IAM Team"
+keywords = ["authentication", "privileged account"]
+
+[tag_rules]
+"Privileged Access" = ["privileged account", "sudoers"]
+```
+
+An example is included at `examples/stigpilot.toml`.
+
 ## Limitations
 
 - STIGPilot does not validate host compliance.
@@ -195,8 +215,8 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 
 ## Roadmap
 
-- Configurable owner/tag mappings with a local YAML or TOML file.
 - Folder-level old/new STIG comparison for release bundles.
+- Team config validation improvements and documented config recipes.
 - Manager-only summary reports.
 - Implementation-only and evidence-only filtered reports.
 - HTML report output.
