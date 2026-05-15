@@ -82,6 +82,7 @@ python -m stigpilot.cli demo
 The demo writes sanitized sample reports under `output/demo/`. Start with:
 
 - `output/demo/change-brief.md`
+- `output/demo/manager-summary.md`
 - `output/demo/remediation-backlog.csv`
 - `output/demo/evidence-checklist.md`
 - `output/demo/jira-import.csv`
@@ -166,6 +167,15 @@ Example change brief excerpt:
 4 control change(s) were detected. 3 likely require priority review, implementation work, or evidence updates.
 ```
 
+## Screenshots
+
+Screenshots can be added after running the demo locally. Useful captures for a portfolio page:
+
+- Terminal output from `stigpilot summary examples/sample_input/new.xml`
+- `examples/sample_output/change-brief.md`
+- `examples/sample_output/manager-summary.md`
+- `examples/sample_output/remediation-backlog.csv`
+
 ## Impact Rules
 
 The classifier is intentionally transparent:
@@ -224,7 +234,6 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 
 - Folder-level old/new STIG comparison for release bundles.
 - Team config validation improvements and documented config recipes.
-- Manager-only summary reports.
 - Implementation-only and evidence-only filtered reports.
 - HTML report output.
 - Optional Streamlit dashboard after the CLI remains strong.
@@ -250,6 +259,8 @@ Regenerate sample outputs:
 
 ```powershell
 python -m stigpilot.cli diff examples\sample_input\old.xml examples\sample_input\new.xml --out examples\sample_output\change-brief.md --csv examples\sample_output\remediation-backlog.csv --jira-csv examples\sample_output\jira-import.csv --servicenow-csv examples\sample_output\servicenow-import.csv --github-md examples\sample_output\github-issues.md
+python -m stigpilot.cli manager examples\sample_input\old.xml examples\sample_input\new.xml --out examples\sample_output\manager-summary.md
 python -m stigpilot.cli parse examples\sample_input\new.xml --csv examples\sample_output\controls.csv --json examples\sample_output\controls.json
+python -m stigpilot.cli tickets examples\sample_input\new.xml --out examples\sample_output\tickets.csv
 python -m stigpilot.cli evidence examples\sample_input\new.xml --out examples\sample_output\evidence-checklist.md
 ```
