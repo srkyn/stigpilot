@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STIGPilot Change Brief</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #dbe3ef;
+      --blue: #0369a1;
+      --green: #15803d;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+    header {
+      border-left: 6px solid var(--blue);
+      padding: 4px 0 4px 20px;
+      margin-bottom: 28px;
+    }
+    h1 { margin: 0 0 8px; font-size: 38px; }
+    h2 { margin-top: 34px; font-size: 23px; }
+    .meta, .summary { color: var(--muted); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 22px 0;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+    .metric { font-size: 30px; font-weight: 700; color: var(--blue); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th { background: #eaf2fb; color: #123047; }
+    tr:last-child td { border-bottom: 0; }
+    ol.priority {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 24px 16px 42px;
+    }
+    ol.priority li { margin: 0 0 14px; }
+    ol.priority span {
+      display: block;
+      color: var(--green);
+      font-weight: 700;
+      margin-top: 3px;
+    }
+    ol.priority p { margin: 4px 0 0; color: var(--muted); }
+    footer {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>STIGPilot Change Brief</h1>
+    <div class="meta">Old: old.xml | New: new.xml</div>
+    <div class="meta">Old controls: 3 | New controls: 3</div>
+  </header>
+  <section class="card summary">4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The most affected owner group(s) are Database Admin, Endpoint/Windows Admin, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.</section>
+  <section class="grid">
+    <div class="card"><div class="metric">1</div><div>Added controls</div></div>
+<div class="card"><div class="metric">1</div><div>Removed controls</div></div>
+<div class="card"><div class="metric">2</div><div>Modified controls</div></div>
+<div class="card"><div class="metric">1</div><div>Severity changes</div></div>
+<div class="card"><div class="metric">2</div><div>High-priority review</div></div>
+<div class="card"><div class="metric">0</div><div>Implementation change likely</div></div>
+<div class="card"><div class="metric">1</div><div>Evidence update likely</div></div>
+  </section>
+  <h2>Priority Actions</h2>
+  <ol class="priority"><li><strong>V-100001 - Windows audit policy must be configured and reviewed</strong><span>High-priority review | Endpoint/Windows Admin</span><p>The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.</p></li><li><strong>V-100004 - Firewall management access must be restricted</strong><span>High-priority review | Network/Security Engineering</span><p>A new high-severity control was added, so it should be triaged before lower-risk backlog work.</p></li><li><strong>V-100002 - Linux SSH banner must be configured</strong><span>Evidence update likely | Linux Admin</span><p>The check procedure changed enough that evidence requests or validation steps may need to be refreshed.</p></li><li><strong>V-100003 - Removed database audit control</strong><span>Review recommended | Database Admin</span><p>The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.</p></li></ol>
+  <h2>Owner Impact</h2>
+  <table><thead><tr><th>Owner</th><th>Changes</th><th>High Priority</th><th>Implementation Likely</th><th>Evidence Updates</th></tr></thead><tbody><tr><td>Database Admin</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>Endpoint/Windows Admin</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>Linux Admin</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+<tr><td>Network/Security Engineering</td><td>1</td><td>1</td><td>0</td><td>0</td></tr></tbody></table>
+  <h2>Change Categories</h2>
+  <table><thead><tr><th>Impact</th><th>Count</th><th>Meaning</th></tr></thead><tbody><tr><td>High-priority review</td><td>2</td><td>Review first because severity or new high-risk scope changed.</td></tr>
+<tr><td>Implementation change likely</td><td>0</td><td>Remediation steps may need updates before reusing old tickets.</td></tr>
+<tr><td>Evidence update likely</td><td>1</td><td>Check procedure changed enough that evidence requests may need refresh.</td></tr>
+<tr><td>Review recommended</td><td>1</td><td>Traceability, cleanup, or analyst review is recommended.</td></tr>
+<tr><td>No action likely</td><td>0</td><td>Likely wording or metadata only; keep awareness but avoid noisy tickets.</td></tr></tbody></table>
+  <h2>Top Changed Controls</h2>
+  <table><thead><tr><th>Impact</th><th>Severity</th><th>Vuln ID</th><th>Rule ID</th><th>Title</th><th>Owner</th><th>Why it matters</th></tr></thead><tbody><tr><td>High-priority review</td><td>high</td><td>V-100001</td><td>SV-100001r2_rule</td><td>Windows audit policy must be configured and reviewed</td><td>Endpoint/Windows Admin</td><td>The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.</td></tr>
+<tr><td>High-priority review</td><td>high</td><td>V-100004</td><td>SV-100004r1_rule</td><td>Firewall management access must be restricted</td><td>Network/Security Engineering</td><td>A new high-severity control was added, so it should be triaged before lower-risk backlog work.</td></tr>
+<tr><td>Evidence update likely</td><td>low</td><td>V-100002</td><td>SV-100002r2_rule</td><td>Linux SSH banner must be configured</td><td>Linux Admin</td><td>The check procedure changed enough that evidence requests or validation steps may need to be refreshed.</td></tr>
+<tr><td>Review recommended</td><td>medium</td><td>V-100003</td><td>SV-100003r1_rule</td><td>Removed database audit control</td><td>Database Admin</td><td>The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.</td></tr></tbody></table>
+  <h2>Detailed Changes</h2>
+  <table><thead><tr><th>Change Type</th><th>Impact</th><th>Severity</th><th>Vuln ID</th><th>Rule ID</th><th>Changed Fields</th><th>Owner</th><th>Why it matters</th></tr></thead><tbody><tr><td>added</td><td>High-priority review</td><td>high</td><td>V-100004</td><td>SV-100004r1_rule</td><td>-</td><td>Network/Security Engineering</td><td>A new high-severity control was added, so it should be triaged before lower-risk backlog work.</td></tr>
+<tr><td>removed</td><td>Review recommended</td><td>medium</td><td>V-100003</td><td>SV-100003r1_rule</td><td>-</td><td>Database Admin</td><td>The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.</td></tr>
+<tr><td>severity_increased</td><td>High-priority review</td><td>high</td><td>V-100001</td><td>SV-100001r2_rule</td><td>title, severity, check_text, fix_text, references</td><td>Endpoint/Windows Admin</td><td>The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.</td></tr>
+<tr><td>check_changed</td><td>Evidence update likely</td><td>low</td><td>V-100002</td><td>SV-100002r2_rule</td><td>check_text</td><td>Linux Admin</td><td>The check procedure changed enough that evidence requests or validation steps may need to be refreshed.</td></tr></tbody></table>
+  <footer>
+    Generated by STIGPilot. This is change triage and remediation planning support, not formal compliance validation.
+  </footer>
+</main>
+</body>
+</html>

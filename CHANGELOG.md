@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0
+
+- Added `stigpilot html` for self-contained browser-readable change briefs.
+- Added HTML report generation using the same impact, owner, and priority logic as Markdown reports.
+- Added committed HTML sample output under `examples/html_output/`.
+- Added CLI and report regression coverage for HTML output.
+
 ## 0.5.1
 
 - Added `--impact` and `--owner` filtering to `stigpilot chrome-demo`.

@@ -2,7 +2,7 @@ from pathlib import Path
 
 from stigpilot.diff import compare_documents
 from stigpilot.parser import parse_stig
-from stigpilot.reports import change_brief, manager_summary_report
+from stigpilot.reports import change_brief, html_change_brief, manager_summary_report
 
 
 def test_manager_summary_report_is_concise_and_actionable():
@@ -32,3 +32,17 @@ def test_change_brief_uses_readable_priority_actions_and_labels():
     assert "1. **" in report
     assert "Impact: High-priority review" in report
     assert "| High-priority review |" in report
+
+
+def test_html_change_brief_is_self_contained_and_readable():
+    old = parse_stig(Path(__file__).parent / "fixtures_old.xml")
+    new = parse_stig(Path(__file__).parent / "fixtures_new.xml")
+    changes = compare_documents(old, new)
+
+    report = html_change_brief(old, new, changes)
+
+    assert "<!doctype html>" in report
+    assert "<style>" in report
+    assert "STIGPilot Change Brief" in report
+    assert "High-priority review" in report
+    assert "formal compliance validation" in report

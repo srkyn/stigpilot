@@ -24,7 +24,7 @@ from .exporters import (
     write_ticket_csv,
 )
 from .parser import StigParseError, parse_stig
-from .reports import change_brief, change_summary_counts, evidence_checklist, filter_by_severity, manager_summary_report, single_stig_brief, write_text_report
+from .reports import change_brief, change_summary_counts, evidence_checklist, filter_by_severity, html_change_brief, manager_summary_report, single_stig_brief, write_text_report
 from .taxonomy import suggested_owner
 
 app = typer.Typer(
@@ -394,6 +394,27 @@ def packet(
     _print_outputs_table("STIGPilot Packet Generated", outputs)
     _print_change_summary(changes, list(outputs.values()))
     console.print(f"[bold]Start here:[/bold] {outputs['Change brief']}")
+
+
+@app.command("html")
+def html_report(
+    old_xml: Path = typer.Argument(..., exists=True, readable=True, help="Old STIG XCCDF/XML file."),
+    new_xml: Path = typer.Argument(..., exists=True, readable=True, help="New STIG XCCDF/XML file."),
+    out: Path = typer.Option(..., "--out", help="Self-contained HTML report output path."),
+    impact_filter: Optional[str] = typer.Option(None, "--impact", help="Only include one impact category, such as high_priority_review."),
+    owner_filter: Optional[str] = typer.Option(None, "--owner", help='Only include changes for one suggested owner, such as "Endpoint/Windows Admin".'),
+    config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
+) -> None:
+    """Generate a self-contained HTML change brief."""
+
+    config = _load_config(config_path)
+    old_doc = _load(old_xml, config)
+    new_doc = _load(new_xml, config)
+    _warn_same_inputs(old_xml, new_xml, old_doc, new_doc)
+    all_changes = compare_documents(old_doc, new_doc)
+    changes = _filter_changes(all_changes, impact_filter, owner_filter, config)
+    _safe_write(lambda: write_text_report(out, html_change_brief(old_doc, new_doc, changes, config)), out, "HTML change brief")
+    _print_change_summary(changes, [out])
 
 
 @app.command()

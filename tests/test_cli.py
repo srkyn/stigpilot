@@ -128,6 +128,27 @@ def test_cli_packet_generates_complete_packet(tmp_path: Path):
     assert (out / "github-issues.md").exists()
 
 
+def test_cli_html_writes_self_contained_report(tmp_path: Path):
+    out = tmp_path / "change-brief.html"
+
+    result = runner.invoke(
+        app,
+        [
+            "html",
+            str(ROOT / "examples" / "sample_input" / "old.xml"),
+            str(ROOT / "examples" / "sample_input" / "new.xml"),
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "HTML change brief" in result.output
+    text = out.read_text(encoding="utf-8")
+    assert "<!doctype html>" in text
+    assert "STIGPilot Change Brief" in text
+
+
 def test_cli_batch_generates_portfolio_packet(tmp_path: Path):
     old_dir = tmp_path / "old"
     new_dir = tmp_path / "new"

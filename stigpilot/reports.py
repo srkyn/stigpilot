@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import Counter
 from collections import defaultdict
+from html import escape
 from pathlib import Path
 
 from .config import StigPilotConfig
@@ -171,6 +172,184 @@ def change_brief(
             f"{', '.join(change.changed_fields) or '-'} | {suggested_owner(control, config)} | {_md(change.reason)} |"
         )
     return "\n".join(lines) + "\n"
+
+
+def html_change_brief(
+    old_doc: StigDocument,
+    new_doc: StigDocument,
+    changes: list[ControlChange],
+    config: StigPilotConfig | None = None,
+) -> str:
+    """Generate a self-contained HTML change brief for browser sharing."""
+
+    counts = change_summary_counts(changes)
+    top = priority_changes(changes)[:10]
+    owner_rows = []
+    for owner, owner_changes in owner_groups(changes, config).items():
+        owner_impacts = Counter(change.impact for change in owner_changes)
+        owner_rows.append(
+            [
+                owner,
+                str(len(owner_changes)),
+                str(owner_impacts.get("high_priority_review", 0)),
+                str(owner_impacts.get("implementation_change_likely", 0)),
+                str(owner_impacts.get("evidence_update_likely", 0)),
+            ]
+        )
+
+    metric_rows = [
+        ("Added controls", counts["added"]),
+        ("Removed controls", counts["removed"]),
+        ("Modified controls", counts["modified"]),
+        ("Severity changes", counts["severity_changed"]),
+        ("High-priority review", counts["high_priority_review"]),
+        ("Implementation change likely", counts["implementation_change_likely"]),
+        ("Evidence update likely", counts["evidence_update_likely"]),
+    ]
+    category_rows = [
+        [impact_label(impact), str(Counter(change.impact for change in changes).get(impact, 0)), meaning]
+        for impact, meaning in IMPACT_MEANINGS.items()
+    ]
+    top_rows = [_change_table_row(change, config) for change in top]
+    detail_rows = [
+        [
+            change.change_type,
+            impact_label(change.impact),
+            (change.current_control or StigControl()).severity or "unspecified",
+            (change.current_control or StigControl()).vuln_id or change.vuln_id,
+            (change.current_control or StigControl()).rule_id or change.rule_id,
+            ", ".join(change.changed_fields) or "-",
+            suggested_owner(change.current_control, config),
+            change.reason,
+        ]
+        for change in changes
+    ]
+    priority_items = "".join(
+        f"<li><strong>{escape((change.current_control or StigControl()).vuln_id or change.vuln_id or 'Control')} - "
+        f"{escape((change.current_control or StigControl()).title or 'Untitled')}</strong>"
+        f"<span>{escape(impact_label(change.impact))} | {escape(suggested_owner(change.current_control, config))}</span>"
+        f"<p>{escape(change.reason)}</p></li>"
+        for change in top
+    ) or "<li>No high-priority implementation or evidence changes detected.</li>"
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>STIGPilot Change Brief</title>
+  <style>
+    :root {{
+      color-scheme: light;
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #dbe3ef;
+      --blue: #0369a1;
+      --green: #15803d;
+    }}
+    body {{
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }}
+    main {{
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }}
+    header {{
+      border-left: 6px solid var(--blue);
+      padding: 4px 0 4px 20px;
+      margin-bottom: 28px;
+    }}
+    h1 {{ margin: 0 0 8px; font-size: 38px; }}
+    h2 {{ margin-top: 34px; font-size: 23px; }}
+    .meta, .summary {{ color: var(--muted); }}
+    .grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 22px 0;
+    }}
+    .card {{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }}
+    .metric {{ font-size: 30px; font-weight: 700; color: var(--blue); }}
+    table {{
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 12px;
+    }}
+    th, td {{
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }}
+    th {{ background: #eaf2fb; color: #123047; }}
+    tr:last-child td {{ border-bottom: 0; }}
+    ol.priority {{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 24px 16px 42px;
+    }}
+    ol.priority li {{ margin: 0 0 14px; }}
+    ol.priority span {{
+      display: block;
+      color: var(--green);
+      font-weight: 700;
+      margin-top: 3px;
+    }}
+    ol.priority p {{ margin: 4px 0 0; color: var(--muted); }}
+    footer {{
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 13px;
+    }}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>STIGPilot Change Brief</h1>
+    <div class="meta">Old: {escape(Path(old_doc.source_file).name)} | New: {escape(Path(new_doc.source_file).name)}</div>
+    <div class="meta">Old controls: {len(old_doc.controls)} | New controls: {len(new_doc.controls)}</div>
+  </header>
+  <section class="card summary">{escape(executive_summary(changes, config))}</section>
+  <section class="grid">
+    {_metric_cards(metric_rows)}
+  </section>
+  <h2>Priority Actions</h2>
+  <ol class="priority">{priority_items}</ol>
+  <h2>Owner Impact</h2>
+  {_html_table(["Owner", "Changes", "High Priority", "Implementation Likely", "Evidence Updates"], owner_rows)}
+  <h2>Change Categories</h2>
+  {_html_table(["Impact", "Count", "Meaning"], category_rows)}
+  <h2>Top Changed Controls</h2>
+  {_html_table(["Impact", "Severity", "Vuln ID", "Rule ID", "Title", "Owner", "Why it matters"], top_rows)}
+  <h2>Detailed Changes</h2>
+  {_html_table(["Change Type", "Impact", "Severity", "Vuln ID", "Rule ID", "Changed Fields", "Owner", "Why it matters"], detail_rows)}
+  <footer>
+    Generated by STIGPilot. This is change triage and remediation planning support, not formal compliance validation.
+  </footer>
+</main>
+</body>
+</html>
+"""
 
 
 def executive_summary(changes: list[ControlChange], config: StigPilotConfig | None = None) -> str:
@@ -366,3 +545,35 @@ def _md(value: str) -> str:
 
 def impact_label(value: str) -> str:
     return IMPACT_LABELS.get(value, value.replace("_", " ").title())
+
+
+def _change_table_row(change: ControlChange, config: StigPilotConfig | None = None) -> list[str]:
+    control = change.current_control or StigControl()
+    return [
+        impact_label(change.impact),
+        control.severity or "unspecified",
+        control.vuln_id or change.vuln_id,
+        control.rule_id or change.rule_id,
+        control.title,
+        suggested_owner(control, config),
+        change.reason,
+    ]
+
+
+def _metric_cards(rows: list[tuple[str, int]]) -> str:
+    return "\n".join(
+        f'<div class="card"><div class="metric">{count}</div><div>{escape(label)}</div></div>'
+        for label, count in rows
+    )
+
+
+def _html_table(headers: list[str], rows: list[list[str]]) -> str:
+    if not rows:
+        column_count = len(headers)
+        rows = [["No matching records."] + [""] * (column_count - 1)]
+    header_html = "".join(f"<th>{escape(header)}</th>" for header in headers)
+    row_html = "\n".join(
+        "<tr>" + "".join(f"<td>{escape(str(cell))}</td>" for cell in row) + "</tr>"
+        for row in rows
+    )
+    return f"<table><thead><tr>{header_html}</tr></thead><tbody>{row_html}</tbody></table>"

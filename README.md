@@ -222,6 +222,12 @@ Generate a manager-facing summary:
 stigpilot manager examples/sample_input/old.xml examples/sample_input/new.xml --out output/manager-summary.md
 ```
 
+Generate a self-contained HTML change brief:
+
+```bash
+stigpilot html examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.html
+```
+
 Generate ticket-ready export from one STIG:
 
 ```bash
@@ -269,6 +275,8 @@ Committed sample outputs in `examples/sample_output/`:
 One-command packet outputs are committed in `examples/packet_output/`.
 
 Folder comparison sample outputs are committed in `examples/portfolio_output/`.
+
+HTML report output is committed in `examples/html_output/`.
 
 Additional parsed-control and ticket-export examples:
 
@@ -345,7 +353,7 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 ## Roadmap
 
 - PyPI packaging and publish workflow
-- HTML report output for easier sharing
+- Better HTML packet/portfolio report coverage
 - More parser fixtures from official-but-user-supplied STIG variants
 - Optional screenshot assets for README examples
 - Optional Streamlit dashboard after the CLI remains strong
