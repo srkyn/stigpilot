@@ -1,0 +1,174 @@
+{
+  "source": {
+    "old_file": "C:\\Users\\Admin\\Documents\\CSProjects\\stigpilot\\examples\\chrome_windows_sample\\old.xml",
+    "new_file": "C:\\Users\\Admin\\Documents\\CSProjects\\stigpilot\\examples\\chrome_windows_sample\\new.xml",
+    "old_title": "Sanitized Chrome for Windows STIG-Style Example",
+    "new_title": "Sanitized Chrome for Windows STIG-Style Example",
+    "old_version": "Sample V1R1",
+    "new_version": "Sample V1R2",
+    "old_release": "Sample Release 1 (2026-01-15)",
+    "new_release": "Sample Release 2 (2026-04-20)",
+    "old_control_count": 3,
+    "new_control_count": 3
+  },
+  "summary": {
+    "total": 4,
+    "added": 1,
+    "removed": 1,
+    "modified": 2,
+    "severity_changed": 1,
+    "high_priority_review": 2,
+    "implementation_change_likely": 0,
+    "evidence_update_likely": 1
+  },
+  "changes": [
+    {
+      "change_type": "added",
+      "impact": "high_priority_review",
+      "impact_label": "High-priority review",
+      "reason": "A new high-severity control was added, so it should be triaged before lower-risk backlog work.",
+      "changed_fields": [],
+      "suggested_owner": "Endpoint/Windows Admin",
+      "evidence_needed": [
+        "Screenshot or export of the relevant setting",
+        "GPO, registry, or Local Security Policy export",
+        "Date/time of validation",
+        "System or asset name",
+        "Reviewer notes"
+      ],
+      "control": {
+        "title": "Chrome extension installation must be restricted",
+        "vuln_id": "V-CHROME-004",
+        "rule_id": "SV-CHROME-004r1_rule",
+        "group_id": "V-CHROME-004",
+        "stig_id": "CHRM-WN-000030",
+        "severity": "high",
+        "tags": [
+          "GPO",
+          "Registry",
+          "Browser Security"
+        ],
+        "cci_refs": [
+          "CCI-001764"
+        ],
+        "references": [
+          "https://chromeenterprise.google/policies/ | Chrome Enterprise extension policy reference"
+        ],
+        "check_summary": "Review Chrome enterprise extension policy and confirm unapproved extension installation is blocked or allowlisted.",
+        "fix_summary": "Configure Chrome ExtensionInstallBlocklist and ExtensionInstallAllowlist policies through GPO or registry."
+      }
+    },
+    {
+      "change_type": "removed",
+      "impact": "review_recommended",
+      "impact_label": "Review recommended",
+      "reason": "The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.",
+      "changed_fields": [],
+      "suggested_owner": "Security/GRC Analyst",
+      "evidence_needed": [
+        "Screenshot or export of the relevant setting",
+        "Date/time of validation",
+        "System or asset name",
+        "Reviewer notes"
+      ],
+      "control": {
+        "title": "Deprecated Chrome cleanup policy must be reviewed",
+        "vuln_id": "V-CHROME-003",
+        "rule_id": "SV-CHROME-003r1_rule",
+        "group_id": "V-CHROME-003",
+        "stig_id": "CHRM-WN-000020",
+        "severity": "low",
+        "tags": [
+          "Browser Security"
+        ],
+        "cci_refs": [],
+        "references": [],
+        "check_summary": "Review legacy Chrome cleanup policy settings.",
+        "fix_summary": "Remove or disable legacy Chrome cleanup configuration."
+      }
+    },
+    {
+      "change_type": "severity_increased",
+      "impact": "high_priority_review",
+      "impact_label": "High-priority review",
+      "reason": "The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.",
+      "changed_fields": [
+        "title",
+        "severity",
+        "check_text",
+        "fix_text",
+        "references"
+      ],
+      "suggested_owner": "Endpoint/Windows Admin",
+      "evidence_needed": [
+        "Screenshot or export of the relevant setting",
+        "GPO, registry, or Local Security Policy export",
+        "Date/time of validation",
+        "System or asset name",
+        "Reviewer notes"
+      ],
+      "control": {
+        "title": "Chrome Safe Browsing enhanced protection must be enabled",
+        "vuln_id": "V-CHROME-001",
+        "rule_id": "SV-CHROME-001r2_rule",
+        "group_id": "V-CHROME-001",
+        "stig_id": "CHRM-WN-000001",
+        "severity": "high",
+        "tags": [
+          "IAM",
+          "Endpoint Security",
+          "GPO",
+          "Registry",
+          "Browser Security"
+        ],
+        "cci_refs": [
+          "CCI-001242"
+        ],
+        "references": [
+          "Mitigations: Document any approved exception to the enterprise browser policy baseline.",
+          "VulnDiscussion: Browser protections help reduce exposure to known malicious sites, suspicious downloads, and unsafe extensions.",
+          "https://chromeenterprise.google/policies/ | Chrome Enterprise policy reference"
+        ],
+        "check_summary": "Review Chrome enterprise policy in GPO or registry and export evidence showing SafeBrowsingProtectionLevel is set to enhanced protection.",
+        "fix_summary": "Configure Chrome Safe Browsing enhanced protection through Group Policy or the registry policy path and document the applied baseline."
+      }
+    },
+    {
+      "change_type": "check_changed",
+      "impact": "evidence_update_likely",
+      "impact_label": "Evidence update likely",
+      "reason": "The check procedure changed enough that evidence requests or validation steps may need to be refreshed.",
+      "changed_fields": [
+        "check_text"
+      ],
+      "suggested_owner": "Endpoint/Windows Admin",
+      "evidence_needed": [
+        "Screenshot or export of the relevant setting",
+        "GPO, registry, or Local Security Policy export",
+        "Date/time of validation",
+        "System or asset name",
+        "Reviewer notes"
+      ],
+      "control": {
+        "title": "Chrome password manager must be disabled",
+        "vuln_id": "V-CHROME-002",
+        "rule_id": "SV-CHROME-002r2_rule",
+        "group_id": "V-CHROME-002",
+        "stig_id": "CHRM-WN-000010",
+        "severity": "medium",
+        "tags": [
+          "Password Policy",
+          "GPO",
+          "Registry",
+          "Browser Security"
+        ],
+        "cci_refs": [
+          "CCI-000366"
+        ],
+        "references": [],
+        "check_summary": "Review Chrome enterprise policy in GPO or registry and export evidence showing PasswordManagerEnabled is disabled for managed users.",
+        "fix_summary": "Disable Chrome Password Manager using enterprise policy."
+      }
+    }
+  ]
+}

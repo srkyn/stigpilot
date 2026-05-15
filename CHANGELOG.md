@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0
+
+- Added machine-readable `changes.json` exports for automation workflows.
+- Packet, batch, demo, and Chrome demo workflows now include `changes.json`.
+- Added `--json` to `stigpilot diff` for standalone changes JSON export.
+- Added JSON export regression coverage for CLI and exporter behavior.
+
 ## 0.6.1
 
 - Added HTML change briefs to generated comparison packets.

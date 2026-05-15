@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import shutil
 
 from typer.testing import CliRunner
@@ -19,6 +20,7 @@ def test_cli_demo_writes_reports(tmp_path: Path):
     assert "Start here" in result.output
     assert (out / "change-brief.md").exists()
     assert (out / "change-brief.html").exists()
+    assert (out / "changes.json").exists()
     assert (out / "manager-summary.md").exists()
     assert (out / "remediation-backlog.csv").exists()
 
@@ -40,6 +42,7 @@ def test_cli_parse_writes_csv_and_json(tmp_path: Path):
 def test_cli_diff_writes_markdown_and_csv(tmp_path: Path):
     report = tmp_path / "change-brief.md"
     backlog = tmp_path / "backlog.csv"
+    changes_json = tmp_path / "changes.json"
 
     result = runner.invoke(
         app,
@@ -51,6 +54,8 @@ def test_cli_diff_writes_markdown_and_csv(tmp_path: Path):
             str(report),
             "--csv",
             str(backlog),
+            "--json",
+            str(changes_json),
         ],
     )
 
@@ -58,6 +63,7 @@ def test_cli_diff_writes_markdown_and_csv(tmp_path: Path):
     assert "STIGPilot Diff Summary" in result.output
     assert report.exists()
     assert backlog.exists()
+    assert json.loads(changes_json.read_text(encoding="utf-8"))["summary"]["total"] == 4
 
 
 def test_cli_diff_can_filter_by_impact_and_owner(tmp_path: Path):
@@ -122,6 +128,8 @@ def test_cli_packet_generates_complete_packet(tmp_path: Path):
     assert result.exit_code == 0
     assert "Start here" in result.output
     assert (out / "change-brief.md").exists()
+    assert (out / "change-brief.html").exists()
+    assert (out / "changes.json").exists()
     assert (out / "manager-summary.md").exists()
     assert (out / "remediation-backlog.csv").exists()
     assert (out / "jira-import.csv").exists()
@@ -166,6 +174,7 @@ def test_cli_batch_generates_portfolio_packet(tmp_path: Path):
     assert (out / "portfolio-summary.md").exists()
     assert (out / "synthetic-windows-and-linux-stig" / "change-brief.md").exists()
     assert (out / "synthetic-windows-and-linux-stig" / "change-brief.html").exists()
+    assert (out / "synthetic-windows-and-linux-stig" / "changes.json").exists()
 
 
 def test_cli_batch_requires_matching_titles(tmp_path: Path):
@@ -220,6 +229,7 @@ def test_cli_chrome_demo_missing_official_files_uses_sample(tmp_path: Path):
     assert "Start here" in result.output
     assert (out / "change-brief.md").exists()
     assert (out / "change-brief.html").exists()
+    assert (out / "changes.json").exists()
     assert (out / "manager-summary.md").exists()
     assert (out / "remediation-backlog.csv").exists()
 

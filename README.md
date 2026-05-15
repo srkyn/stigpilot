@@ -36,6 +36,7 @@ Generated files:
 ```text
 output/demo/change-brief.md
 output/demo/change-brief.html
+output/demo/changes.json
 output/demo/manager-summary.md
 output/demo/remediation-backlog.csv
 output/demo/evidence-checklist.md
@@ -90,6 +91,7 @@ Generated files:
 ```text
 output/chrome/change-brief.md
 output/chrome/change-brief.html
+output/chrome/changes.json
 output/chrome/manager-summary.md
 output/chrome/remediation-backlog.csv
 output/chrome/evidence-checklist.md
@@ -203,7 +205,7 @@ stigpilot packet examples/sample_input/old.xml examples/sample_input/new.xml --o
 Generate workflow exports:
 
 ```bash
-stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --jira-csv output/jira-import.csv --servicenow-csv output/servicenow-import.csv --github-md output/github-issues.md
+stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --jira-csv output/jira-import.csv --servicenow-csv output/servicenow-import.csv --github-md output/github-issues.md --json output/changes.json
 ```
 
 Compare folders of old/new STIG XML files:
@@ -268,6 +270,7 @@ Committed sample outputs in `examples/sample_output/`:
 
 - `change-brief.md`
 - `change-brief.html`
+- `changes.json`
 - `manager-summary.md`
 - `remediation-backlog.csv`
 - `evidence-checklist.md`

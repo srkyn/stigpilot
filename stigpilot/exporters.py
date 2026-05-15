@@ -69,6 +69,36 @@ def write_controls_json(document: StigDocument, path: str | Path) -> None:
     Path(path).write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def write_changes_json(
+    changes: Iterable[ControlChange],
+    path: str | Path,
+    old_doc: StigDocument | None = None,
+    new_doc: StigDocument | None = None,
+    config: StigPilotConfig | None = None,
+) -> None:
+    """Write machine-readable change intelligence for automation workflows."""
+
+    ensure_parent(path)
+    change_list = list(changes)
+    payload = {
+        "source": {
+            "old_file": old_doc.source_file if old_doc else "",
+            "new_file": new_doc.source_file if new_doc else "",
+            "old_title": old_doc.title if old_doc else "",
+            "new_title": new_doc.title if new_doc else "",
+            "old_version": old_doc.version if old_doc else "",
+            "new_version": new_doc.version if new_doc else "",
+            "old_release": old_doc.release if old_doc else "",
+            "new_release": new_doc.release if new_doc else "",
+            "old_control_count": len(old_doc.controls) if old_doc else 0,
+            "new_control_count": len(new_doc.controls) if new_doc else 0,
+        },
+        "summary": _change_counts(change_list),
+        "changes": [_change_json_row(change, config) for change in change_list],
+    }
+    Path(path).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
 BACKLOG_FIELDS = [
     "Title",
     "Vuln ID",
@@ -274,3 +304,47 @@ def _priority(change: ControlChange) -> str:
 
 def _impact_label(value: str) -> str:
     return IMPACT_LABELS.get(value, value.replace("_", " ").title())
+
+
+def _change_counts(changes: list[ControlChange]) -> dict[str, int]:
+    impacts: dict[str, int] = {}
+    change_types: dict[str, int] = {}
+    for change in changes:
+        impacts[change.impact] = impacts.get(change.impact, 0) + 1
+        change_types[change.change_type] = change_types.get(change.change_type, 0) + 1
+    return {
+        "total": len(changes),
+        "added": change_types.get("added", 0),
+        "removed": change_types.get("removed", 0),
+        "modified": sum(1 for change in changes if change.change_type not in {"added", "removed"}),
+        "severity_changed": sum(1 for change in changes if "severity" in change.changed_fields),
+        "high_priority_review": impacts.get("high_priority_review", 0),
+        "implementation_change_likely": impacts.get("implementation_change_likely", 0),
+        "evidence_update_likely": impacts.get("evidence_update_likely", 0),
+    }
+
+
+def _change_json_row(change: ControlChange, config: StigPilotConfig | None = None) -> dict[str, object]:
+    control = change.current_control or StigControl()
+    return {
+        "change_type": change.change_type,
+        "impact": change.impact,
+        "impact_label": _impact_label(change.impact),
+        "reason": change.reason,
+        "changed_fields": change.changed_fields,
+        "suggested_owner": suggested_owner(control, config),
+        "evidence_needed": evidence_requests(control),
+        "control": {
+            "title": control.title,
+            "vuln_id": control.vuln_id or change.vuln_id,
+            "rule_id": control.rule_id or change.rule_id,
+            "group_id": control.group_id,
+            "stig_id": control.stig_id,
+            "severity": control.severity,
+            "tags": control.tags,
+            "cci_refs": control.cci_refs,
+            "references": control.references,
+            "check_summary": summarize(control.check_text),
+            "fix_summary": summarize(control.fix_text),
+        },
+    }

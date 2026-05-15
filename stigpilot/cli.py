@@ -17,6 +17,7 @@ from .diff import compare_documents, duplicate_keys
 from .exporters import (
     github_issue_markdown,
     write_backlog_csv,
+    write_changes_json,
     write_controls_csv,
     write_controls_json,
     write_jira_csv,
@@ -134,6 +135,7 @@ def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigP
     outputs = {
         "Change brief": out / "change-brief.md",
         "HTML change brief": out / "change-brief.html",
+        "Changes JSON": out / "changes.json",
         "Manager summary": out / "manager-summary.md",
         "Remediation backlog": out / "remediation-backlog.csv",
         "Evidence checklist": out / "evidence-checklist.md",
@@ -143,6 +145,7 @@ def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigP
     }
     write_text_report(outputs["Change brief"], change_brief(old_doc, new_doc, changes, config))
     write_text_report(outputs["HTML change brief"], html_change_brief(old_doc, new_doc, changes, config))
+    write_changes_json(changes, outputs["Changes JSON"], old_doc, new_doc, config)
     write_text_report(outputs["Manager summary"], manager_summary_report(old_doc, new_doc, changes, config))
     write_backlog_csv(changes, outputs["Remediation backlog"], config)
     write_text_report(outputs["Evidence checklist"], evidence_checklist(new_doc, config=config))
@@ -319,6 +322,7 @@ def diff(
     jira_csv: Optional[Path] = typer.Option(None, "--jira-csv", help="Jira-friendly CSV output path."),
     servicenow_csv: Optional[Path] = typer.Option(None, "--servicenow-csv", help="ServiceNow-friendly CSV output path."),
     github_md: Optional[Path] = typer.Option(None, "--github-md", help="GitHub issue draft Markdown output path."),
+    json_out: Optional[Path] = typer.Option(None, "--json", help="Machine-readable changes JSON output path."),
     impact_filter: Optional[str] = typer.Option(None, "--impact", help="Only include one impact category, such as high_priority_review."),
     owner_filter: Optional[str] = typer.Option(None, "--owner", help='Only include changes for one suggested owner, such as "Endpoint/Windows Admin".'),
     config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
@@ -348,6 +352,9 @@ def diff(
     if github_md:
         _safe_write(lambda: write_text_report(github_md, github_issue_markdown(changes, config)), github_md, "GitHub issue drafts")
         outputs.append(github_md)
+    if json_out:
+        _safe_write(lambda: write_changes_json(changes, json_out, old_doc, new_doc, config), json_out, "changes JSON")
+        outputs.append(json_out)
     _print_change_summary(changes, outputs)
 
 
@@ -577,6 +584,7 @@ def demo(
         "Brief": out / "brief.md",
         "Change brief": out / "change-brief.md",
         "HTML change brief": out / "change-brief.html",
+        "Changes JSON": out / "changes.json",
         "Manager summary": out / "manager-summary.md",
         "Remediation backlog": out / "remediation-backlog.csv",
         "Evidence checklist": out / "evidence-checklist.md",
@@ -589,6 +597,7 @@ def demo(
     write_text_report(outputs["Brief"], single_stig_brief(new_doc, config=config))
     write_text_report(outputs["Change brief"], change_brief(old_doc, new_doc, changes, config))
     write_text_report(outputs["HTML change brief"], html_change_brief(old_doc, new_doc, changes, config))
+    write_changes_json(changes, outputs["Changes JSON"], old_doc, new_doc, config)
     write_text_report(outputs["Manager summary"], manager_summary_report(old_doc, new_doc, changes, config))
     write_backlog_csv(changes, outputs["Remediation backlog"], config)
     write_text_report(outputs["Evidence checklist"], evidence_checklist(new_doc, config=config))
