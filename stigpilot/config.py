@@ -16,6 +16,30 @@ class StigPilotConfig:
     tag_rules: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
 
+CONFIG_EXAMPLE = """# STIGPilot local team routing config.
+#
+# Custom owner rules are checked before built-in defaults.
+# Custom tag rules are merged with built-in tags.
+
+[[owner_rules]]
+owner = "Windows Platform Team"
+keywords = ["windows audit policy", "local security policy", "defender baseline", "gpresult"]
+
+[[owner_rules]]
+owner = "Identity/IAM Team"
+keywords = ["privileged account", "authentication", "account lifecycle", "password lockout"]
+
+[[owner_rules]]
+owner = "Network Security Team"
+keywords = ["firewall management", "router", "switch", "palo alto", "cisco"]
+
+[tag_rules]
+"Privileged Access" = ["privileged account", "domain admin", "sudoers"]
+"Evidence Refresh" = ["export applied", "validation artifact", "evidence package"]
+"Policy Exception Review" = ["waiver", "exception", "documentable"]
+"""
+
+
 def load_config(path: str | Path | None) -> StigPilotConfig | None:
     """Load an optional TOML config file.
 

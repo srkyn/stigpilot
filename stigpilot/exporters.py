@@ -16,32 +16,43 @@ from .utils import ensure_parent, summarize
 
 
 CONTROL_FIELDS = [
-    "vuln_id",
-    "rule_id",
-    "group_id",
-    "stig_id",
-    "title",
-    "severity",
-    "check_text",
-    "fix_text",
-    "cci_refs",
-    "references",
-    "tags",
-    "raw_id",
+    "Vuln ID",
+    "Rule ID",
+    "Group ID",
+    "STIG ID",
+    "Title",
+    "Severity",
+    "Check Text",
+    "Fix Text",
+    "CCI References",
+    "References",
+    "Tags",
+    "Raw ID",
 ]
 
 
 def write_controls_csv(document: StigDocument, path: str | Path) -> None:
     ensure_parent(path)
-    with Path(path).open("w", newline="", encoding="utf-8") as handle:
+    with Path(path).open("w", newline="", encoding="utf-8-sig") as handle:
         writer = csv.DictWriter(handle, fieldnames=CONTROL_FIELDS)
         writer.writeheader()
         for control in document.controls:
-            row = asdict(control)
-            row["cci_refs"] = "; ".join(control.cci_refs)
-            row["references"] = "; ".join(control.references)
-            row["tags"] = "; ".join(control.tags)
-            writer.writerow(row)
+            writer.writerow(
+                {
+                    "Vuln ID": control.vuln_id,
+                    "Rule ID": control.rule_id,
+                    "Group ID": control.group_id,
+                    "STIG ID": control.stig_id,
+                    "Title": control.title,
+                    "Severity": control.severity,
+                    "Check Text": control.check_text,
+                    "Fix Text": control.fix_text,
+                    "CCI References": "; ".join(control.cci_refs),
+                    "References": "; ".join(control.references),
+                    "Tags": "; ".join(control.tags),
+                    "Raw ID": control.raw_id,
+                }
+            )
 
 
 def write_controls_json(document: StigDocument, path: str | Path) -> None:
@@ -51,26 +62,26 @@ def write_controls_json(document: StigDocument, path: str | Path) -> None:
 
 
 BACKLOG_FIELDS = [
-    "title",
-    "vuln_id",
-    "rule_id",
-    "severity",
-    "change_type",
-    "impact",
-    "reason",
-    "suggested_owner",
-    "tags",
-    "check_summary",
-    "fix_summary",
-    "evidence_needed",
-    "status",
-    "notes",
+    "Title",
+    "Vuln ID",
+    "Rule ID",
+    "Severity",
+    "Change Type",
+    "Impact",
+    "Suggested Owner",
+    "Tags",
+    "Why It Matters",
+    "Check Summary",
+    "Fix Summary",
+    "Evidence Needed",
+    "Status",
+    "Notes",
 ]
 
 
 def write_backlog_csv(changes: Iterable[ControlChange], path: str | Path, config: StigPilotConfig | None = None) -> None:
     ensure_parent(path)
-    with Path(path).open("w", newline="", encoding="utf-8") as handle:
+    with Path(path).open("w", newline="", encoding="utf-8-sig") as handle:
         writer = csv.DictWriter(handle, fieldnames=BACKLOG_FIELDS)
         writer.writeheader()
         for change in changes:
@@ -80,55 +91,55 @@ def write_backlog_csv(changes: Iterable[ControlChange], path: str | Path, config
 def backlog_row(change: ControlChange, config: StigPilotConfig | None = None) -> dict[str, str]:
     control = change.current_control or StigControl()
     return {
-        "title": control.title,
-        "vuln_id": control.vuln_id or change.vuln_id,
-        "rule_id": control.rule_id or change.rule_id,
-        "severity": control.severity,
-        "change_type": change.change_type,
-        "impact": change.impact,
-        "reason": change.reason,
-        "suggested_owner": suggested_owner(control, config),
-        "tags": "; ".join(control.tags),
-        "check_summary": summarize(control.check_text),
-        "fix_summary": summarize(control.fix_text),
-        "evidence_needed": "; ".join(evidence_requests(control)),
-        "status": "Not Started",
-        "notes": "",
+        "Title": control.title,
+        "Vuln ID": control.vuln_id or change.vuln_id,
+        "Rule ID": control.rule_id or change.rule_id,
+        "Severity": control.severity,
+        "Change Type": change.change_type,
+        "Impact": change.impact,
+        "Suggested Owner": suggested_owner(control, config),
+        "Tags": "; ".join(control.tags),
+        "Why It Matters": change.reason,
+        "Check Summary": summarize(control.check_text),
+        "Fix Summary": summarize(control.fix_text),
+        "Evidence Needed": "; ".join(evidence_requests(control)),
+        "Status": "Not Started",
+        "Notes": "",
     }
 
 
 def write_ticket_csv(controls: Iterable[StigControl], path: str | Path, config: StigPilotConfig | None = None) -> None:
     ensure_parent(path)
     fields = [
-        "title",
-        "vuln_id",
-        "rule_id",
-        "severity",
-        "suggested_owner",
-        "tags",
-        "ticket_summary",
-        "description",
-        "evidence_needed",
-        "status",
-        "notes",
+        "Title",
+        "Vuln ID",
+        "Rule ID",
+        "Severity",
+        "Suggested Owner",
+        "Tags",
+        "Ticket Summary",
+        "Description",
+        "Evidence Needed",
+        "Status",
+        "Notes",
     ]
-    with Path(path).open("w", newline="", encoding="utf-8") as handle:
+    with Path(path).open("w", newline="", encoding="utf-8-sig") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for control in controls:
             writer.writerow(
                 {
-                    "title": control.title,
-                    "vuln_id": control.vuln_id,
-                    "rule_id": control.rule_id,
-                    "severity": control.severity,
-                    "suggested_owner": suggested_owner(control, config),
-                    "tags": "; ".join(control.tags),
-                    "ticket_summary": f"Review STIG control {control.vuln_id or control.rule_id}: {control.title}",
-                    "description": summarize(f"Check: {control.check_text} Fix: {control.fix_text}", 500),
-                    "evidence_needed": "; ".join(evidence_requests(control)),
-                    "status": "Not Started",
-                    "notes": "",
+                    "Title": control.title,
+                    "Vuln ID": control.vuln_id,
+                    "Rule ID": control.rule_id,
+                    "Severity": control.severity,
+                    "Suggested Owner": suggested_owner(control, config),
+                    "Tags": "; ".join(control.tags),
+                    "Ticket Summary": f"Review STIG control {control.vuln_id or control.rule_id}: {control.title}",
+                    "Description": summarize(f"Check: {control.check_text} Fix: {control.fix_text}", 500),
+                    "Evidence Needed": "; ".join(evidence_requests(control)),
+                    "Status": "Not Started",
+                    "Notes": "",
                 }
             )
 
@@ -159,7 +170,7 @@ def write_servicenow_csv(changes: Iterable[ControlChange], path: str | Path, con
     """Write a ServiceNow-friendly local CSV."""
 
     ensure_parent(path)
-    fields = ["short_description", "description", "assignment_group", "priority", "u_stig_vuln_id", "u_stig_rule_id", "u_impact", "u_tags"]
+    fields = ["short_description", "description", "assignment_group", "priority", "u_stig_vuln_id", "u_stig_rule_id", "u_stig_impact", "u_stig_tags"]
     with Path(path).open("w", newline="", encoding="utf-8-sig") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
@@ -173,8 +184,8 @@ def write_servicenow_csv(changes: Iterable[ControlChange], path: str | Path, con
                     "priority": _priority(change),
                     "u_stig_vuln_id": control.vuln_id or change.vuln_id,
                     "u_stig_rule_id": control.rule_id or change.rule_id,
-                    "u_impact": change.impact,
-                    "u_tags": "; ".join(control.tags),
+                    "u_stig_impact": change.impact,
+                    "u_stig_tags": "; ".join(control.tags),
                 }
             )
 
@@ -187,7 +198,9 @@ def github_issue_markdown(changes: Iterable[ControlChange], config: StigPilotCon
         control = change.current_control or StigControl()
         lines.extend(
             [
-                f"## Issue {idx}: {change.change_type}: {control.vuln_id or control.rule_id} - {control.title}",
+                f"## Issue {idx}",
+                "",
+                f"Title: `{change.change_type}: {control.vuln_id or control.rule_id} - {control.title}`",
                 "",
                 f"Labels: `stigpilot`, `{change.impact}`, " + ", ".join(f"`{tag}`" for tag in control.tags),
                 "",
@@ -205,7 +218,22 @@ def github_issue_markdown(changes: Iterable[ControlChange], config: StigPilotCon
         )
         for item in evidence_requests(control):
             lines.append(f"- [ ] {item}")
-        lines.extend(["", "### Notes", "", "- ", ""])
+        lines.extend(
+            [
+                "",
+                "### Acceptance Criteria",
+                "",
+                "- [ ] Change reviewed by suggested owner",
+                "- [ ] Ticket priority matches STIGPilot impact category",
+                "- [ ] Evidence request updated or confirmed unchanged",
+                "- [ ] Notes added for any downstream checklist or backlog impact",
+                "",
+                "### Notes",
+                "",
+                "- ",
+                "",
+            ]
+        )
     return "\n".join(lines)
 
 

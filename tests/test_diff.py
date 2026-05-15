@@ -14,7 +14,7 @@ def test_compare_documents_detects_added_removed_and_modified():
 
     assert by_vuln["V-100004"].change_type == "added"
     assert by_vuln["V-100003"].change_type == "removed"
-    assert by_vuln["V-100001"].change_type == "modified"
+    assert by_vuln["V-100001"].change_type == "severity_increased"
     assert "severity" in by_vuln["V-100001"].changed_fields
     assert "fix_text" in by_vuln["V-100001"].changed_fields
     assert by_vuln["V-100002"].impact == "evidence_update_likely"
@@ -27,7 +27,7 @@ def test_compare_documents_falls_back_to_stig_id_when_rule_revision_changes():
     changes = compare_documents(old, new)
 
     assert len(changes) == 1
-    assert changes[0].change_type == "modified"
+    assert changes[0].change_type == "metadata_only_change"
     assert changes[0].changed_fields == ["title"]
 
 

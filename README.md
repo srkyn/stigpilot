@@ -1,155 +1,190 @@
 # STIGPilot
 
-Navigate DISA STIG changes, remediation planning, and ticket-ready reporting.
+[![Tests](https://github.com/srkyn/stigpilot/actions/workflows/tests.yml/badge.svg)](https://github.com/srkyn/stigpilot/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-STIGPilot is a Python CLI that turns STIG XCCDF/XML updates into analyst-ready change intelligence: what changed, what matters, who should review it, what ticket should be created, and what evidence should be collected.
+STIGPilot is a local Python CLI that compares official DISA STIG XCCDF releases and turns the changes into impact summaries, remediation backlogs, evidence checklists, and ticket-ready exports.
 
-It is intentionally narrow. It does not scan systems, validate compliance, auto-remediate hosts, or replace official tooling.
+## Why this exists
 
-## Why It Exists
+Official tools are authoritative for viewing, scanning, checklist work, and formal compliance. STIGPilot focuses on the workflow gap after a new STIG release drops: what changed, what matters, who owns it, what tickets should be created, and what evidence needs refreshing.
 
-Official tools are authoritative for viewing STIGs, scanning systems, managing checklists, applying baselines, and supporting formal compliance workflows. STIGPilot solves a different operational problem:
+## 30-second demo
 
-> A new STIG release dropped. What changed, who needs to act, and what work should be queued?
-
-The tool is useful when an analyst, sysadmin, vulnerability management team, or GRC person needs a fast, local way to compare releases and turn changes into reviewable work.
-
-## Why Not Just Use Official Tools?
-
-Use official DISA tools, SCC, SCAP validation, STIG Viewer, PowerSTIG, OpenRMF, and your organization’s compliance process for authoritative assessment work.
-
-Use STIGPilot as a helper layer for:
-
-- STIG version diffing
-- implementation impact triage
-- remediation backlog preparation
-- evidence request planning
-- ticket-friendly exports
-- manager-readable summaries
-
-STIGPilot does not claim compliance, certification, endorsement, or validation.
-
-## Features
-
-- Parse common XCCDF/XML STIG structures with namespace-tolerant XML handling.
-- Extract Vuln ID, Rule ID, Group ID, STIG ID/version, title, severity, check text, fix text, CCI references, references, release metadata, and transparent tags.
-- Export parsed controls to CSV and JSON.
-- Generate single-STIG Markdown briefs.
-- Compare old/new STIG files and detect added, removed, modified, severity, check text, fix text, CCI, and reference changes.
-- Classify changes with explainable rule-based impact:
-  - `high_priority_review`
-  - `implementation_change_likely`
-  - `evidence_update_likely`
-  - `review_recommended`
-  - `no_action_likely`
-- Generate remediation backlog CSVs, evidence checklists, Jira-friendly CSVs, ServiceNow-friendly CSVs, GitHub issue draft Markdown, and ticket-friendly CSVs.
-- Assign keyword-based tags such as Windows, Linux, GPO, Registry, Audit Logging, IAM, Remote Access, Network Security, Database, Cloud, and Container/Kubernetes.
-- Suggest likely owners using transparent keyword rules.
-- Extend owner and tag mappings with an optional local TOML config.
-
-## Install
-
-```powershell
-cd C:\Users\Admin\Documents\CSProjects\stigpilot
-python -m pip install -r requirements.txt
+```bash
+git clone https://github.com/srkyn/stigpilot.git
+cd stigpilot
 python -m pip install -e .
-```
-
-Development mode without installing:
-
-```powershell
-python -m stigpilot.cli --help
-```
-
-On Windows, `pip` may warn that the Python user Scripts directory is not on `PATH`. If the `stigpilot` command is not recognized, either add that Scripts directory to `PATH` or use the module form:
-
-```powershell
-python -m stigpilot.cli demo
-```
-
-## One-Command Demo
-
-```powershell
 stigpilot demo
 ```
 
-Or during development:
+Generated files:
 
-```powershell
+```text
+output/demo/change-brief.md
+output/demo/manager-summary.md
+output/demo/remediation-backlog.csv
+output/demo/evidence-checklist.md
+output/demo/jira-import.csv
+output/demo/servicenow-import.csv
+output/demo/github-issues.md
+```
+
+Example terminal output:
+
+```text
+Demo Reports Generated
+Change brief          output/demo/change-brief.md
+Manager summary       output/demo/manager-summary.md
+Remediation backlog   output/demo/remediation-backlog.csv
+
+STIGPilot Diff Summary
+Total changes                     4
+Added                             1
+Removed                           1
+Modified                          2
+High-priority review              2
+Evidence update likely            1
+```
+
+Change brief excerpt:
+
+```text
+4 control change(s) were detected. 3 change(s) are likely to require priority review,
+implementation work, or evidence refresh. Prioritize high-severity additions or
+severity increases, then review remediation text changes before reusing old tickets.
+```
+
+## What STIGPilot is good at
+
+- Release-to-release STIG change triage
+- Identifying severity increases and implementation-impacting changes
+- Generating remediation backlog CSVs
+- Preparing owner-focused evidence requests
+- Creating manager summaries
+- Exporting ticket-ready CSVs and GitHub issue drafts
+
+## What STIGPilot is not
+
+- Not official DISA tooling
+- Not compliance validation
+- Not a scanner
+- Not auto-remediation
+- Not a replacement for SCC, STIG Viewer, PowerSTIG, OpenRMF, or organizational compliance review
+
+## When to use it
+
+- A new Windows 11 STIG release drops and you need to know what changed.
+- A vulnerability management analyst needs a backlog CSV.
+- A GRC analyst needs an evidence checklist.
+- A sysadmin team needs owner-focused remediation work.
+- A manager needs a short update without reading hundreds of controls.
+
+## Install
+
+From a clone:
+
+```bash
+git clone https://github.com/srkyn/stigpilot.git
+cd stigpilot
+python -m pip install -e .
+```
+
+Development dependencies:
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
+With `pipx` from a local clone:
+
+```bash
+pipx install .
+```
+
+Fallback without the console script:
+
+```bash
+python -m stigpilot.cli --help
 python -m stigpilot.cli demo
 ```
 
-The demo writes sanitized sample reports under `output/demo/`. Start with:
+Windows note: if `stigpilot` is not recognized after install, your Python Scripts directory may not be on `PATH`. The `python -m stigpilot.cli ...` fallback works without changing `PATH`.
 
-- `output/demo/change-brief.md`
-- `output/demo/manager-summary.md`
-- `output/demo/remediation-backlog.csv`
-- `output/demo/evidence-checklist.md`
-- `output/demo/jira-import.csv`
-- `output/demo/servicenow-import.csv`
-- `output/demo/github-issues.md`
+## CLI usage
 
-## CLI Usage
+Health check:
+
+```bash
+stigpilot doctor
+```
 
 Parse a STIG:
 
-```powershell
+```bash
 stigpilot parse examples/sample_input/new.xml --csv output/controls.csv --json output/controls.json
 ```
 
 Generate a brief:
 
-```powershell
+```bash
 stigpilot brief examples/sample_input/new.xml --out output/brief.md --severity high
 ```
 
 Compare two STIG versions:
 
-```powershell
+```bash
 stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv
 ```
 
 Generate workflow exports:
 
-```powershell
-stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --jira-csv output/jira.csv --servicenow-csv output/servicenow.csv --github-md output/github-issues.md
+```bash
+stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --jira-csv output/jira-import.csv --servicenow-csv output/servicenow-import.csv --github-md output/github-issues.md
 ```
 
 Generate a manager-facing summary:
 
-```powershell
+```bash
 stigpilot manager examples/sample_input/old.xml examples/sample_input/new.xml --out output/manager-summary.md
 ```
 
 Generate ticket-ready export from one STIG:
 
-```powershell
+```bash
 stigpilot tickets examples/sample_input/new.xml --out output/tickets.csv --severity high
 ```
 
 Generate an evidence checklist:
 
-```powershell
+```bash
 stigpilot evidence examples/sample_input/new.xml --out output/evidence-checklist.md
 ```
 
 Show a terminal summary:
 
-```powershell
+```bash
 stigpilot summary examples/sample_input/new.xml
+```
+
+Write a configurable owner/tag mapping example:
+
+```bash
+stigpilot config-example --out stigpilot.toml
 ```
 
 Use a local owner/tag mapping config:
 
-```powershell
-stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --config examples/stigpilot.toml
+```bash
+stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --config stigpilot.toml
 ```
 
-## Example Output
+## Example outputs
 
 Synthetic fixtures are included in `examples/sample_input/`. They are fake and sanitized.
 
-The committed sample outputs in `examples/sample_output/` include:
+Committed sample outputs in `examples/sample_output/`:
 
 - `change-brief.md`
 - `manager-summary.md`
@@ -160,25 +195,21 @@ The committed sample outputs in `examples/sample_output/` include:
 - `github-issues.md`
 - `controls.csv`
 - `controls.json`
-
-Example change brief excerpt:
-
-```text
-4 control change(s) were detected. 3 likely require priority review, implementation work, or evidence updates.
-```
+- `tickets.csv`
 
 ## Screenshots
 
 Screenshots can be added after running the demo locally. Useful captures for a portfolio page:
 
+- Terminal output from `stigpilot demo`
 - Terminal output from `stigpilot summary examples/sample_input/new.xml`
 - `examples/sample_output/change-brief.md`
 - `examples/sample_output/manager-summary.md`
 - `examples/sample_output/remediation-backlog.csv`
 
-## Impact Rules
+## Impact rules
 
-The classifier is intentionally transparent:
+The classifier is intentionally transparent. There is no opaque AI dependency.
 
 - New high severity control: `high_priority_review`
 - Severity increased to high: `high_priority_review`
@@ -186,17 +217,18 @@ The classifier is intentionally transparent:
 - Meaningful fix text change: `implementation_change_likely`
 - Meaningful check text change: `evidence_update_likely`
 - Removed control: `review_recommended`
-- Only title wording changed: `no_action_likely`
+- Only title/metadata wording changed: `no_action_likely`
 - CCI/reference changes: `review_recommended`
 
-“Meaningful” text changes are based on simple text similarity and configuration-language keywords. There is no opaque AI dependency.
+Text changes use a transparent similarity threshold of `0.86` plus configuration-language keywords. The goal is to separate wording-only churn from changes likely to affect implementation steps or evidence requests.
 
-## Tags and Ownership
+## Tags and ownership
 
-Tags and suggested owners are keyword-based and explainable. Examples:
+Tags and suggested owners are keyword-based and explainable.
 
 - Windows, GPO, Registry, Defender/AV: Endpoint/Windows Admin
 - Linux, sshd, sudo, auditd, PAM: Linux Admin
+- IAM, privileged access, authentication, lockout: IAM/Security Admin
 - SQL, Oracle, PostgreSQL, MongoDB: Database Admin
 - Firewall, router, switch, Cisco, Palo Alto: Network/Security Engineering
 - Cloud, Azure, AWS, GCP, Entra: Cloud/IAM Admin
@@ -204,7 +236,7 @@ Tags and suggested owners are keyword-based and explainable. Examples:
 
 Everything else defaults to Security/GRC Analyst.
 
-Teams can extend these mappings with a local TOML file. Custom owner rules are checked before the built-in defaults, and custom tag rules are merged with built-in tags.
+Teams can extend mappings with a local TOML file:
 
 ```toml
 [[owner_rules]]
@@ -215,8 +247,6 @@ keywords = ["authentication", "privileged account"]
 "Privileged Access" = ["privileged account", "sudoers"]
 ```
 
-An example is included at `examples/stigpilot.toml`.
-
 ## Limitations
 
 - STIGPilot does not validate host compliance.
@@ -226,19 +256,18 @@ An example is included at `examples/stigpilot.toml`.
 - XML variants are handled best-effort; unusual vendor packaging may require parser improvements.
 - Keyword tags and owner mapping are transparent but imperfect.
 
-## Safe Usage
+## Safe usage
 
 Use STIGPilot only with files you are authorized to process. Do not publish sensitive evidence, system names, internal host data, credentials, classified information, or restricted organizational material. The included fixtures are synthetic.
 
 ## Roadmap
 
-- Folder-level old/new STIG comparison for release bundles.
-- Team config validation improvements and documented config recipes.
-- Implementation-only and evidence-only filtered reports.
-- HTML report output.
-- Optional Streamlit dashboard after the CLI remains strong.
+- Folder-level old/new STIG comparison for release bundles
+- Implementation-only and evidence-only filtered reports
+- HTML report output
+- Optional Streamlit dashboard after the CLI remains strong
 
-## Portfolio Value
+## Portfolio value
 
 - Defensive security product judgment
 - XCCDF/XML parsing with namespace resilience
@@ -251,16 +280,16 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 
 Run tests:
 
-```powershell
+```bash
 python -m pytest
 ```
 
 Regenerate sample outputs:
 
-```powershell
-python -m stigpilot.cli diff examples\sample_input\old.xml examples\sample_input\new.xml --out examples\sample_output\change-brief.md --csv examples\sample_output\remediation-backlog.csv --jira-csv examples\sample_output\jira-import.csv --servicenow-csv examples\sample_output\servicenow-import.csv --github-md examples\sample_output\github-issues.md
-python -m stigpilot.cli manager examples\sample_input\old.xml examples\sample_input\new.xml --out examples\sample_output\manager-summary.md
-python -m stigpilot.cli parse examples\sample_input\new.xml --csv examples\sample_output\controls.csv --json examples\sample_output\controls.json
-python -m stigpilot.cli tickets examples\sample_input\new.xml --out examples\sample_output\tickets.csv
-python -m stigpilot.cli evidence examples\sample_input\new.xml --out examples\sample_output\evidence-checklist.md
+```bash
+python -m stigpilot.cli diff examples/sample_input/old.xml examples/sample_input/new.xml --out examples/sample_output/change-brief.md --csv examples/sample_output/remediation-backlog.csv --jira-csv examples/sample_output/jira-import.csv --servicenow-csv examples/sample_output/servicenow-import.csv --github-md examples/sample_output/github-issues.md
+python -m stigpilot.cli manager examples/sample_input/old.xml examples/sample_input/new.xml --out examples/sample_output/manager-summary.md
+python -m stigpilot.cli parse examples/sample_input/new.xml --csv examples/sample_output/controls.csv --json examples/sample_output/controls.json
+python -m stigpilot.cli tickets examples/sample_input/new.xml --out examples/sample_output/tickets.csv
+python -m stigpilot.cli evidence examples/sample_input/new.xml --out examples/sample_output/evidence-checklist.md
 ```

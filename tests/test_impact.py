@@ -1,5 +1,6 @@
-from stigpilot.impact import classify_change, evidence_requests, suggested_owner
+from stigpilot.impact import classify_change, evidence_requests
 from stigpilot.models import ControlChange, StigControl
+from stigpilot.taxonomy import suggested_owner
 
 
 def test_high_added_control_is_high_priority():
@@ -7,7 +8,7 @@ def test_high_added_control_is_high_priority():
     impact, reason = classify_change(ControlChange(change_type="added", new_control=control))
 
     assert impact == "high_priority_review"
-    assert "high severity" in reason
+    assert "high-severity" in reason
 
 
 def test_fix_text_change_is_implementation_change():

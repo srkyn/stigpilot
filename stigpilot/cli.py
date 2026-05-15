@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import importlib.util
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -9,8 +11,8 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from .config import StigPilotConfig, load_config
-from .diff import compare_documents
+from .config import CONFIG_EXAMPLE, StigPilotConfig, load_config
+from .diff import compare_documents, duplicate_keys
 from .exporters import (
     github_issue_markdown,
     write_backlog_csv,
@@ -21,10 +23,13 @@ from .exporters import (
     write_ticket_csv,
 )
 from .parser import StigParseError, parse_stig
-from .reports import change_brief, evidence_checklist, filter_by_severity, manager_summary_report, single_stig_brief, write_text_report
+from .reports import change_brief, change_summary_counts, evidence_checklist, filter_by_severity, manager_summary_report, single_stig_brief, write_text_report
 from .taxonomy import suggested_owner
 
-app = typer.Typer(help="STIGPilot: STIG change intelligence and remediation workflow assistance.")
+app = typer.Typer(
+    help="Turn DISA STIG XCCDF release changes into briefs, backlogs, evidence checklists, and ticket-ready exports.",
+    no_args_is_help=True,
+)
 console = Console()
 
 
@@ -47,6 +52,49 @@ def _load(path: Path, config: StigPilotConfig | None = None):
     return document
 
 
+def _safe_write(action, output: Path, label: str) -> None:
+    try:
+        action()
+    except OSError as exc:
+        console.print(f"[red]Output error:[/red] could not write {label} to {output}: {exc}")
+        raise typer.Exit(1) from exc
+    console.print(f"[green]Wrote {label}:[/green] {output}")
+
+
+def _warn_same_inputs(old_xml: Path, new_xml: Path, old_doc, new_doc) -> None:
+    try:
+        if old_xml.resolve() == new_xml.resolve() or old_xml.read_bytes() == new_xml.read_bytes():
+            console.print("[yellow]Warning:[/yellow] old and new inputs appear to be the same file or same content.")
+            return
+    except OSError:
+        return
+    if old_doc.version == new_doc.version and old_doc.release == new_doc.release:
+        console.print("[yellow]Warning:[/yellow] old and new STIG metadata appear to describe the same release.")
+
+
+def _print_change_summary(changes, outputs: list[Path]) -> None:
+    counts = change_summary_counts(changes)
+    table = Table(title="STIGPilot Diff Summary")
+    table.add_column("Metric")
+    table.add_column("Count", justify="right")
+    for label, key in (
+        ("Total changes", "total"),
+        ("Added", "added"),
+        ("Removed", "removed"),
+        ("Modified", "modified"),
+        ("Severity changed", "severity_changed"),
+        ("High-priority review", "high_priority_review"),
+        ("Implementation change likely", "implementation_change_likely"),
+        ("Evidence update likely", "evidence_update_likely"),
+    ):
+        table.add_row(label, str(counts[key]))
+    console.print(table)
+    if outputs:
+        console.print("[bold]Written files:[/bold]")
+        for output in outputs:
+            console.print(f"- {output}")
+
+
 @app.command()
 def parse(
     input_xml: Path = typer.Argument(..., exists=True, readable=True, help="STIG XCCDF/XML input file."),
@@ -59,11 +107,9 @@ def parse(
     config = _load_config(config_path)
     document = _load(input_xml, config)
     if csv_out:
-        write_controls_csv(document, csv_out)
-        console.print(f"[green]Wrote CSV:[/green] {csv_out}")
+        _safe_write(lambda: write_controls_csv(document, csv_out), csv_out, "CSV")
     if json_out:
-        write_controls_json(document, json_out)
-        console.print(f"[green]Wrote JSON:[/green] {json_out}")
+        _safe_write(lambda: write_controls_json(document, json_out), json_out, "JSON")
     if not csv_out and not json_out:
         console.print(f"Parsed {len(document.controls)} controls from {input_xml}")
 
@@ -79,8 +125,7 @@ def brief(
 
     config = _load_config(config_path)
     document = _load(input_xml, config)
-    write_text_report(out, single_stig_brief(document, severity, config))
-    console.print(f"[green]Wrote brief:[/green] {out}")
+    _safe_write(lambda: write_text_report(out, single_stig_brief(document, severity, config)), out, "brief")
 
 
 @app.command()
@@ -99,22 +144,26 @@ def diff(
     config = _load_config(config_path)
     old_doc = _load(old_xml, config)
     new_doc = _load(new_xml, config)
+    _warn_same_inputs(old_xml, new_xml, old_doc, new_doc)
+    for source_name, duplicates in (("old", duplicate_keys(old_doc.controls)), ("new", duplicate_keys(new_doc.controls))):
+        if duplicates:
+            console.print(f"[yellow]Warning:[/yellow] duplicate stable keys in {source_name} file: {duplicates}")
     changes = compare_documents(old_doc, new_doc)
-    write_text_report(out, change_brief(old_doc, new_doc, changes, config))
-    console.print(f"[green]Wrote change brief:[/green] {out}")
+    outputs = [out]
+    _safe_write(lambda: write_text_report(out, change_brief(old_doc, new_doc, changes, config)), out, "change brief")
     if csv_out:
-        write_backlog_csv(changes, csv_out, config)
-        console.print(f"[green]Wrote backlog CSV:[/green] {csv_out}")
+        _safe_write(lambda: write_backlog_csv(changes, csv_out, config), csv_out, "backlog CSV")
+        outputs.append(csv_out)
     if jira_csv:
-        write_jira_csv(changes, jira_csv, config)
-        console.print(f"[green]Wrote Jira CSV:[/green] {jira_csv}")
+        _safe_write(lambda: write_jira_csv(changes, jira_csv, config), jira_csv, "Jira CSV")
+        outputs.append(jira_csv)
     if servicenow_csv:
-        write_servicenow_csv(changes, servicenow_csv, config)
-        console.print(f"[green]Wrote ServiceNow CSV:[/green] {servicenow_csv}")
+        _safe_write(lambda: write_servicenow_csv(changes, servicenow_csv, config), servicenow_csv, "ServiceNow CSV")
+        outputs.append(servicenow_csv)
     if github_md:
-        write_text_report(github_md, github_issue_markdown(changes, config))
-        console.print(f"[green]Wrote GitHub issue drafts:[/green] {github_md}")
-    console.print(f"Detected {len(changes)} changes.")
+        _safe_write(lambda: write_text_report(github_md, github_issue_markdown(changes, config)), github_md, "GitHub issue drafts")
+        outputs.append(github_md)
+    _print_change_summary(changes, outputs)
 
 
 @app.command()
@@ -129,10 +178,10 @@ def manager(
     config = _load_config(config_path)
     old_doc = _load(old_xml, config)
     new_doc = _load(new_xml, config)
+    _warn_same_inputs(old_xml, new_xml, old_doc, new_doc)
     changes = compare_documents(old_doc, new_doc)
-    write_text_report(out, manager_summary_report(old_doc, new_doc, changes, config))
-    console.print(f"[green]Wrote manager summary:[/green] {out}")
-    console.print(f"Detected {len(changes)} changes.")
+    _safe_write(lambda: write_text_report(out, manager_summary_report(old_doc, new_doc, changes, config)), out, "manager summary")
+    _print_change_summary(changes, [out])
 
 
 @app.command()
@@ -147,8 +196,7 @@ def tickets(
     config = _load_config(config_path)
     document = _load(input_xml, config)
     controls = filter_by_severity(document.controls, severity)
-    write_ticket_csv(controls, out, config)
-    console.print(f"[green]Wrote ticket CSV:[/green] {out}")
+    _safe_write(lambda: write_ticket_csv(controls, out, config), out, "ticket CSV")
 
 
 @app.command()
@@ -162,8 +210,7 @@ def evidence(
 
     config = _load_config(config_path)
     document = _load(input_xml, config)
-    write_text_report(out, evidence_checklist(document, severity, config))
-    console.print(f"[green]Wrote evidence checklist:[/green] {out}")
+    _safe_write(lambda: write_text_report(out, evidence_checklist(document, severity, config)), out, "evidence checklist")
 
 
 @app.command()
@@ -218,19 +265,97 @@ def demo(
     old_doc = _load(old_xml, config)
     changes = compare_documents(old_doc, new_doc)
 
-    write_controls_csv(new_doc, out / "controls.csv")
-    write_controls_json(new_doc, out / "controls.json")
-    write_text_report(out / "brief.md", single_stig_brief(new_doc, config=config))
-    write_text_report(out / "change-brief.md", change_brief(old_doc, new_doc, changes, config))
-    write_text_report(out / "manager-summary.md", manager_summary_report(old_doc, new_doc, changes, config))
-    write_backlog_csv(changes, out / "remediation-backlog.csv", config)
-    write_text_report(out / "evidence-checklist.md", evidence_checklist(new_doc, config=config))
-    write_jira_csv(changes, out / "jira-import.csv", config)
-    write_servicenow_csv(changes, out / "servicenow-import.csv", config)
-    write_text_report(out / "github-issues.md", github_issue_markdown(changes, config))
+    outputs = {
+        "Controls CSV": out / "controls.csv",
+        "Controls JSON": out / "controls.json",
+        "Brief": out / "brief.md",
+        "Change brief": out / "change-brief.md",
+        "Manager summary": out / "manager-summary.md",
+        "Remediation backlog": out / "remediation-backlog.csv",
+        "Evidence checklist": out / "evidence-checklist.md",
+        "Jira import": out / "jira-import.csv",
+        "ServiceNow import": out / "servicenow-import.csv",
+        "GitHub issues": out / "github-issues.md",
+    }
+    write_controls_csv(new_doc, outputs["Controls CSV"])
+    write_controls_json(new_doc, outputs["Controls JSON"])
+    write_text_report(outputs["Brief"], single_stig_brief(new_doc, config=config))
+    write_text_report(outputs["Change brief"], change_brief(old_doc, new_doc, changes, config))
+    write_text_report(outputs["Manager summary"], manager_summary_report(old_doc, new_doc, changes, config))
+    write_backlog_csv(changes, outputs["Remediation backlog"], config)
+    write_text_report(outputs["Evidence checklist"], evidence_checklist(new_doc, config=config))
+    write_jira_csv(changes, outputs["Jira import"], config)
+    write_servicenow_csv(changes, outputs["ServiceNow import"], config)
+    write_text_report(outputs["GitHub issues"], github_issue_markdown(changes, config))
 
-    console.print(f"[green]Demo reports generated:[/green] {out}")
-    console.print("Open change-brief.md, remediation-backlog.csv, and evidence-checklist.md first.")
+    table = Table(title="Demo Reports Generated")
+    table.add_column("Report")
+    table.add_column("Path")
+    for name, path in outputs.items():
+        table.add_row(name, str(path))
+    console.print(table)
+    _print_change_summary(changes, [])
+    console.print("[bold]Start here:[/bold]")
+    console.print(f"- Open {outputs['Change brief']}")
+    console.print(f"- Open {outputs['Manager summary']}")
+    console.print(f"- Open {outputs['Remediation backlog']}")
+
+
+@app.command("config-example")
+def config_example(
+    out: Path = typer.Option(Path("stigpilot.toml"), "--out", help="Where to write the example TOML config."),
+) -> None:
+    """Write an example local owner/tag mapping config."""
+
+    _safe_write(lambda: out.write_text(CONFIG_EXAMPLE, encoding="utf-8"), out, "config example")
+
+
+@app.command()
+def doctor() -> None:
+    """Run a local reality check for STIGPilot."""
+
+    root = Path(__file__).resolve().parents[1]
+    checks: list[tuple[str, bool, str]] = []
+    checks.append(("Python version", sys.version_info >= (3, 11), sys.version.split()[0]))
+    checks.append(("stigpilot import", importlib.util.find_spec("stigpilot") is not None, "package importable"))
+    checks.append(("typer installed", importlib.util.find_spec("typer") is not None, "required CLI dependency"))
+    checks.append(("rich installed", importlib.util.find_spec("rich") is not None, "required terminal dependency"))
+    checks.append(("examples directory", (root / "examples").exists(), str(root / "examples")))
+    old_xml = root / "examples" / "sample_input" / "old.xml"
+    new_xml = root / "examples" / "sample_input" / "new.xml"
+    checks.append(("sample old XML", old_xml.exists(), str(old_xml)))
+    checks.append(("sample new XML", new_xml.exists(), str(new_xml)))
+    output_dir = root / "output"
+    try:
+        output_dir.mkdir(exist_ok=True)
+        probe = output_dir / ".stigpilot-doctor"
+        probe.write_text("ok", encoding="utf-8")
+        probe.unlink()
+        writable = True
+        detail = str(output_dir)
+    except OSError as exc:
+        writable = False
+        detail = str(exc)
+    checks.append(("output writable", writable, detail))
+    try:
+        old_doc = parse_stig(old_xml)
+        new_doc = parse_stig(new_xml)
+        changes = compare_documents(old_doc, new_doc)
+        checks.append(("sample parse", len(old_doc.controls) > 0 and len(new_doc.controls) > 0, f"{len(old_doc.controls)} old / {len(new_doc.controls)} new controls"))
+        checks.append(("sample diff", len(changes) > 0, f"{len(changes)} changes"))
+    except StigParseError as exc:
+        checks.append(("sample parse/diff", False, str(exc)))
+
+    table = Table(title="STIGPilot Doctor")
+    table.add_column("Check")
+    table.add_column("Status")
+    table.add_column("Details")
+    for name, ok, detail in checks:
+        table.add_row(name, "[green]PASS[/green]" if ok else "[red]FAIL[/red]", detail)
+    console.print(table)
+    console.print("Tests: run [bold]python -m pytest[/bold]")
+    if not all(ok for _, ok, _ in checks):
+        raise typer.Exit(1)
 
 
 if __name__ == "__main__":

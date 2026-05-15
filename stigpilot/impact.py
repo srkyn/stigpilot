@@ -5,10 +5,11 @@ from __future__ import annotations
 from difflib import SequenceMatcher
 
 from .models import ControlChange, StigControl
-from .taxonomy import has_config_terms, suggested_owner
+from .taxonomy import has_config_terms
 from .utils import clean_text
 
 SEVERITY_RANK = {"low": 1, "medium": 2, "high": 3}
+MEANINGFUL_TEXT_THRESHOLD = 0.86
 
 
 def classify_change(change: ControlChange) -> tuple[str, str]:
@@ -19,33 +20,33 @@ def classify_change(change: ControlChange) -> tuple[str, str]:
     fields = set(change.changed_fields)
 
     if change.change_type == "added" and severity == "high":
-        return "high_priority_review", "New high severity control; triage ownership, implementation, and evidence first."
+        return "high_priority_review", "A new high-severity control was added, so it should be triaged before lower-risk backlog work."
     if "severity" in fields and _severity_increased_to_high(change):
         if "fix_text" in fields:
-            return "high_priority_review", "Severity increased to high and fix guidance changed; prioritize analyst and implementation owner review."
+            return "high_priority_review", "The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review."
         if "check_text" in fields:
-            return "high_priority_review", "Severity increased to high and check guidance changed; prioritize analyst review and evidence updates."
-        return "high_priority_review", "Severity increased to high; prioritize analyst and owner review."
+            return "high_priority_review", "The severity increased to high and the check procedure changed, so validation evidence may need to be refreshed quickly."
+        return "high_priority_review", "The severity increased to high, so this should be prioritized for analyst and owner review."
     if "severity" in fields and _severity_increased(change):
-        return "review_recommended", "Severity increased; review priority and downstream ticket severity."
+        return "review_recommended", "The severity increased, so ticket priority and owner review expectations may need to change."
     if "fix_text" in fields:
         if _meaningful_text_change(change.old_control, change.new_control, "fix_text"):
-            return "implementation_change_likely", "Fix guidance changed meaningfully; implementation steps may need updates."
-        return "review_recommended", "Fix guidance wording changed, but the implementation meaning appears similar."
+            return "implementation_change_likely", "The remediation text changed enough that implementation steps should be reviewed before reusing old tickets or evidence."
+        return "review_recommended", "The remediation wording changed, but it appears similar enough that a quick review is likely sufficient."
     if "check_text" in fields:
         if _meaningful_text_change(change.old_control, change.new_control, "check_text"):
-            return "evidence_update_likely", "Check guidance changed meaningfully; validation evidence may need updates."
-        return "no_action_likely", "Check guidance changed only slightly; no action is likely beyond reviewer awareness."
+            return "evidence_update_likely", "The check procedure changed enough that evidence requests or validation steps may need to be refreshed."
+        return "no_action_likely", "The check wording changed only slightly, so no action is likely beyond reviewer awareness."
     if change.change_type == "removed":
-        return "review_recommended", "The control was removed and downstream tickets or evidence mappings may need cleanup."
+        return "review_recommended", "The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup."
     if fields and fields <= {"title"}:
-        return "no_action_likely", "Only the title changed; no technical action is likely."
+        return "no_action_likely", "Only metadata or title wording changed; no technical action is likely."
     if fields & {"cci_refs", "references"}:
-        return "review_recommended", "Control mappings or references changed and should be reviewed."
+        return "review_recommended", "Control mappings or references changed, which may affect traceability or evidence mapping."
     if change.change_type == "added":
         if has_config_terms(" ".join([control.title, control.check_text, control.fix_text])):
-            return "implementation_change_likely", "New control includes configuration language; implementation owner should review."
-        return "review_recommended", "A new control was added and should be triaged."
+            return "implementation_change_likely", "A new control includes configuration language, so an implementation owner should review it."
+        return "review_recommended", "A new control was added and should be triaged for owner, ticket, and evidence impact."
     return "review_recommended", "The change should be reviewed by an analyst."
 
 
@@ -103,6 +104,6 @@ def _meaningful_text_change(old: StigControl | None, new: StigControl | None, fi
     if not old_text or not new_text:
         return old_text != new_text
     similarity = SequenceMatcher(None, old_text.lower(), new_text.lower()).ratio()
-    if similarity < 0.86:
+    if similarity < MEANINGFUL_TEXT_THRESHOLD:
         return True
     return has_config_terms(old_text) != has_config_terms(new_text)

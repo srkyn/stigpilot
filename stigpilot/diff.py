@@ -22,6 +22,16 @@ def _index_controls(controls: list[StigControl]) -> dict[str, StigControl]:
     return indexed
 
 
+def duplicate_keys(controls: list[StigControl]) -> dict[str, int]:
+    """Return stable keys that appear more than once in a document."""
+
+    counts: dict[str, int] = {}
+    for idx, control in enumerate(controls):
+        key = _stable_key(control) or f"control-{idx}"
+        counts[key] = counts.get(key, 0) + 1
+    return {key: count for key, count in counts.items() if count > 1}
+
+
 def _stable_key(control: StigControl) -> str:
     """Return a release-stable key, stripping common DISA rule revision suffixes."""
 
@@ -83,9 +93,7 @@ def compare_documents(old: StigDocument, new: StigDocument) -> list[ControlChang
         changed_fields = [field for field in DIFF_FIELDS if _field_changed(old_control, new_control, field)]
         if not changed_fields:
             continue
-        change_type = "severity_changed" if changed_fields == ["severity"] else "modified"
-        if "severity" in changed_fields and change_type != "modified":
-            change_type = "severity_changed"
+        change_type = _change_type(old_control, new_control, changed_fields)
         changes.append(
             apply_impact(
                 ControlChange(
@@ -100,3 +108,28 @@ def compare_documents(old: StigDocument, new: StigDocument) -> list[ControlChang
         )
 
     return changes
+
+
+def _change_type(old: StigControl, new: StigControl, changed_fields: list[str]) -> str:
+    fields = set(changed_fields)
+    if "severity" in fields:
+        old_rank = _severity_rank(old.severity)
+        new_rank = _severity_rank(new.severity)
+        if new_rank > old_rank:
+            return "severity_increased"
+        if new_rank < old_rank:
+            return "severity_decreased"
+        return "severity_changed"
+    if "fix_text" in fields:
+        return "fix_changed"
+    if "check_text" in fields:
+        return "check_changed"
+    if fields & {"cci_refs", "references"}:
+        return "reference_changed"
+    if fields and fields <= {"title"}:
+        return "metadata_only_change"
+    return "modified"
+
+
+def _severity_rank(value: str) -> int:
+    return {"low": 1, "medium": 2, "high": 3}.get(value.lower(), 0)

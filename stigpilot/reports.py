@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections import defaultdict
 from pathlib import Path
 
 from .config import StigPilotConfig
@@ -52,40 +53,34 @@ def change_brief(
     counts = Counter(change.change_type for change in changes)
     impacts = Counter(change.impact for change in changes)
     severity_changed_count = sum(1 for change in changes if "severity" in change.changed_fields)
-    check_changed_count = sum(1 for change in changes if "check_text" in change.changed_fields)
-    fix_changed_count = sum(1 for change in changes if "fix_text" in change.changed_fields)
-    top = [
-        change
-        for change in changes
-        if change.impact in {"high_priority_review", "implementation_change_likely", "evidence_update_likely"}
-    ][:10]
+    top = priority_changes(changes)[:10]
     lines = [
         "# STIGPilot Change Brief",
+        "",
+        "## Executive Summary",
+        "",
+        executive_summary(changes, config),
+        "",
+        "## Source Files",
         "",
         f"Old source: `{Path(old_doc.source_file).name}`",
         f"New source: `{Path(new_doc.source_file).name}`",
         f"Total controls old: {len(old_doc.controls)}",
         f"Total controls new: {len(new_doc.controls)}",
         "",
-        "## Change Summary",
+        "## At-a-Glance",
         "",
-        f"- Added: {counts.get('added', 0)}",
-        f"- Removed: {counts.get('removed', 0)}",
-        f"- Modified: {counts.get('modified', 0)}",
-        f"- Severity changed: {severity_changed_count}",
-        f"- Check text changed: {check_changed_count}",
-        f"- Fix text changed: {fix_changed_count}",
-        f"- High-priority review: {impacts.get('high_priority_review', 0)}",
-        f"- Implementation change likely: {impacts.get('implementation_change_likely', 0)}",
-        f"- Evidence update likely: {impacts.get('evidence_update_likely', 0)}",
-        f"- Review recommended: {impacts.get('review_recommended', 0)}",
-        f"- No action likely: {impacts.get('no_action_likely', 0)}",
+        "| Metric | Count |",
+        "| --- | ---: |",
+        f"| Added controls | {counts.get('added', 0)} |",
+        f"| Removed controls | {counts.get('removed', 0)} |",
+        f"| Modified controls | {sum(1 for change in changes if change.change_type not in {'added', 'removed'})} |",
+        f"| Severity changes | {severity_changed_count} |",
+        f"| High-priority review | {impacts.get('high_priority_review', 0)} |",
+        f"| Implementation change likely | {impacts.get('implementation_change_likely', 0)} |",
+        f"| Evidence update likely | {impacts.get('evidence_update_likely', 0)} |",
         "",
-        "## Manager Summary",
-        "",
-        manager_summary(changes, config),
-        "",
-        "## Top Priority Actions",
+        "## Priority Actions",
         "",
     ]
     if not top:
@@ -93,27 +88,116 @@ def change_brief(
     for change in top:
         control = change.current_control or StigControl()
         lines.append(
-            f"- **{change.impact}**: {control.vuln_id or control.rule_id} - "
-            f"{control.title or 'Untitled'} ({change.reason})"
+            f"- **{control.vuln_id or control.rule_id or 'Control'}**: {control.title or 'Untitled'} - {change.reason}"
+        )
+    lines.extend(
+        [
+            "",
+            "## Owner Impact",
+            "",
+            "| Owner | Changes | High Priority | Implementation Likely | Evidence Updates |",
+            "| --- | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for owner, owner_changes in owner_groups(changes, config).items():
+        owner_impacts = Counter(change.impact for change in owner_changes)
+        lines.append(
+            f"| {_md(owner)} | {len(owner_changes)} | {owner_impacts.get('high_priority_review', 0)} | "
+            f"{owner_impacts.get('implementation_change_likely', 0)} | {owner_impacts.get('evidence_update_likely', 0)} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Change Categories",
+            "",
+            "| Impact | Count | Meaning |",
+            "| --- | ---: | --- |",
+        ]
+    )
+    for impact, meaning in IMPACT_MEANINGS.items():
+        lines.append(f"| {impact} | {impacts.get(impact, 0)} | {meaning} |")
+    lines.extend(
+        [
+            "",
+            "## Top Changed Controls",
+            "",
+            "| Impact | Severity | Vuln ID | Rule ID | Title | Owner | Why it matters |",
+            "| --- | --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+    for change in top:
+        control = change.current_control or StigControl()
+        lines.append(
+            f"| {change.impact} | {control.severity or 'unspecified'} | {control.vuln_id or change.vuln_id} | "
+            f"{control.rule_id or change.rule_id} | {_md(control.title)} | {suggested_owner(control, config)} | {_md(change.reason)} |"
         )
     lines.extend(
         [
             "",
             "## Detailed Changes",
             "",
-            "| Change | Impact | Severity | Vuln ID | Rule ID | Changed Fields | Owner | Tags | Reason |",
-            "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+            "| Change Type | Impact | Severity | Vuln ID | Rule ID | Changed Fields | Owner | Why it matters |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- |",
         ]
     )
     for change in changes:
         control = change.current_control or StigControl()
         lines.append(
-            f"| {change.change_type} | {change.impact} | {control.severity or ''} | "
+            f"| {change.change_type} | {change.impact} | {control.severity or 'unspecified'} | "
             f"{control.vuln_id or change.vuln_id} | {control.rule_id or change.rule_id} | "
-            f"{', '.join(change.changed_fields) or '-'} | {suggested_owner(control, config)} | "
-            f"{_md(', '.join(control.tags))} | {_md(change.reason)} |"
+            f"{', '.join(change.changed_fields) or '-'} | {suggested_owner(control, config)} | {_md(change.reason)} |"
         )
     return "\n".join(lines) + "\n"
+
+
+IMPACT_MEANINGS = {
+    "high_priority_review": "Review first because severity or new high-risk scope changed.",
+    "implementation_change_likely": "Remediation steps may need updates before reusing old tickets.",
+    "evidence_update_likely": "Check procedure changed enough that evidence requests may need refresh.",
+    "review_recommended": "Traceability, cleanup, or analyst review is recommended.",
+    "no_action_likely": "Likely wording or metadata only; keep awareness but avoid noisy tickets.",
+}
+
+
+def executive_summary(changes: list[ControlChange], config: StigPilotConfig | None = None) -> str:
+    if not changes:
+        return "No STIG control changes were detected between the compared files. No remediation or evidence refresh work is suggested by this comparison."
+    impacts = Counter(change.impact for change in changes)
+    owners = owner_groups(changes, config)
+    owner_phrase = ", ".join(list(owners.keys())[:3]) if owners else "no owner group"
+    action_count = impacts.get("high_priority_review", 0) + impacts.get("implementation_change_likely", 0) + impacts.get("evidence_update_likely", 0)
+    return (
+        f"{len(changes)} control change(s) were detected. "
+        f"{action_count} change(s) are likely to require priority review, implementation work, or evidence refresh. "
+        f"The most affected owner group(s) are {owner_phrase}. "
+        "Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets."
+    )
+
+
+def priority_changes(changes: list[ControlChange]) -> list[ControlChange]:
+    priority = {"high_priority_review": 0, "implementation_change_likely": 1, "evidence_update_likely": 2, "review_recommended": 3, "no_action_likely": 4}
+    return sorted(changes, key=lambda change: (priority.get(change.impact, 9), change.current_control.severity if change.current_control else "", change.vuln_id))
+
+
+def owner_groups(changes: list[ControlChange], config: StigPilotConfig | None = None) -> dict[str, list[ControlChange]]:
+    grouped: dict[str, list[ControlChange]] = defaultdict(list)
+    for change in changes:
+        grouped[suggested_owner(change.current_control, config)].append(change)
+    return dict(sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0])))
+
+
+def change_summary_counts(changes: list[ControlChange]) -> dict[str, int]:
+    impacts = Counter(change.impact for change in changes)
+    return {
+        "total": len(changes),
+        "added": sum(1 for change in changes if change.change_type == "added"),
+        "removed": sum(1 for change in changes if change.change_type == "removed"),
+        "modified": sum(1 for change in changes if change.change_type not in {"added", "removed"}),
+        "severity_changed": sum(1 for change in changes if "severity" in change.changed_fields),
+        "high_priority_review": impacts.get("high_priority_review", 0),
+        "implementation_change_likely": impacts.get("implementation_change_likely", 0),
+        "evidence_update_likely": impacts.get("evidence_update_likely", 0),
+    }
 
 
 def manager_summary_report(
@@ -141,7 +225,7 @@ def manager_summary_report(
         "",
         "## Executive Readout",
         "",
-        manager_summary(changes, config),
+        executive_summary(changes, config),
         "",
         "## Workload Snapshot",
         "",
@@ -154,10 +238,17 @@ def manager_summary_report(
         "",
         "## Owner Impact",
         "",
+        "| Owner | Changes | High Priority | Implementation Likely | Evidence Updates |",
+        "| --- | ---: | ---: | ---: | ---: |",
     ]
     if owners:
         for owner, count in owners.most_common():
-            lines.append(f"- {owner}: {count}")
+            owner_changes = [change for change in changes if suggested_owner(change.current_control, config) == owner]
+            owner_impacts = Counter(change.impact for change in owner_changes)
+            lines.append(
+                f"| {_md(owner)} | {count} | {owner_impacts.get('high_priority_review', 0)} | "
+                f"{owner_impacts.get('implementation_change_likely', 0)} | {owner_impacts.get('evidence_update_likely', 0)} |"
+            )
     else:
         lines.append("- No owner impact detected.")
 
@@ -186,6 +277,9 @@ def manager_summary_report(
 
 def evidence_checklist(document: StigDocument, severity: str | None = None, config: StigPilotConfig | None = None) -> str:
     controls = filter_by_severity(document.controls, severity)
+    grouped: dict[str, list[StigControl]] = defaultdict(list)
+    for control in controls:
+        grouped[suggested_owner(control, config)].append(control)
     lines = [
         "# STIGPilot Evidence Checklist",
         "",
@@ -193,21 +287,31 @@ def evidence_checklist(document: StigDocument, severity: str | None = None, conf
         f"Controls included: {len(controls)}",
         "",
     ]
-    for control in controls:
-        lines.extend(
-            [
-                f"## {control.vuln_id or control.rule_id or 'Control'} - {control.title or 'Untitled'}",
-                "",
-                f"- Severity: {control.severity or 'unspecified'}",
-                f"- Suggested owner: {suggested_owner(control, config)}",
-                f"- Tags: {', '.join(control.tags)}",
-                f"- Check summary: {summarize(control.check_text)}",
-                "- Evidence requested:",
-            ]
-        )
-        for request in evidence_requests(control):
-            lines.append(f"  - {request}")
-        lines.append("")
+    for owner in sorted(grouped):
+        lines.extend([f"## {owner}", ""])
+        for control in grouped[owner]:
+            lines.extend(
+                [
+                    f"### {control.vuln_id or control.rule_id or 'Control'} - {control.title or 'Untitled'}",
+                    "",
+                    f"- Severity: {control.severity or 'unspecified'}",
+                    f"- Rule ID: {control.rule_id or 'unknown'}",
+                    f"- Tags: {', '.join(control.tags)}",
+                    f"- Check summary: {summarize(control.check_text)}",
+                    "",
+                    "Validation metadata:",
+                    "",
+                    "- [ ] Asset/System:",
+                    "- [ ] Validated by:",
+                    "- [ ] Date:",
+                    "- [ ] Notes:",
+                    "",
+                    "Evidence requested:",
+                ]
+            )
+            for request in evidence_requests(control):
+                lines.append(f"- [ ] {request}")
+            lines.append("")
     return "\n".join(lines)
 
 

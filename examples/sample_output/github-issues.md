@@ -1,6 +1,8 @@
 # STIGPilot GitHub Issue Drafts
 
-## Issue 1: added: V-100004 - Firewall management access must be restricted
+## Issue 1
+
+Title: `added: V-100004 - Firewall management access must be restricted`
 
 Labels: `stigpilot`, `high_priority_review`, `Network Security`
 
@@ -9,7 +11,7 @@ Labels: `stigpilot`, `high_priority_review`, `Network Security`
 - Severity: high
 - Suggested owner: Network/Security Engineering
 - Impact: high_priority_review
-- Reason: New high severity control; triage ownership, implementation, and evidence first.
+- Reason: A new high-severity control was added, so it should be triaged before lower-risk backlog work.
 - Changed fields: added
 
 ### Evidence Needed
@@ -20,11 +22,20 @@ Labels: `stigpilot`, `high_priority_review`, `Network Security`
 - [ ] System or asset name
 - [ ] Reviewer notes
 
+### Acceptance Criteria
+
+- [ ] Change reviewed by suggested owner
+- [ ] Ticket priority matches STIGPilot impact category
+- [ ] Evidence request updated or confirmed unchanged
+- [ ] Notes added for any downstream checklist or backlog impact
+
 ### Notes
 
 - 
 
-## Issue 2: removed: V-100003 - Removed database audit control
+## Issue 2
+
+Title: `removed: V-100003 - Removed database audit control`
 
 Labels: `stigpilot`, `review_recommended`, `Audit Logging`, `Database`
 
@@ -33,7 +44,7 @@ Labels: `stigpilot`, `review_recommended`, `Audit Logging`, `Database`
 - Severity: medium
 - Suggested owner: Database Admin
 - Impact: review_recommended
-- Reason: The control was removed and downstream tickets or evidence mappings may need cleanup.
+- Reason: The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
 - Changed fields: removed
 
 ### Evidence Needed
@@ -44,11 +55,20 @@ Labels: `stigpilot`, `review_recommended`, `Audit Logging`, `Database`
 - [ ] System or asset name
 - [ ] Reviewer notes
 
+### Acceptance Criteria
+
+- [ ] Change reviewed by suggested owner
+- [ ] Ticket priority matches STIGPilot impact category
+- [ ] Evidence request updated or confirmed unchanged
+- [ ] Notes added for any downstream checklist or backlog impact
+
 ### Notes
 
 - 
 
-## Issue 3: modified: V-100001 - Windows audit policy must be configured and reviewed
+## Issue 3
+
+Title: `severity_increased: V-100001 - Windows audit policy must be configured and reviewed`
 
 Labels: `stigpilot`, `high_priority_review`, `Audit Logging`, `Endpoint Security`, `Windows`, `GPO`
 
@@ -57,7 +77,7 @@ Labels: `stigpilot`, `high_priority_review`, `Audit Logging`, `Endpoint Security
 - Severity: high
 - Suggested owner: Endpoint/Windows Admin
 - Impact: high_priority_review
-- Reason: Severity increased to high and fix guidance changed; prioritize analyst and implementation owner review.
+- Reason: The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.
 - Changed fields: title, severity, check_text, fix_text, references
 
 ### Evidence Needed
@@ -68,11 +88,20 @@ Labels: `stigpilot`, `high_priority_review`, `Audit Logging`, `Endpoint Security
 - [ ] System or asset name
 - [ ] Reviewer notes
 
+### Acceptance Criteria
+
+- [ ] Change reviewed by suggested owner
+- [ ] Ticket priority matches STIGPilot impact category
+- [ ] Evidence request updated or confirmed unchanged
+- [ ] Notes added for any downstream checklist or backlog impact
+
 ### Notes
 
 - 
 
-## Issue 4: modified: V-100002 - Linux SSH banner must be configured
+## Issue 4
+
+Title: `check_changed: V-100002 - Linux SSH banner must be configured`
 
 Labels: `stigpilot`, `evidence_update_likely`, `Remote Access`, `Linux`
 
@@ -81,7 +110,7 @@ Labels: `stigpilot`, `evidence_update_likely`, `Remote Access`, `Linux`
 - Severity: low
 - Suggested owner: Linux Admin
 - Impact: evidence_update_likely
-- Reason: Check guidance changed meaningfully; validation evidence may need updates.
+- Reason: The check procedure changed enough that evidence requests or validation steps may need to be refreshed.
 - Changed fields: check_text
 
 ### Evidence Needed
@@ -92,6 +121,13 @@ Labels: `stigpilot`, `evidence_update_likely`, `Remote Access`, `Linux`
 - [ ] Date/time of validation
 - [ ] System or asset name
 - [ ] Reviewer notes
+
+### Acceptance Criteria
+
+- [ ] Change reviewed by suggested owner
+- [ ] Ticket priority matches STIGPilot impact category
+- [ ] Evidence request updated or confirmed unchanged
+- [ ] Notes added for any downstream checklist or backlog impact
 
 ### Notes
 

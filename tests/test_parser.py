@@ -66,3 +66,25 @@ def test_parser_extracts_nested_description_metadata(tmp_path: Path):
 
     assert "VulnDiscussion: Nested discussion text should be retained." in document.controls[0].references
     assert "Mitigations: Nested mitigation text should be retained." in document.controls[0].references
+
+
+def test_parser_missing_optional_fields_do_not_crash(tmp_path: Path):
+    xml_path = tmp_path / "missing-fields.xml"
+    xml_path.write_text(
+        """
+<Benchmark>
+  <Group id="V-300001">
+    <Rule id="SV-300001r1_rule" />
+  </Group>
+</Benchmark>
+""".strip(),
+        encoding="utf-8",
+    )
+
+    document = parse_stig(xml_path)
+
+    assert len(document.controls) == 1
+    assert document.controls[0].title == ""
+    assert document.controls[0].check_text == ""
+    assert document.controls[0].fix_text == ""
+    assert document.controls[0].cci_refs == []

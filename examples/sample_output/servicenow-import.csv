@@ -1,7 +1,7 @@
-﻿short_description,description,assignment_group,priority,u_stig_vuln_id,u_stig_rule_id,u_impact,u_tags
+﻿short_description,description,assignment_group,priority,u_stig_vuln_id,u_stig_rule_id,u_stig_impact,u_stig_tags
 Review STIG change V-100004: Firewall management access must be restricted,"Change type: added
 Impact: high_priority_review
-Reason: New high severity control; triage ownership, implementation, and evidence first.
+Reason: A new high-severity control was added, so it should be triaged before lower-risk backlog work.
 Changed fields: added
 Vuln ID: V-100004
 Rule ID: SV-100004r1_rule
@@ -12,7 +12,7 @@ Fix summary: Restrict firewall management access to approved networks.
 Evidence needed: Screenshot or export of the relevant setting; Network device configuration excerpt or management console export; Date/time of validation; System or asset name; Reviewer notes",Network/Security Engineering,High,V-100004,SV-100004r1_rule,high_priority_review,Network Security
 Review STIG change V-100003: Removed database audit control,"Change type: removed
 Impact: review_recommended
-Reason: The control was removed and downstream tickets or evidence mappings may need cleanup.
+Reason: The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
 Changed fields: removed
 Vuln ID: V-100003
 Rule ID: SV-100003r1_rule
@@ -21,9 +21,9 @@ Tags: Audit Logging, Database
 Check summary: Review SQL audit settings.
 Fix summary: Configure SQL audit settings.
 Evidence needed: Screenshot or export of the relevant setting; Database configuration query output or parameter export; Date/time of validation; System or asset name; Reviewer notes",Database Admin,Low,V-100003,SV-100003r1_rule,review_recommended,Audit Logging; Database
-Review STIG change V-100001: Windows audit policy must be configured and reviewed,"Change type: modified
+Review STIG change V-100001: Windows audit policy must be configured and reviewed,"Change type: severity_increased
 Impact: high_priority_review
-Reason: Severity increased to high and fix guidance changed; prioritize analyst and implementation owner review.
+Reason: The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.
 Changed fields: title, severity, check_text, fix_text, references
 Vuln ID: V-100001
 Rule ID: SV-100001r2_rule
@@ -32,9 +32,9 @@ Tags: Audit Logging, Endpoint Security, Windows, GPO
 Check summary: Review Windows audit policy settings in Local Security Policy and export applied GPO evidence.
 Fix summary: Configure Windows audit policy through GPO and document the applied baseline.
 Evidence needed: Screenshot or export of the relevant setting; GPO, registry, or Local Security Policy export; Date/time of validation; System or asset name; Reviewer notes",Endpoint/Windows Admin,High,V-100001,SV-100001r2_rule,high_priority_review,Audit Logging; Endpoint Security; Windows; GPO
-Review STIG change V-100002: Linux SSH banner must be configured,"Change type: modified
+Review STIG change V-100002: Linux SSH banner must be configured,"Change type: check_changed
 Impact: evidence_update_likely
-Reason: Check guidance changed meaningfully; validation evidence may need updates.
+Reason: The check procedure changed enough that evidence requests or validation steps may need to be refreshed.
 Changed fields: check_text
 Vuln ID: V-100002
 Rule ID: SV-100002r2_rule

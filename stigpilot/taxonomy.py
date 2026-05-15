@@ -9,30 +9,31 @@ from .models import StigControl
 
 
 DEFAULT_TAG_RULES: dict[str, tuple[str, ...]] = {
-    "IAM": ("account", "authentication", "authorization", "privilege", "least privilege", "user", "group"),
-    "Audit Logging": ("audit", "log", "logging", "event log", "syslog", "auditd"),
-    "Endpoint Security": ("endpoint", "workstation", "server", "local security policy", "security option"),
-    "Password Policy": ("password", "passphrase", "credential", "lockout"),
-    "Remote Access": ("ssh", "sshd", "rdp", "remote access", "vpn", "winrm"),
-    "Encryption": ("encrypt", "encryption", "tls", "ssl", "certificate", "cryptographic", "fips"),
-    "Network Security": ("network", "firewall", "router", "switch", "cisco", "palo alto", "port", "acl"),
-    "Database": ("database", "sql", "oracle", "postgresql", "mongodb", "mysql"),
-    "Linux": ("linux", "sshd", "sudo", "auditd", "pam", "/etc/", "systemctl"),
-    "Windows": ("windows", "powershell", "local security policy", "event viewer", "ntfs"),
-    "GPO": ("gpo", "group policy", "policy setting"),
-    "Registry": ("registry", "regedit", "hkey_", "hkcu", "hklm"),
-    "Defender/AV": ("defender", "antivirus", "anti-virus", "malware", "real-time protection"),
-    "Cloud": ("cloud", "azure", "aws", "gcp", "entra", "iam role"),
-    "Container/Kubernetes": ("container", "kubernetes", "kubelet", "docker", "pod", "namespace"),
+    "IAM": ("account", "authentication", "authorization", "privilege", "privileged access", "least privilege", "user", "group", "role", "identity"),
+    "Audit Logging": ("audit", "audit policy", "log", "logging", "event log", "event forwarding", "syslog", "auditd", "siem"),
+    "Endpoint Security": ("endpoint", "workstation", "server", "local security policy", "security option", "baseline"),
+    "Password Policy": ("password", "passphrase", "credential", "lockout", "complexity", "expiration"),
+    "Remote Access": ("ssh", "sshd", "rdp", "remote access", "vpn", "winrm", "banner"),
+    "Encryption": ("encrypt", "encryption", "tls", "ssl", "certificate", "cryptographic", "fips", "cipher"),
+    "Network Security": ("network", "firewall", "router", "switch", "cisco", "palo alto", "port", "acl", "management access"),
+    "Database": ("database", "sql", "oracle", "postgresql", "mongodb", "mysql", "dbms", "stored procedure"),
+    "Linux": ("linux", "sshd", "sudo", "sudoers", "auditd", "pam", "/etc/", "systemctl", "journald"),
+    "Windows": ("windows", "powershell", "local security policy", "event viewer", "ntfs", "secedit", "windows defender"),
+    "GPO": ("gpo", "group policy", "policy setting", "gpresult", "lgpo"),
+    "Registry": ("registry", "regedit", "hkey_", "hkcu", "hklm", "reg add"),
+    "Defender/AV": ("defender", "windows defender", "antivirus", "anti-virus", "malware", "real-time protection", "tamper protection"),
+    "Cloud": ("cloud", "azure", "aws", "gcp", "entra", "iam role", "security group", "conditional access"),
+    "Container/Kubernetes": ("container", "kubernetes", "kubelet", "docker", "pod", "namespace", "kubectl", "helm"),
 }
 
 DEFAULT_OWNER_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("Endpoint/Windows Admin", ("windows", "registry", "gpo", "group policy", "defender", "audit policy", "local security policy")),
-    ("Linux Admin", ("linux", "sshd", "sudo", "auditd", "pam", "/etc/")),
-    ("Database Admin", ("database", "sql", "oracle", "postgresql", "mongodb", "mysql")),
-    ("Network/Security Engineering", ("network", "router", "firewall", "switch", "cisco", "palo alto", "acl", "vpn")),
-    ("Cloud/IAM Admin", ("cloud", "azure", "aws", "gcp", "entra", "iam role")),
-    ("Platform/Container Admin", ("container", "kubernetes", "kubelet", "docker")),
+    ("Endpoint/Windows Admin", ("windows", "registry", "gpo", "group policy", "defender", "audit policy", "local security policy", "secedit", "gpresult")),
+    ("Linux Admin", ("linux", "sshd", "sudo", "sudoers", "auditd", "pam", "/etc/", "systemctl")),
+    ("IAM/Security Admin", ("authentication", "authorization", "privileged access", "least privilege", "account lifecycle", "lockout")),
+    ("Database Admin", ("database", "sql", "oracle", "postgresql", "mongodb", "mysql", "dbms")),
+    ("Network/Security Engineering", ("network", "router", "firewall", "switch", "cisco", "palo alto", "acl", "vpn", "management access")),
+    ("Cloud/IAM Admin", ("cloud", "azure", "aws", "gcp", "entra", "iam role", "conditional access")),
+    ("Platform/Container Admin", ("container", "kubernetes", "kubelet", "docker", "kubectl")),
 )
 
 CONFIG_TERMS = (

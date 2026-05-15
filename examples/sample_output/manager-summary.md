@@ -7,7 +7,7 @@ New controls: 3
 
 ## Executive Readout
 
-4 control change(s) were detected. 3 likely require priority review, implementation work, or evidence updates. The most affected owner group is multiple owner groups. Use the backlog CSV to assign review work and the evidence checklist to prepare validation requests.
+4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The most affected owner group(s) are Database Admin, Endpoint/Windows Admin, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.
 
 ## Workload Snapshot
 
@@ -20,10 +20,12 @@ New controls: 3
 
 ## Owner Impact
 
-- Network/Security Engineering: 1
-- Database Admin: 1
-- Endpoint/Windows Admin: 1
-- Linux Admin: 1
+| Owner | Changes | High Priority | Implementation Likely | Evidence Updates |
+| --- | ---: | ---: | ---: | ---: |
+| Network/Security Engineering | 1 | 1 | 0 | 0 |
+| Database Admin | 1 | 0 | 0 | 0 |
+| Endpoint/Windows Admin | 1 | 1 | 0 | 0 |
+| Linux Admin | 1 | 0 | 0 | 1 |
 
 ## Top Actions
 
