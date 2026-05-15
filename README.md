@@ -35,6 +35,7 @@ Generated files:
 
 ```text
 output/demo/change-brief.md
+output/demo/change-brief.html
 output/demo/manager-summary.md
 output/demo/remediation-backlog.csv
 output/demo/evidence-checklist.md
@@ -88,6 +89,7 @@ Generated files:
 
 ```text
 output/chrome/change-brief.md
+output/chrome/change-brief.html
 output/chrome/manager-summary.md
 output/chrome/remediation-backlog.csv
 output/chrome/evidence-checklist.md
@@ -265,6 +267,7 @@ Synthetic fixtures are included in `examples/sample_input/`. They are fake and s
 Committed sample outputs in `examples/sample_output/`:
 
 - `change-brief.md`
+- `change-brief.html`
 - `manager-summary.md`
 - `remediation-backlog.csv`
 - `evidence-checklist.md`

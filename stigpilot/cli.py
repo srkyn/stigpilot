@@ -133,6 +133,7 @@ def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigP
     out.mkdir(parents=True, exist_ok=True)
     outputs = {
         "Change brief": out / "change-brief.md",
+        "HTML change brief": out / "change-brief.html",
         "Manager summary": out / "manager-summary.md",
         "Remediation backlog": out / "remediation-backlog.csv",
         "Evidence checklist": out / "evidence-checklist.md",
@@ -141,6 +142,7 @@ def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigP
         "GitHub issues": out / "github-issues.md",
     }
     write_text_report(outputs["Change brief"], change_brief(old_doc, new_doc, changes, config))
+    write_text_report(outputs["HTML change brief"], html_change_brief(old_doc, new_doc, changes, config))
     write_text_report(outputs["Manager summary"], manager_summary_report(old_doc, new_doc, changes, config))
     write_backlog_csv(changes, outputs["Remediation backlog"], config)
     write_text_report(outputs["Evidence checklist"], evidence_checklist(new_doc, config=config))
@@ -574,6 +576,7 @@ def demo(
         "Controls JSON": out / "controls.json",
         "Brief": out / "brief.md",
         "Change brief": out / "change-brief.md",
+        "HTML change brief": out / "change-brief.html",
         "Manager summary": out / "manager-summary.md",
         "Remediation backlog": out / "remediation-backlog.csv",
         "Evidence checklist": out / "evidence-checklist.md",
@@ -585,6 +588,7 @@ def demo(
     write_controls_json(new_doc, outputs["Controls JSON"])
     write_text_report(outputs["Brief"], single_stig_brief(new_doc, config=config))
     write_text_report(outputs["Change brief"], change_brief(old_doc, new_doc, changes, config))
+    write_text_report(outputs["HTML change brief"], html_change_brief(old_doc, new_doc, changes, config))
     write_text_report(outputs["Manager summary"], manager_summary_report(old_doc, new_doc, changes, config))
     write_backlog_csv(changes, outputs["Remediation backlog"], config)
     write_text_report(outputs["Evidence checklist"], evidence_checklist(new_doc, config=config))

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1
+
+- Added HTML change briefs to generated comparison packets.
+- Packet, batch, and Chrome demo workflows now include `change-brief.html` alongside Markdown and CSV outputs.
+- Updated README examples and CLI regression coverage for packet HTML output.
+
 ## 0.6.0
 
 - Added `stigpilot html` for self-contained browser-readable change briefs.

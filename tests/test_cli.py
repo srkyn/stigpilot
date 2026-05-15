@@ -18,6 +18,7 @@ def test_cli_demo_writes_reports(tmp_path: Path):
     assert result.exit_code == 0
     assert "Start here" in result.output
     assert (out / "change-brief.md").exists()
+    assert (out / "change-brief.html").exists()
     assert (out / "manager-summary.md").exists()
     assert (out / "remediation-backlog.csv").exists()
 
@@ -164,6 +165,7 @@ def test_cli_batch_generates_portfolio_packet(tmp_path: Path):
     assert "Start here" in result.output
     assert (out / "portfolio-summary.md").exists()
     assert (out / "synthetic-windows-and-linux-stig" / "change-brief.md").exists()
+    assert (out / "synthetic-windows-and-linux-stig" / "change-brief.html").exists()
 
 
 def test_cli_batch_requires_matching_titles(tmp_path: Path):
@@ -217,6 +219,7 @@ def test_cli_chrome_demo_missing_official_files_uses_sample(tmp_path: Path):
     assert "Official Chrome STIG files were not found" in result.output
     assert "Start here" in result.output
     assert (out / "change-brief.md").exists()
+    assert (out / "change-brief.html").exists()
     assert (out / "manager-summary.md").exists()
     assert (out / "remediation-backlog.csv").exists()
 
