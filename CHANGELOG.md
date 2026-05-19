@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1
+
+- Added Jira CSV, ServiceNow CSV, and GitHub issue Markdown drafts to the Government Mode packet.
+- Updated Government Mode documentation, README output lists, sample outputs, and regression coverage for ticket exports.
+
 ## 0.8.0
 
 - Added Government Mode with `tools/STIGPilot-Gov.ps1`, a PowerShell-only fallback for restrictive Windows environments where Python may be considered third-party software.

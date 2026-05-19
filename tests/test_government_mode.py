@@ -73,15 +73,27 @@ def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
     assert (out / "remediation-backlog.csv").exists()
     assert (out / "changes.json").exists()
     assert (out / "evidence-checklist.md").exists()
+    assert (out / "jira-import.csv").exists()
+    assert (out / "servicenow-import.csv").exists()
+    assert (out / "github-issues.md").exists()
 
     brief = (out / "change-brief.md").read_text(encoding="utf-8")
     checklist = (out / "evidence-checklist.md").read_text(encoding="utf-8")
     backlog = (out / "remediation-backlog.csv").read_text(encoding="utf-8-sig")
+    jira = (out / "jira-import.csv").read_text(encoding="utf-8-sig")
+    servicenow = (out / "servicenow-import.csv").read_text(encoding="utf-8-sig")
+    issues = (out / "github-issues.md").read_text(encoding="utf-8")
 
     assert "# STIGPilot Government Mode Change Brief" in brief
     assert "## At-a-Glance" in brief
     assert "- [ ]" in checklist
     assert "Suggested Owner" in backlog
+    assert "Summary" in jira
+    assert "Issue Type" in jira
+    assert "short_description" in servicenow
+    assert "assignment_group" in servicenow
+    assert "# STIGPilot Government Mode GitHub Issue Drafts" in issues
+    assert "### Acceptance Criteria" in issues
 
 
 def test_government_mode_parse_writes_csv_and_json(tmp_path: Path):

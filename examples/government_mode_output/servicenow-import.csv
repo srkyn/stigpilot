@@ -1,0 +1,73 @@
+﻿"short_description","description","assignment_group","priority","u_stig_vuln_id","u_stig_rule_id","u_stig_impact","u_stig_tags"
+"severity_increased: V-100001 - Windows audit policy must be configured and reviewed","STIGPilot Government Mode triage item
+
+Control: V-100001 / SV-100001r2_rule
+Title: Windows audit policy must be configured and reviewed
+Severity: high
+Change type: severity_increased
+Impact: High-priority review
+Suggested owner: Endpoint/Windows Admin
+Tags: Audit Logging; GPO; Windows
+
+Why it matters: The severity increased, so the control should be reviewed before reusing old risk notes, tickets, or evidence.
+
+Check summary: Review Windows audit policy settings in Local Security Policy and export applied GPO evidence.
+Fix summary: Configure Windows audit policy through GPO and document the applied baseline.
+
+Evidence needed: Screenshot or export of the relevant setting; Date/time of validation; System or asset name; Reviewer notes; GPO, registry, browser policy, or configuration export
+
+Note: This is a local workflow helper export. It does not scan systems or validate compliance.","Endpoint/Windows Admin","High","V-100001","SV-100001r2_rule","High-priority review","Audit Logging; GPO; Windows"
+"added: V-100004 - Firewall management access must be restricted","STIGPilot Government Mode triage item
+
+Control: V-100004 / SV-100004r1_rule
+Title: Firewall management access must be restricted
+Severity: high
+Change type: added
+Impact: High-priority review
+Suggested owner: Network/Security Engineering
+Tags: Network Security; Privileged Access
+
+Why it matters: A new high-severity control was added, so it should be reviewed before lower-risk backlog items.
+
+Check summary: Review firewall management network restrictions and approved admin source ranges.
+Fix summary: Restrict firewall management access to approved networks.
+
+Evidence needed: Screenshot or export of the relevant setting; Date/time of validation; System or asset name; Reviewer notes; Device configuration excerpt or management console export
+
+Note: This is a local workflow helper export. It does not scan systems or validate compliance.","Network/Security Engineering","High","V-100004","SV-100004r1_rule","High-priority review","Network Security; Privileged Access"
+"modified: V-100002 - Linux SSH banner must be configured","STIGPilot Government Mode triage item
+
+Control: V-100002 / SV-100002r2_rule
+Title: Linux SSH banner must be configured
+Severity: low
+Change type: modified
+Impact: Evidence update likely
+Suggested owner: Linux Admin
+Tags: Linux; Remote Access
+
+Why it matters: The validation steps changed enough that evidence requests may need to be refreshed.
+
+Check summary: Run sshd -T and review the banner setting and file permissions.
+Fix summary: Configure the sshd Banner directive in /etc/ssh/sshd_config.
+
+Evidence needed: Screenshot or export of the relevant setting; Date/time of validation; System or asset name; Reviewer notes; Command output and relevant configuration file excerpt
+
+Note: This is a local workflow helper export. It does not scan systems or validate compliance.","Linux Admin","Medium","V-100002","SV-100002r2_rule","Evidence update likely","Linux; Remote Access"
+"removed: V-100003 - Removed database audit control","STIGPilot Government Mode triage item
+
+Control: V-100003 / SV-100003r1_rule
+Title: Removed database audit control
+Severity: medium
+Change type: removed
+Impact: Review recommended
+Suggested owner: Database Admin
+Tags: Audit Logging; Database
+
+Why it matters: The control was removed from the newer file; review whether open tickets or evidence requests can be closed or retired.
+
+Check summary: Review SQL audit settings.
+Fix summary: Configure SQL audit settings.
+
+Evidence needed: Screenshot or export of the relevant setting; Date/time of validation; System or asset name; Reviewer notes; Database configuration query output or admin console export
+
+Note: This is a local workflow helper export. It does not scan systems or validate compliance.","Database Admin","Low","V-100003","SV-100003r1_rule","Review recommended","Audit Logging; Database"

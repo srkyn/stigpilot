@@ -39,7 +39,7 @@ function Write-GovHelp {
     Write-Host "  parse     Parse one XCCDF/XML file to CSV and/or JSON"
     Write-Host "  diff      Compare old/new XCCDF/XML files and write a Markdown brief/backlog CSV"
     Write-Host "  evidence  Generate an evidence checklist from one XCCDF/XML file"
-    Write-Host "  packet    Generate change brief, backlog CSV, changes JSON, and evidence checklist"
+    Write-Host "  packet    Generate change brief, backlog CSV, ticket exports, changes JSON, and evidence checklist"
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov"
@@ -548,6 +548,120 @@ function Write-BacklogCsv {
     } | Export-Csv -NoTypeInformation -Encoding UTF8 -Path $PathValue
 }
 
+function Get-TicketPriority {
+    param($Change)
+    if ($Change.impact -eq "high_priority_review") {
+        return "High"
+    }
+    if ($Change.impact -eq "implementation_change_likely") {
+        return "Medium"
+    }
+    if ($Change.impact -eq "evidence_update_likely") {
+        return "Medium"
+    }
+    return "Low"
+}
+
+function Get-TicketDescription {
+    param($Change)
+    $evidence = (Get-EvidenceRequests $Change) -join "; "
+    return @(
+        "STIGPilot Government Mode triage item"
+        ""
+        "Control: $($Change.vuln_id) / $($Change.rule_id)"
+        "Title: $($Change.title)"
+        "Severity: $($Change.severity)"
+        "Change type: $($Change.change_type)"
+        "Impact: $($Change.impact_label)"
+        "Suggested owner: $($Change.owner)"
+        "Tags: $(Join-List $Change.tags)"
+        ""
+        "Why it matters: $($Change.reason)"
+        ""
+        "Check summary: $(Get-Summary $Change.check_text 260)"
+        "Fix summary: $(Get-Summary $Change.fix_text 260)"
+        ""
+        "Evidence needed: $evidence"
+        ""
+        "Note: This is a local workflow helper export. It does not scan systems or validate compliance."
+    ) -join [Environment]::NewLine
+}
+
+function Write-JiraCsv {
+    param($Changes, [string]$PathValue)
+    Ensure-ParentDirectory $PathValue
+    $Changes | ForEach-Object {
+        [PSCustomObject]@{
+            "Summary" = "$($_.change_type): $($_.vuln_id) - $($_.title)"
+            "Issue Type" = "Task"
+            "Priority" = Get-TicketPriority $_
+            "Labels" = (@("stigpilot", "government-mode", $_.impact) + @($_.tags | ForEach-Object { "$_".ToLowerInvariant() -replace "[^a-z0-9]+", "-" })) -join ","
+            "Description" = Get-TicketDescription $_
+        }
+    } | Export-Csv -NoTypeInformation -Encoding UTF8 -Path $PathValue
+}
+
+function Write-ServiceNowCsv {
+    param($Changes, [string]$PathValue)
+    Ensure-ParentDirectory $PathValue
+    $Changes | ForEach-Object {
+        [PSCustomObject]@{
+            "short_description" = "$($_.change_type): $($_.vuln_id) - $($_.title)"
+            "description" = Get-TicketDescription $_
+            "assignment_group" = $_.owner
+            "priority" = Get-TicketPriority $_
+            "u_stig_vuln_id" = $_.vuln_id
+            "u_stig_rule_id" = $_.rule_id
+            "u_stig_impact" = $_.impact_label
+            "u_stig_tags" = Join-List $_.tags
+        }
+    } | Export-Csv -NoTypeInformation -Encoding UTF8 -Path $PathValue
+}
+
+function Write-GitHubIssuesMarkdown {
+    param($Changes, [string]$PathValue)
+    Ensure-ParentDirectory $PathValue
+    $lines = @()
+    $lines += "# STIGPilot Government Mode GitHub Issue Drafts"
+    $lines += ""
+    $lines += "Copy these drafts into GitHub Issues if that workflow fits your environment. These are triage tasks, not compliance validation claims."
+    $lines += ""
+    foreach ($change in $Changes) {
+        $labels = (@("stigpilot", "government-mode", $change.impact) + @($change.tags | ForEach-Object { "$_".ToLowerInvariant() -replace "[^a-z0-9]+", "-" })) -join ", "
+        $lines += "## $($change.change_type): $($change.vuln_id) - $($change.title)"
+        $lines += ""
+        $lines += 'Labels: `' + $labels + '`'
+        $lines += ""
+        $lines += "### Context"
+        $lines += ""
+        $lines += "- Severity: $($change.severity)"
+        $lines += "- Rule ID: $($change.rule_id)"
+        $lines += "- Impact: $($change.impact_label)"
+        $lines += "- Suggested owner: $($change.owner)"
+        $lines += "- Why it matters: $($change.reason)"
+        $lines += ""
+        $lines += "### Acceptance Criteria"
+        $lines += ""
+        $lines += "- [ ] Review the changed STIG guidance."
+        $lines += "- [ ] Confirm whether implementation work, evidence refresh, or ticket closure is needed."
+        $lines += "- [ ] Attach evidence or notes from the responsible owner."
+        $lines += "- [ ] Document the final triage decision."
+        $lines += ""
+        $lines += "### Evidence Checklist"
+        $lines += ""
+        foreach ($item in (Get-EvidenceRequests $change)) {
+            $lines += "- [ ] $item"
+        }
+        $lines += ""
+        $lines += "### Notes"
+        $lines += ""
+        $lines += '- Generated by `tools/STIGPilot-Gov.ps1`.'
+        $lines += "- This issue draft supports local triage and does not validate compliance."
+        $lines += ""
+    }
+    ($lines -join [Environment]::NewLine).TrimEnd() | Set-Content -Encoding UTF8 -Path $PathValue
+}
+
 function Write-ChangesJson {
     param($OldDoc, $NewDoc, $Changes, [string]$PathValue)
     Ensure-ParentDirectory $PathValue
@@ -749,15 +863,24 @@ function Invoke-Packet {
     $backlogPath = Join-Path $OutDir "remediation-backlog.csv"
     $jsonPath = Join-Path $OutDir "changes.json"
     $evidencePath = Join-Path $OutDir "evidence-checklist.md"
+    $jiraPath = Join-Path $OutDir "jira-import.csv"
+    $serviceNowPath = Join-Path $OutDir "servicenow-import.csv"
+    $githubPath = Join-Path $OutDir "github-issues.md"
 
     Write-ChangeBrief $oldDoc $newDoc $changes $briefPath
     Write-BacklogCsv $changes $backlogPath
     Write-ChangesJson $oldDoc $newDoc $changes $jsonPath
     Write-EvidenceChecklist $newDoc.controls $evidencePath
+    Write-JiraCsv $changes $jiraPath
+    Write-ServiceNowCsv $changes $serviceNowPath
+    Write-GitHubIssuesMarkdown $changes $githubPath
 
     Write-DiffSummary $oldDoc $newDoc $changes $briefPath $backlogPath
     Write-Host "Changes JSON: $jsonPath" -ForegroundColor Green
     Write-Host "Evidence checklist: $evidencePath" -ForegroundColor Green
+    Write-Host "Jira import CSV: $jiraPath" -ForegroundColor Green
+    Write-Host "ServiceNow import CSV: $serviceNowPath" -ForegroundColor Green
+    Write-Host "GitHub issue drafts: $githubPath" -ForegroundColor Green
     Write-Host ""
     Write-Host "Start here: $briefPath" -ForegroundColor Cyan
 }

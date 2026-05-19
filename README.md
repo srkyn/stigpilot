@@ -188,6 +188,9 @@ output/gov/change-brief.md
 output/gov/remediation-backlog.csv
 output/gov/changes.json
 output/gov/evidence-checklist.md
+output/gov/jira-import.csv
+output/gov/servicenow-import.csv
+output/gov/github-issues.md
 ```
 
 This mode uses only built-in PowerShell/.NET XML, CSV, JSON, and file APIs. It is intentionally smaller than the Python CLI, but it preserves the core local workflow: parse, compare, summarize, produce a backlog, and prepare evidence requests. See [docs/government-mode.md](docs/government-mode.md).

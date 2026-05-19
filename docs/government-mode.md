@@ -28,6 +28,7 @@ Government Mode focuses on the same core workflow as STIGPilot:
 - Produce a remediation backlog CSV
 - Produce a Markdown evidence checklist
 - Produce a machine-readable `changes.json`
+- Produce Jira CSV, ServiceNow CSV, and GitHub issue Markdown drafts
 
 It is intentionally smaller than the Python CLI. It is a fallback for locked-down Windows environments, not a replacement for the full STIGPilot experience.
 
@@ -49,6 +50,9 @@ output/gov/change-brief.md
 output/gov/remediation-backlog.csv
 output/gov/changes.json
 output/gov/evidence-checklist.md
+output/gov/jira-import.csv
+output/gov/servicenow-import.csv
+output/gov/github-issues.md
 ```
 
 ## Parse One STIG
@@ -89,6 +93,16 @@ Government Mode is a local workflow helper. It does not:
 - Download official STIG content
 
 Use official tools and your organization's compliance process for authoritative validation. Use Government Mode when you need a lightweight local packet that helps answer what changed, what likely matters, who owns the work, and what evidence should be refreshed.
+
+## Ticket Exports
+
+The `packet` command writes local ticket-friendly files without connecting to Jira, ServiceNow, GitHub, or any external API:
+
+- `jira-import.csv`
+- `servicenow-import.csv`
+- `github-issues.md`
+
+These files are intentionally plain local exports. Review them before importing into a ticketing system, especially in environments with formal change-control or records-management requirements.
 
 ## Why PowerShell
 
