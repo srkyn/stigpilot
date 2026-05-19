@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0
+
+- Added Government Mode with `tools/STIGPilot-Gov.ps1`, a PowerShell-only fallback for restrictive Windows environments where Python may be considered third-party software.
+- Added Government Mode documentation with parse, diff, packet, and evidence examples.
+- Documented the Government Mode workflow in the README.
+- Added regression coverage for the PowerShell fallback script and documentation.
+- Added `schema_version` and schema path metadata to `changes.json`.
+- Added a committed JSON Schema for machine-readable change exports.
+- Documented the changes JSON schema contract in the README.
+
 ## 0.7.0
 
 - Added machine-readable `changes.json` exports for automation workflows.

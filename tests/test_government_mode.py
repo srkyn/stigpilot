@@ -1,0 +1,105 @@
+from __future__ import annotations
+
+import shutil
+import subprocess
+from pathlib import Path
+
+import pytest
+
+
+ROOT = Path(__file__).parents[1]
+SCRIPT = ROOT / "tools" / "STIGPilot-Gov.ps1"
+
+
+def powershell_executable() -> str | None:
+    return shutil.which("pwsh") or shutil.which("powershell")
+
+
+def run_gov_mode(*args: str) -> subprocess.CompletedProcess[str]:
+    shell = powershell_executable()
+    if shell is None:
+        pytest.skip("PowerShell is not available on this runner")
+    return subprocess.run(
+        [
+            shell,
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(SCRIPT),
+            *args,
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+
+def test_government_mode_script_and_docs_exist():
+    assert SCRIPT.exists()
+    assert (ROOT / "docs" / "government-mode.md").exists()
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "Government Mode" in readme
+    assert "STIGPilot-Gov.ps1" in readme
+
+
+def test_government_mode_help_runs():
+    result = run_gov_mode("-Command", "help")
+
+    assert result.returncode == 0
+    assert "STIGPilot Government Mode" in result.stdout
+    assert "PowerShell-only" in result.stdout
+
+
+def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
+    out = tmp_path / "gov"
+
+    result = run_gov_mode(
+        "-Command",
+        "packet",
+        "-Old",
+        str(ROOT / "examples" / "sample_input" / "old.xml"),
+        "-New",
+        str(ROOT / "examples" / "sample_input" / "new.xml"),
+        "-OutDir",
+        str(out),
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "STIGPilot Government Mode Diff Summary" in result.stdout
+    assert "Start here" in result.stdout
+    assert (out / "change-brief.md").exists()
+    assert (out / "remediation-backlog.csv").exists()
+    assert (out / "changes.json").exists()
+    assert (out / "evidence-checklist.md").exists()
+
+    brief = (out / "change-brief.md").read_text(encoding="utf-8")
+    checklist = (out / "evidence-checklist.md").read_text(encoding="utf-8")
+    backlog = (out / "remediation-backlog.csv").read_text(encoding="utf-8-sig")
+
+    assert "# STIGPilot Government Mode Change Brief" in brief
+    assert "## At-a-Glance" in brief
+    assert "- [ ]" in checklist
+    assert "Suggested Owner" in backlog
+
+
+def test_government_mode_parse_writes_csv_and_json(tmp_path: Path):
+    csv_out = tmp_path / "controls.csv"
+    json_out = tmp_path / "controls.json"
+
+    result = run_gov_mode(
+        "-Command",
+        "parse",
+        "-Input",
+        str(ROOT / "examples" / "sample_input" / "new.xml"),
+        "-Csv",
+        str(csv_out),
+        "-Json",
+        str(json_out),
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert csv_out.exists()
+    assert json_out.exists()
+    assert "Vuln ID" in csv_out.read_text(encoding="utf-8-sig")

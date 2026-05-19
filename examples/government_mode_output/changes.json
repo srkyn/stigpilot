@@ -1,0 +1,109 @@
+﻿{
+    "mode":  "government_powershell",
+    "generated_by":  "tools/STIGPilot-Gov.ps1",
+    "source":  {
+                   "old_file":  "C:\\Users\\Admin\\Documents\\CSProjects\\stigpilot\\examples\\sample_input\\old.xml",
+                   "new_file":  "C:\\Users\\Admin\\Documents\\CSProjects\\stigpilot\\examples\\sample_input\\new.xml",
+                   "old_title":  "Synthetic Windows and Linux STIG",
+                   "new_title":  "Synthetic Windows and Linux STIG",
+                   "old_control_count":  3,
+                   "new_control_count":  3
+               },
+    "summary":  {
+                    "total":  4,
+                    "added":  1,
+                    "removed":  1,
+                    "modified":  2,
+                    "severity_increased":  1,
+                    "high_priority_review":  2,
+                    "implementation_change_likely":  0,
+                    "evidence_update_likely":  1
+                },
+    "changes":  [
+                    {
+                        "change_type":  "severity_increased",
+                        "vuln_id":  "V-100001",
+                        "rule_id":  "SV-100001r2_rule",
+                        "title":  "Windows audit policy must be configured and reviewed",
+                        "severity":  "high",
+                        "impact":  "high_priority_review",
+                        "impact_label":  "High-priority review",
+                        "reason":  "The severity increased, so the control should be reviewed before reusing old risk notes, tickets, or evidence.",
+                        "changed_fields":  [
+                                               "title",
+                                               "severity",
+                                               "check_text",
+                                               "fix_text",
+                                               "references"
+                                           ],
+                        "owner":  "Endpoint/Windows Admin",
+                        "tags":  [
+                                     "Windows",
+                                     "GPO",
+                                     "Audit Logging"
+                                 ],
+                        "check_text":  "Review Windows audit policy settings in Local Security Policy and export applied GPO evidence.",
+                        "fix_text":  "Configure Windows audit policy through GPO and document the applied baseline."
+                    },
+                    {
+                        "change_type":  "added",
+                        "vuln_id":  "V-100004",
+                        "rule_id":  "SV-100004r1_rule",
+                        "title":  "Firewall management access must be restricted",
+                        "severity":  "high",
+                        "impact":  "high_priority_review",
+                        "impact_label":  "High-priority review",
+                        "reason":  "A new high-severity control was added, so it should be reviewed before lower-risk backlog items.",
+                        "changed_fields":  [
+
+                                           ],
+                        "owner":  "Network/Security Engineering",
+                        "tags":  [
+                                     "Privileged Access",
+                                     "Network Security"
+                                 ],
+                        "check_text":  "Review firewall management network restrictions and approved admin source ranges.",
+                        "fix_text":  "Restrict firewall management access to approved networks."
+                    },
+                    {
+                        "change_type":  "modified",
+                        "vuln_id":  "V-100002",
+                        "rule_id":  "SV-100002r2_rule",
+                        "title":  "Linux SSH banner must be configured",
+                        "severity":  "low",
+                        "impact":  "evidence_update_likely",
+                        "impact_label":  "Evidence update likely",
+                        "reason":  "The validation steps changed enough that evidence requests may need to be refreshed.",
+                        "changed_fields":  [
+                                               "check_text"
+                                           ],
+                        "owner":  "Linux Admin",
+                        "tags":  [
+                                     "Linux",
+                                     "Remote Access"
+                                 ],
+                        "check_text":  "Run sshd -T and review the banner setting and file permissions.",
+                        "fix_text":  "Configure the sshd Banner directive in /etc/ssh/sshd_config."
+                    },
+                    {
+                        "change_type":  "removed",
+                        "vuln_id":  "V-100003",
+                        "rule_id":  "SV-100003r1_rule",
+                        "title":  "Removed database audit control",
+                        "severity":  "medium",
+                        "impact":  "review_recommended",
+                        "impact_label":  "Review recommended",
+                        "reason":  "The control was removed from the newer file; review whether open tickets or evidence requests can be closed or retired.",
+                        "changed_fields":  [
+
+                                           ],
+                        "owner":  "Database Admin",
+                        "tags":  [
+                                     "Audit Logging",
+                                     "Database"
+                                 ],
+                        "check_text":  "Review SQL audit settings.",
+                        "fix_text":  "Configure SQL audit settings."
+                    }
+                ]
+}

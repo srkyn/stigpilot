@@ -170,6 +170,28 @@ python -m stigpilot.cli demo
 
 Windows note: if `stigpilot` is not recognized after install, your Python Scripts directory may not be on `PATH`. The `python -m stigpilot.cli ...` fallback works without changing `PATH`.
 
+## Government Mode
+
+Some government environments treat Python and pip packages as third-party software. STIGPilot includes a PowerShell-only fallback for restrictive Windows instances:
+
+```powershell
+.\tools\STIGPilot-Gov.ps1 -Command packet `
+  -Old examples\sample_input\old.xml `
+  -New examples\sample_input\new.xml `
+  -OutDir output\gov
+```
+
+Generated files:
+
+```text
+output/gov/change-brief.md
+output/gov/remediation-backlog.csv
+output/gov/changes.json
+output/gov/evidence-checklist.md
+```
+
+This mode uses only built-in PowerShell/.NET XML, CSV, JSON, and file APIs. It is intentionally smaller than the Python CLI, but it preserves the core local workflow: parse, compare, summarize, produce a backlog, and prepare evidence requests. See [docs/government-mode.md](docs/government-mode.md).
+
 ## CLI usage
 
 Health check:
@@ -283,6 +305,8 @@ One-command packet outputs are committed in `examples/packet_output/`.
 Folder comparison sample outputs are committed in `examples/portfolio_output/`.
 
 HTML report output is committed in `examples/html_output/`.
+
+Machine-readable change exports include `schema_version: "1.0"` and are documented by [docs/schemas/changes.schema.json](docs/schemas/changes.schema.json).
 
 Additional parsed-control and ticket-export examples:
 

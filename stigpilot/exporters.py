@@ -37,6 +37,7 @@ IMPACT_LABELS = {
     "review_recommended": "Review recommended",
     "no_action_likely": "No action likely",
 }
+CHANGES_JSON_SCHEMA_VERSION = "1.0"
 
 
 def write_controls_csv(document: StigDocument, path: str | Path) -> None:
@@ -81,6 +82,8 @@ def write_changes_json(
     ensure_parent(path)
     change_list = list(changes)
     payload = {
+        "schema_version": CHANGES_JSON_SCHEMA_VERSION,
+        "schema": "docs/schemas/changes.schema.json",
         "source": {
             "old_file": old_doc.source_file if old_doc else "",
             "new_file": new_doc.source_file if new_doc else "",

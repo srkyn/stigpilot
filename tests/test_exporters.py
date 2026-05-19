@@ -70,6 +70,8 @@ def test_changes_json_contains_summary_and_actionable_fields(tmp_path: Path):
     write_changes_json(changes, path, old, new)
 
     payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["schema_version"] == "1.0"
+    assert payload["schema"] == "docs/schemas/changes.schema.json"
     assert payload["summary"]["total"] == 4
     assert payload["source"]["old_control_count"] == 3
     assert payload["changes"][0]["impact_label"]
