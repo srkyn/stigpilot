@@ -195,6 +195,17 @@ output/gov/github-issues.md
 
 This mode uses only built-in PowerShell/.NET XML, CSV, JSON, and file APIs. It is intentionally smaller than the Python CLI, but it preserves the core local workflow: parse, compare, summarize, produce a backlog, and prepare evidence requests. See [docs/government-mode.md](docs/government-mode.md).
 
+Generate a focused Government Mode packet for one impact category or owner:
+
+```powershell
+.\tools\STIGPilot-Gov.ps1 -Command packet `
+  -Old examples\sample_input\old.xml `
+  -New examples\sample_input\new.xml `
+  -OutDir output\gov-windows `
+  -Impact high_priority_review `
+  -Owner "Endpoint/Windows Admin"
+```
+
 ## CLI usage
 
 Health check:

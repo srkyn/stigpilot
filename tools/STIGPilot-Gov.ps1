@@ -7,6 +7,7 @@ built-in PowerShell/.NET XML, CSV, JSON, and file APIs.
 
 Examples:
   .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov
+  .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov-windows -Impact high_priority_review -Owner "Endpoint/Windows Admin"
   .\tools\STIGPilot-Gov.ps1 -Command parse -Input examples\sample_input\new.xml -Csv output\gov\controls.csv -Json output\gov\controls.json
   .\tools\STIGPilot-Gov.ps1 -Command evidence -Input examples\sample_input\new.xml -OutDir output\gov
 #>
@@ -23,7 +24,9 @@ param(
     [string]$OutDir = "output\gov",
     [string]$Csv,
     [string]$Json,
-    [string]$Markdown
+    [string]$Markdown,
+    [string]$Impact,
+    [string]$Owner
 )
 
 Set-StrictMode -Version 2.0
@@ -43,6 +46,7 @@ function Write-GovHelp {
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov"
+    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov-windows -Impact high_priority_review -Owner `"Endpoint/Windows Admin`""
     Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command parse -Input examples\sample_input\new.xml -Csv output\gov\controls.csv -Json output\gov\controls.json"
     Write-Host ""
     Write-Host "Notes:"
@@ -50,6 +54,36 @@ function Write-GovHelp {
     Write-Host "  - Does not scan systems, validate compliance, or replace official DISA tooling."
     Write-Host "  - Intended as a lightweight fallback for local change triage and evidence planning."
     Write-Host ""
+}
+
+function Test-ImpactFilter {
+    param([AllowNull()][string]$ImpactValue)
+    if (-not $ImpactValue) {
+        return
+    }
+    $allowed = @(
+        "high_priority_review",
+        "implementation_change_likely",
+        "evidence_update_likely",
+        "review_recommended",
+        "no_action_likely"
+    )
+    if ($ImpactValue -notin $allowed) {
+        throw "-Impact must be one of: $($allowed -join ', ')"
+    }
+}
+
+function Select-FilteredChanges {
+    param($Changes)
+    Test-ImpactFilter $Impact
+    $filtered = @($Changes)
+    if ($Impact) {
+        $filtered = @($filtered | Where-Object { $_.impact -eq $Impact })
+    }
+    if ($Owner) {
+        $filtered = @($filtered | Where-Object { $_.owner -eq $Owner })
+    }
+    return $filtered
 }
 
 function Resolve-ExistingPath {
@@ -832,12 +866,13 @@ function Invoke-Diff {
     }
     $oldDoc = Get-StigDocument $Old
     $newDoc = Get-StigDocument $New
-    $changes = @(Compare-StigDocuments $oldDoc $newDoc)
+    $allChanges = @(Compare-StigDocuments $oldDoc $newDoc)
+    $changes = @(Select-FilteredChanges $allChanges)
     $briefPath = if ($Markdown) { $Markdown } else { Join-Path $OutDir "change-brief.md" }
     $csvPath = if ($Csv) { $Csv } else { Join-Path $OutDir "remediation-backlog.csv" }
     Write-ChangeBrief $oldDoc $newDoc $changes $briefPath
     Write-BacklogCsv $changes $csvPath
-    Write-DiffSummary $oldDoc $newDoc $changes $briefPath $csvPath
+    Write-DiffSummary $oldDoc $newDoc $changes $briefPath $csvPath $allChanges.Count
 }
 
 function Invoke-Evidence {
@@ -857,7 +892,8 @@ function Invoke-Packet {
     Ensure-Directory $OutDir
     $oldDoc = Get-StigDocument $Old
     $newDoc = Get-StigDocument $New
-    $changes = @(Compare-StigDocuments $oldDoc $newDoc)
+    $allChanges = @(Compare-StigDocuments $oldDoc $newDoc)
+    $changes = @(Select-FilteredChanges $allChanges)
 
     $briefPath = Join-Path $OutDir "change-brief.md"
     $backlogPath = Join-Path $OutDir "remediation-backlog.csv"
@@ -875,7 +911,7 @@ function Invoke-Packet {
     Write-ServiceNowCsv $changes $serviceNowPath
     Write-GitHubIssuesMarkdown $changes $githubPath
 
-    Write-DiffSummary $oldDoc $newDoc $changes $briefPath $backlogPath
+    Write-DiffSummary $oldDoc $newDoc $changes $briefPath $backlogPath $allChanges.Count
     Write-Host "Changes JSON: $jsonPath" -ForegroundColor Green
     Write-Host "Evidence checklist: $evidencePath" -ForegroundColor Green
     Write-Host "Jira import CSV: $jiraPath" -ForegroundColor Green
@@ -886,12 +922,21 @@ function Invoke-Packet {
 }
 
 function Write-DiffSummary {
-    param($OldDoc, $NewDoc, $Changes, [string]$BriefPath, [string]$BacklogPath)
+    param($OldDoc, $NewDoc, $Changes, [string]$BriefPath, [string]$BacklogPath, [int]$UnfilteredCount = -1)
     $counts = Get-ChangeCounts $Changes
     Write-Host ""
     Write-Host "STIGPilot Government Mode Diff Summary" -ForegroundColor Cyan
     Write-Host ("Old controls:                 {0}" -f $OldDoc.controls.Count)
     Write-Host ("New controls:                 {0}" -f $NewDoc.controls.Count)
+    if ($UnfilteredCount -ge 0 -and (($Impact) -or ($Owner))) {
+        Write-Host ("Unfiltered changes:           {0}" -f $UnfilteredCount)
+        if ($Impact) {
+            Write-Host ("Impact filter:                {0}" -f $Impact)
+        }
+        if ($Owner) {
+            Write-Host ("Owner filter:                 {0}" -f $Owner)
+        }
+    }
     Write-Host ("Total changes:                {0}" -f $counts.total)
     Write-Host ("Added:                        {0}" -f $counts.added)
     Write-Host ("Removed:                      {0}" -f $counts.removed)

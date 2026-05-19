@@ -74,6 +74,27 @@ output/gov/github-issues.md
   -Csv output\gov\remediation-backlog.csv
 ```
 
+## Generate a Focused Packet
+
+Use `-Impact` and `-Owner` when a Windows, Linux, GRC, or network team only needs its slice of the change packet:
+
+```powershell
+.\tools\STIGPilot-Gov.ps1 -Command packet `
+  -Old examples\sample_input\old.xml `
+  -New examples\sample_input\new.xml `
+  -OutDir output\gov-windows `
+  -Impact high_priority_review `
+  -Owner "Endpoint/Windows Admin"
+```
+
+Allowed impact filters:
+
+- `high_priority_review`
+- `implementation_change_likely`
+- `evidence_update_likely`
+- `review_recommended`
+- `no_action_likely`
+
 ## Generate Evidence Checklist
 
 ```powershell

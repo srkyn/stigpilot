@@ -115,3 +115,55 @@ def test_government_mode_parse_writes_csv_and_json(tmp_path: Path):
     assert csv_out.exists()
     assert json_out.exists()
     assert "Vuln ID" in csv_out.read_text(encoding="utf-8-sig")
+
+
+def test_government_mode_packet_can_filter_by_impact_and_owner(tmp_path: Path):
+    out = tmp_path / "gov-windows"
+
+    result = run_gov_mode(
+        "-Command",
+        "packet",
+        "-Old",
+        str(ROOT / "examples" / "sample_input" / "old.xml"),
+        "-New",
+        str(ROOT / "examples" / "sample_input" / "new.xml"),
+        "-OutDir",
+        str(out),
+        "-Impact",
+        "high_priority_review",
+        "-Owner",
+        "Endpoint/Windows Admin",
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Unfiltered changes" in result.stdout
+    assert "Impact filter" in result.stdout
+    assert "Owner filter" in result.stdout
+
+    brief = (out / "change-brief.md").read_text(encoding="utf-8")
+    backlog = (out / "remediation-backlog.csv").read_text(encoding="utf-8-sig")
+    issues = (out / "github-issues.md").read_text(encoding="utf-8")
+
+    assert "Windows audit policy" in brief
+    assert "Firewall management access" not in brief
+    assert "Endpoint/Windows Admin" in backlog
+    assert "Network/Security Engineering" not in backlog
+    assert "Windows audit policy" in issues
+
+
+def test_government_mode_rejects_unknown_impact_filter(tmp_path: Path):
+    result = run_gov_mode(
+        "-Command",
+        "packet",
+        "-Old",
+        str(ROOT / "examples" / "sample_input" / "old.xml"),
+        "-New",
+        str(ROOT / "examples" / "sample_input" / "new.xml"),
+        "-OutDir",
+        str(tmp_path / "bad-impact"),
+        "-Impact",
+        "urgent_magic",
+    )
+
+    assert result.returncode == 1
+    assert "-Impact must be one of" in result.stdout

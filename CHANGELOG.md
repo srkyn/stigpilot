@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.2
+
+- Added `-Impact` and `-Owner` filters to Government Mode `diff` and `packet` workflows.
+- Added Government Mode validation for unknown impact filters.
+- Documented focused Government Mode packets for team-specific review.
+- Added regression coverage for filtered Government Mode packets.
+
 ## 0.8.1
 
 - Added Jira CSV, ServiceNow CSV, and GitHub issue Markdown drafts to the Government Mode packet.
