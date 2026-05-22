@@ -84,6 +84,7 @@ STIGPilot is built around reviewable outputs, not hidden scoring. A typical pack
 Useful sample artifacts:
 
 - [Chrome change brief](examples/chrome_windows_output/change-brief.md)
+- [Chrome HTML change brief](examples/chrome_windows_output/change-brief.html)
 - [Chrome manager summary](examples/chrome_windows_output/manager-summary.md)
 - [Chrome remediation backlog CSV](examples/chrome_windows_output/remediation-backlog.csv)
 - [Chrome evidence checklist](examples/chrome_windows_output/evidence-checklist.md)
