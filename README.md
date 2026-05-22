@@ -422,7 +422,7 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 - Optional screenshot assets for README examples
 - Optional Streamlit dashboard after the CLI remains strong
 
-## Portfolio value
+## What this demonstrates
 
 - Built from a practical security-automation question: how can STIG comparison and follow-up work be made less painful for the people doing it?
 - Defensive security product judgment
