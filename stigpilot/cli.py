@@ -16,6 +16,7 @@ from .config import CONFIG_EXAMPLE, StigPilotConfig, load_config
 from .diff import compare_documents, duplicate_keys
 from .exporters import (
     github_issue_markdown,
+    remediation_draft_markdown,
     write_backlog_csv,
     write_changes_json,
     write_controls_csv,
@@ -142,6 +143,7 @@ def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigP
         "Jira import": out / "jira-import.csv",
         "ServiceNow import": out / "servicenow-import.csv",
         "GitHub issues": out / "github-issues.md",
+        "Remediation drafts": out / "remediation-drafts.md",
     }
     write_text_report(outputs["Change brief"], change_brief(old_doc, new_doc, changes, config))
     write_text_report(outputs["HTML change brief"], html_change_brief(old_doc, new_doc, changes, config))
@@ -152,6 +154,7 @@ def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigP
     write_jira_csv(changes, outputs["Jira import"], config)
     write_servicenow_csv(changes, outputs["ServiceNow import"], config)
     write_text_report(outputs["GitHub issues"], github_issue_markdown(changes, config))
+    write_text_report(outputs["Remediation drafts"], remediation_draft_markdown(changes, config))
     return outputs
 
 
@@ -322,6 +325,7 @@ def diff(
     jira_csv: Optional[Path] = typer.Option(None, "--jira-csv", help="Jira-friendly CSV output path."),
     servicenow_csv: Optional[Path] = typer.Option(None, "--servicenow-csv", help="ServiceNow-friendly CSV output path."),
     github_md: Optional[Path] = typer.Option(None, "--github-md", help="GitHub issue draft Markdown output path."),
+    drafts_md: Optional[Path] = typer.Option(None, "--drafts-md", help="Review-only remediation draft Markdown output path."),
     json_out: Optional[Path] = typer.Option(None, "--json", help="Machine-readable changes JSON output path."),
     impact_filter: Optional[str] = typer.Option(None, "--impact", help="Only include one impact category, such as high_priority_review."),
     owner_filter: Optional[str] = typer.Option(None, "--owner", help='Only include changes for one suggested owner, such as "Endpoint/Windows Admin".'),
@@ -352,6 +356,9 @@ def diff(
     if github_md:
         _safe_write(lambda: write_text_report(github_md, github_issue_markdown(changes, config)), github_md, "GitHub issue drafts")
         outputs.append(github_md)
+    if drafts_md:
+        _safe_write(lambda: write_text_report(drafts_md, remediation_draft_markdown(changes, config)), drafts_md, "remediation drafts")
+        outputs.append(drafts_md)
     if json_out:
         _safe_write(lambda: write_changes_json(changes, json_out, old_doc, new_doc, config), json_out, "changes JSON")
         outputs.append(json_out)
@@ -526,6 +533,26 @@ def evidence(
     _safe_write(lambda: write_text_report(out, evidence_checklist(document, severity, config)), out, "evidence checklist")
 
 
+@app.command("drafts")
+def drafts(
+    old_xml: Path = typer.Argument(..., exists=True, readable=True),
+    new_xml: Path = typer.Argument(..., exists=True, readable=True),
+    out: Path = typer.Option(..., "--out", help="Review-only remediation draft Markdown output path."),
+    impact_filter: Optional[str] = typer.Option(None, "--impact", help="Only include one impact category, such as high_priority_review."),
+    owner_filter: Optional[str] = typer.Option(None, "--owner", help='Only include changes for one suggested owner, such as "Endpoint/Windows Admin".'),
+    config_path: Optional[Path] = typer.Option(None, "--config", help="Optional local TOML owner/tag mapping config."),
+) -> None:
+    """Generate review-only remediation draft notes without applying changes."""
+
+    config = _load_config(config_path)
+    old_doc = _load(old_xml, config)
+    new_doc = _load(new_xml, config)
+    _warn_same_inputs(old_xml, new_xml, old_doc, new_doc)
+    changes = _filter_changes(compare_documents(old_doc, new_doc), impact_filter, owner_filter, config)
+    _safe_write(lambda: write_text_report(out, remediation_draft_markdown(changes, config)), out, "remediation drafts")
+    _print_change_summary(changes, [out])
+
+
 @app.command()
 def summary(
     input_xml: Path = typer.Argument(..., exists=True, readable=True),
@@ -591,6 +618,7 @@ def demo(
         "Jira import": out / "jira-import.csv",
         "ServiceNow import": out / "servicenow-import.csv",
         "GitHub issues": out / "github-issues.md",
+        "Remediation drafts": out / "remediation-drafts.md",
     }
     write_controls_csv(new_doc, outputs["Controls CSV"])
     write_controls_json(new_doc, outputs["Controls JSON"])
@@ -604,6 +632,7 @@ def demo(
     write_jira_csv(changes, outputs["Jira import"], config)
     write_servicenow_csv(changes, outputs["ServiceNow import"], config)
     write_text_report(outputs["GitHub issues"], github_issue_markdown(changes, config))
+    write_text_report(outputs["Remediation drafts"], remediation_draft_markdown(changes, config))
 
     table = Table(title="Demo Reports Generated")
     table.add_column("Report")

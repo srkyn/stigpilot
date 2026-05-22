@@ -26,7 +26,7 @@ Good automation for this project:
 - Evidence checklists.
 - Owner-focused packets.
 - Machine-readable `changes.json` exports.
-- Optional script or playbook drafts marked as review-only.
+- Review-only remediation drafts marked as non-executable.
 
 Risky automation for this project:
 
@@ -39,6 +39,6 @@ Risky automation for this project:
 
 ## Future Safe Direction
 
-A future command could generate review-only remediation stubs, such as PowerShell, Ansible, or policy notes, but those files should be disabled by default and clearly marked as drafts. They should require human review, local testing, rollback planning, and organizational approval before use.
+Future versions could add more detailed draft formats, such as PowerShell notes, Ansible notes, or policy notes, but those files should remain disabled by default and clearly marked as drafts. They should require human review, local testing, rollback planning, and organizational approval before use.
 
 The goal is not to avoid automation. The goal is to automate the part that should be consistent and leave the environment-specific decision with the operator.

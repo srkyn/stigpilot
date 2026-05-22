@@ -278,6 +278,86 @@ def github_issue_markdown(changes: Iterable[ControlChange], config: StigPilotCon
     return "\n".join(lines)
 
 
+def remediation_draft_markdown(changes: Iterable[ControlChange], config: StigPilotConfig | None = None) -> str:
+    """Generate review-only remediation draft notes without executable steps."""
+
+    lines = [
+        "# STIGPilot Remediation Drafts",
+        "",
+        "> Review-only planning notes. STIGPilot does not apply changes, run commands, edit policy, restart services, or modify hosts.",
+        "",
+        "Use these drafts to prepare owner review, change-control notes, implementation tickets, and evidence requests. Validate every item against the local environment before any change is made.",
+        "",
+    ]
+    for idx, change in enumerate(changes, start=1):
+        control = change.current_control or StigControl()
+        draft_note = _remediation_draft_note(change, control)
+        review_items = _remediation_review_items(change)
+        lines.extend(
+            [
+                f"## Draft {idx}: {control.vuln_id or change.vuln_id or control.rule_id or change.rule_id}",
+                "",
+                f"**Title:** {control.title or 'Untitled control'}",
+                f"**Impact:** {_impact_label(change.impact)} (`{change.impact or 'unclassified'}`)",
+                f"**Suggested owner:** {suggested_owner(control, config)}",
+                f"**Change type:** {change.change_type}",
+                f"**Why it matters:** {change.reason or 'Review the changed control text before reusing prior implementation notes.'}",
+                "",
+                "### Draft Remediation Note",
+                "",
+                draft_note,
+                "",
+                "### Review Before Action",
+                "",
+            ]
+        )
+        lines.extend(f"- [ ] {item}" for item in review_items)
+        lines.extend(
+            [
+                "",
+                "### Evidence To Prepare",
+                "",
+            ]
+        )
+        for item in evidence_requests(control):
+            lines.append(f"- [ ] {item}")
+        lines.extend(
+            [
+                "",
+                "### Boundary",
+                "",
+                "- Changes made by STIGPilot: none.",
+                "- This draft is not an executable patch.",
+                "",
+            ]
+        )
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _remediation_draft_note(change: ControlChange, control: StigControl) -> str:
+    if change.change_type == "removed":
+        return "The control was removed from the compared release. Review downstream tickets, evidence requests, mappings, and local exceptions before closing or archiving related work."
+    return summarize(control.fix_text, 700) or "Review the current STIG fix text and document the local implementation path."
+
+
+def _remediation_review_items(change: ControlChange) -> list[str]:
+    if change.change_type == "removed":
+        return [
+            "Confirm the control is actually removed from the authoritative release being adopted.",
+            "Review open tickets, evidence requests, mappings, and exceptions tied to the removed control.",
+            "Decide whether any local policy still requires the control despite the STIG removal.",
+            "Document the closure, carry-forward, or exception decision.",
+            "Do not remove a local control solely because it disappeared from one comparison packet.",
+        ]
+    return [
+        "Confirm the control applies to the local environment.",
+        "Identify the actual implementation path: local policy, GPO, MDM, configuration management, image build, or compensating control.",
+        "Test in a safe scope before broad rollout.",
+        "Document rollback or exception handling.",
+        "Update evidence only after the approved implementation path is confirmed.",
+    ]
+
+
 def _ticket_description(change: ControlChange, config: StigPilotConfig | None = None) -> str:
     control = change.current_control or StigControl()
     return "\n".join(

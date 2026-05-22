@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Added review-only remediation draft generation.
+- Added `--drafts-md` to `stigpilot diff`.
+- Added `stigpilot drafts` for standalone remediation planning notes.
+- Packet, batch, demo, and Chrome demo workflows now include `remediation-drafts.md`.
+- Documented the remediation automation boundary.
+
 ## 0.8.2
 
 - Added `-Impact` and `-Owner` filters to Government Mode `diff` and `packet` workflows.

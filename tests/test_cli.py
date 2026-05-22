@@ -23,6 +23,7 @@ def test_cli_demo_writes_reports(tmp_path: Path):
     assert (out / "changes.json").exists()
     assert (out / "manager-summary.md").exists()
     assert (out / "remediation-backlog.csv").exists()
+    assert (out / "remediation-drafts.md").exists()
 
 
 def test_cli_parse_writes_csv_and_json(tmp_path: Path):
@@ -43,6 +44,7 @@ def test_cli_diff_writes_markdown_and_csv(tmp_path: Path):
     report = tmp_path / "change-brief.md"
     backlog = tmp_path / "backlog.csv"
     changes_json = tmp_path / "changes.json"
+    drafts = tmp_path / "remediation-drafts.md"
 
     result = runner.invoke(
         app,
@@ -56,6 +58,8 @@ def test_cli_diff_writes_markdown_and_csv(tmp_path: Path):
             str(backlog),
             "--json",
             str(changes_json),
+            "--drafts-md",
+            str(drafts),
         ],
     )
 
@@ -63,6 +67,8 @@ def test_cli_diff_writes_markdown_and_csv(tmp_path: Path):
     assert "STIGPilot Diff Summary" in result.output
     assert report.exists()
     assert backlog.exists()
+    assert drafts.exists()
+    assert "Review-only planning notes" in drafts.read_text(encoding="utf-8")
     assert json.loads(changes_json.read_text(encoding="utf-8"))["summary"]["total"] == 4
 
 
@@ -135,6 +141,28 @@ def test_cli_packet_generates_complete_packet(tmp_path: Path):
     assert (out / "jira-import.csv").exists()
     assert (out / "servicenow-import.csv").exists()
     assert (out / "github-issues.md").exists()
+    assert (out / "remediation-drafts.md").exists()
+
+
+def test_cli_drafts_writes_review_only_markdown(tmp_path: Path):
+    out = tmp_path / "remediation-drafts.md"
+
+    result = runner.invoke(
+        app,
+        [
+            "drafts",
+            str(ROOT / "examples" / "sample_input" / "old.xml"),
+            str(ROOT / "examples" / "sample_input" / "new.xml"),
+            "--out",
+            str(out),
+        ],
+    )
+
+    assert result.exit_code == 0
+    text = out.read_text(encoding="utf-8")
+    assert "Review-only planning notes" in text
+    assert "Changes made by STIGPilot: none" in text
+    assert "not an executable patch" in text
 
 
 def test_cli_html_writes_self_contained_report(tmp_path: Path):
@@ -232,6 +260,7 @@ def test_cli_chrome_demo_missing_official_files_uses_sample(tmp_path: Path):
     assert (out / "changes.json").exists()
     assert (out / "manager-summary.md").exists()
     assert (out / "remediation-backlog.csv").exists()
+    assert (out / "remediation-drafts.md").exists()
 
 
 def test_cli_chrome_demo_can_filter_by_impact_and_owner(tmp_path: Path):

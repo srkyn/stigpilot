@@ -43,6 +43,7 @@ output/demo/evidence-checklist.md
 output/demo/jira-import.csv
 output/demo/servicenow-import.csv
 output/demo/github-issues.md
+output/demo/remediation-drafts.md
 ```
 
 Example terminal output:
@@ -79,7 +80,7 @@ STIGPilot is built around reviewable outputs, not hidden scoring. A typical pack
 | What changed? | `4 control change(s)` detected across the Chrome sample |
 | What needs attention first? | `2` high-priority review items |
 | Who should review it? | Endpoint/Windows Admin and Security/GRC Analyst owner groups |
-| What can be handed off? | Backlog CSV, evidence checklist, manager summary, and ticket imports |
+| What can be handed off? | Backlog CSV, evidence checklist, manager summary, ticket imports, and review-only remediation drafts |
 
 Useful sample artifacts:
 
@@ -118,6 +119,7 @@ output/chrome/evidence-checklist.md
 output/chrome/jira-import.csv
 output/chrome/servicenow-import.csv
 output/chrome/github-issues.md
+output/chrome/remediation-drafts.md
 ```
 
 To run against official DoD Cyber Exchange Google Chrome Current Windows STIG V2R10 and V2R11 files, download the public ZIPs, extract the XCCDF XML files, and place them here:
@@ -263,7 +265,7 @@ stigpilot packet examples/sample_input/old.xml examples/sample_input/new.xml --o
 Generate workflow exports:
 
 ```bash
-stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --jira-csv output/jira-import.csv --servicenow-csv output/servicenow-import.csv --github-md output/github-issues.md --json output/changes.json
+stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out output/change-brief.md --csv output/remediation-backlog.csv --jira-csv output/jira-import.csv --servicenow-csv output/servicenow-import.csv --github-md output/github-issues.md --drafts-md output/remediation-drafts.md --json output/changes.json
 ```
 
 Compare folders of old/new STIG XML files:
@@ -302,6 +304,12 @@ Generate an evidence checklist:
 stigpilot evidence examples/sample_input/new.xml --out output/evidence-checklist.md
 ```
 
+Generate review-only remediation drafts:
+
+```bash
+stigpilot drafts examples/sample_input/old.xml examples/sample_input/new.xml --out output/remediation-drafts.md
+```
+
 Show a terminal summary:
 
 ```bash
@@ -335,6 +343,7 @@ Committed sample outputs in `examples/sample_output/`:
 - `jira-import.csv`
 - `servicenow-import.csv`
 - `github-issues.md`
+- `remediation-drafts.md`
 
 One-command packet outputs are committed in `examples/packet_output/`.
 
@@ -421,7 +430,7 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 - PyPI packaging and publish workflow
 - Better HTML packet/portfolio report coverage
 - More parser fixtures from official-but-user-supplied STIG variants
-- Review-only remediation stub generation, clearly marked as drafts
+- More detailed review-only remediation draft formats
 - Optional screenshot assets for README examples
 - Optional Streamlit dashboard after the CLI remains strong
 
@@ -446,7 +455,7 @@ python -m pytest
 Regenerate sample outputs:
 
 ```bash
-python -m stigpilot.cli diff examples/sample_input/old.xml examples/sample_input/new.xml --out examples/sample_output/change-brief.md --csv examples/sample_output/remediation-backlog.csv --jira-csv examples/sample_output/jira-import.csv --servicenow-csv examples/sample_output/servicenow-import.csv --github-md examples/sample_output/github-issues.md
+python -m stigpilot.cli diff examples/sample_input/old.xml examples/sample_input/new.xml --out examples/sample_output/change-brief.md --csv examples/sample_output/remediation-backlog.csv --jira-csv examples/sample_output/jira-import.csv --servicenow-csv examples/sample_output/servicenow-import.csv --github-md examples/sample_output/github-issues.md --drafts-md examples/sample_output/remediation-drafts.md
 python -m stigpilot.cli manager examples/sample_input/old.xml examples/sample_input/new.xml --out examples/sample_output/manager-summary.md
 python -m stigpilot.cli parse examples/sample_input/new.xml --csv examples/sample_output/controls.csv --json examples/sample_output/controls.json
 python -m stigpilot.cli tickets examples/sample_input/new.xml --out examples/sample_output/tickets.csv

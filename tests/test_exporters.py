@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from stigpilot.diff import compare_documents
-from stigpilot.exporters import write_changes_json, write_jira_csv, write_servicenow_csv
+from stigpilot.exporters import remediation_draft_markdown, write_changes_json, write_jira_csv, write_servicenow_csv
 from stigpilot.parser import parse_stig
 from stigpilot.reports import evidence_checklist
 
@@ -77,3 +77,15 @@ def test_changes_json_contains_summary_and_actionable_fields(tmp_path: Path):
     assert payload["changes"][0]["impact_label"]
     assert "suggested_owner" in payload["changes"][0]
     assert "evidence_needed" in payload["changes"][0]
+
+
+def test_remediation_draft_markdown_is_review_only():
+    report = remediation_draft_markdown(_changes())
+
+    assert "# STIGPilot Remediation Drafts" in report
+    assert "Review-only planning notes" in report
+    assert "Changes made by STIGPilot: none" in report
+    assert "not an executable patch" in report
+    assert "Review Before Action" in report
+    assert "The control was removed from the compared release" in report
+    assert "Do not remove a local control solely because it disappeared" in report
