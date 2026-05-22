@@ -151,6 +151,8 @@ stigpilot chrome-demo
 - Not auto-remediation
 - Not a replacement for SCC, STIG Viewer, PowerSTIG, OpenRMF, or organizational compliance review
 
+STIGPilot intentionally stops at the remediation-planning boundary. See [docs/remediation-boundary.md](docs/remediation-boundary.md) for why it generates reviewable work packets instead of applying system changes.
+
 ## When to use it
 
 - A new Windows 11 STIG release drops and you need to know what changed.
@@ -419,6 +421,7 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 - PyPI packaging and publish workflow
 - Better HTML packet/portfolio report coverage
 - More parser fixtures from official-but-user-supplied STIG variants
+- Review-only remediation stub generation, clearly marked as drafts
 - Optional screenshot assets for README examples
 - Optional Streamlit dashboard after the CLI remains strong
 

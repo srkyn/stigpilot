@@ -15,4 +15,5 @@ Run this before tagging a STIGPilot release:
 - [ ] Verify no personal local paths are present
 - [ ] Verify no sensitive files are committed
 - [ ] Verify official-tool and compliance language does not imply endorsement or validation
+- [ ] Confirm generated artifacts stop at review/planning and do not apply system changes
 - [ ] Review generated Markdown in raw and rendered form
