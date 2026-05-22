@@ -70,6 +70,25 @@ implementation work, or evidence refresh. Prioritize high-severity additions or
 severity increases, then review remediation text changes before reusing old tickets.
 ```
 
+## Artifact preview
+
+STIGPilot is built around reviewable outputs, not hidden scoring. A typical packet answers four questions:
+
+| Question | Example from the sample packet |
+|---|---|
+| What changed? | `4 control change(s)` detected across the Chrome sample |
+| What needs attention first? | `2` high-priority review items |
+| Who should review it? | Endpoint/Windows Admin and Security/GRC Analyst owner groups |
+| What can be handed off? | Backlog CSV, evidence checklist, manager summary, and ticket imports |
+
+Useful sample artifacts:
+
+- [Chrome change brief](examples/chrome_windows_output/change-brief.md)
+- [Chrome manager summary](examples/chrome_windows_output/manager-summary.md)
+- [Chrome remediation backlog CSV](examples/chrome_windows_output/remediation-backlog.csv)
+- [Chrome evidence checklist](examples/chrome_windows_output/evidence-checklist.md)
+- [Portfolio comparison summary](examples/portfolio_output/portfolio-summary.md)
+
 ## Real-world Chrome demo
 
 Google Chrome for Windows is the best first real-world scenario because it is familiar, endpoint-security relevant, and smaller than a full operating system STIG.
