@@ -2,6 +2,8 @@
 
 ## 0.9.0
 
+2026-05-31
+
 - Added review-only remediation draft generation.
 - Added `--drafts-md` to `stigpilot diff`.
 - Added `stigpilot drafts` for standalone remediation planning notes.

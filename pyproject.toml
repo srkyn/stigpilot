@@ -9,7 +9,7 @@ description = "STIG change intelligence and remediation workflow assistant."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-authors = [{name = "David Sarkisyan", email = "contact@srkyn.com"}]
+authors = [{name = "David Sarkisyan"}]
 dependencies = [
   "typer>=0.12",
   "rich>=13.7",

@@ -5,32 +5,24 @@ on:
     types: [published]
 
 permissions:
-  contents: read
   id-token: write
 
 jobs:
   publish:
-    name: Build and publish package
     runs-on: ubuntu-latest
     environment: pypi
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install package with development dependencies
-        run: python -m pip install -e ".[dev]"
-
       - name: Run tests
-        run: python -m pytest
-
+        run: |
+          pip install -e ".[dev]"
+          python -m pytest
       - name: Build package
-        run: python -m build
-
-      - name: Publish package to PyPI
+        run: |
+          pip install build
+          python -m build
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
