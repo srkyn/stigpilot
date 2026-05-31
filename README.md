@@ -91,6 +91,8 @@ Useful sample artifacts:
 - [Chrome evidence checklist](examples/chrome_windows_output/evidence-checklist.md)
 - [Portfolio comparison summary](examples/portfolio_output/portfolio-summary.md)
 
+A complete pre-generated sample packet is available in [docs/sample-packet/](docs/sample-packet/) — open it directly without running anything to see what STIGPilot produces.
+
 ## Real-world Chrome demo
 
 Google Chrome for Windows is the best first real-world scenario because it is familiar, endpoint-security relevant, and smaller than a full operating system STIG.
@@ -197,6 +199,23 @@ Windows note: if `stigpilot` is not recognized after install, your Python Script
 ## Government Mode
 
 Some government environments treat Python and pip packages as third-party software. STIGPilot includes a PowerShell-only fallback for restrictive Windows instances:
+
+**No execution policy change required system-wide.** If PowerShell says scripts are
+disabled, run this first — it only affects the current process and resets when you
+close the window:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
+
+**Or use the included `.cmd` launcher** which handles this automatically:
+tools\STIGPilot.cmd -Command packet -Old old.xml -New new.xml -OutDir output\packet
+
+**No git required.** If you cannot clone the repository, download
+[`STIGPilot-Gov.ps1`](https://github.com/srkyn/stigpilot/raw/main/tools/STIGPilot-Gov.ps1)
+and [`STIGPilot.cmd`](https://github.com/srkyn/stigpilot/raw/main/tools/STIGPilot.cmd)
+directly. Place both files in the same folder. Run `STIGPilot.cmd` with your STIG
+XML files as arguments.
 
 ```powershell
 .\tools\STIGPilot-Gov.ps1 -Command packet `

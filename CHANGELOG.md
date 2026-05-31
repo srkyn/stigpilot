@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.3
+
+2026-05-31
+
+- Improved Government Mode accessibility for restricted and no-Python Windows environments.
+- Made `tools/STIGPilot-Gov.ps1` friendlier when run standalone, with no-argument usage guidance and early parameter validation.
+- Added `tools/STIGPilot.cmd` as a Command Prompt launcher with process-scoped execution policy bypass.
+- Added a pre-generated sample packet under `docs/sample-packet/`.
+- Documented how to source DISA XCCDF XML files and run Government Mode without cloning the repository.
+
 ## 0.9.2
 
 2026-05-31

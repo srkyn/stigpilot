@@ -32,6 +32,29 @@ Government Mode focuses on the same core workflow as STIGPilot:
 
 It is intentionally smaller than the Python CLI. It is a fallback for locked-down Windows environments, not a replacement for the full STIGPilot experience.
 
+## Getting Your STIG Files
+
+STIGPilot works with XCCDF XML files from DISA. Here is how to get them:
+
+1. Go to [https://public.cyber.mil/stigs/downloads/](https://public.cyber.mil/stigs/downloads/)
+2. Search for the STIG you need — for example, "Windows 11", "Google Chrome", or "Red Hat"
+3. Download two ZIP files: the current release and the previous release
+4. Extract each ZIP
+5. Inside each extracted folder, find the file whose name ends in `_Manual-xccdf.xml`
+   — that is the file STIGPilot needs
+6. Use the older release file as `-Old` and the newer release file as `-New`
+
+**Example with Google Chrome:**
+- Download `U_Google_Chrome_V2R10_STIG.zip` and `U_Google_Chrome_V2R11_STIG.zip`
+- Extract both
+- Find `U_Google_Chrome_Current_Windows_V2R10_STIG_Manual-xccdf.xml` (old)
+- Find `U_Google_Chrome_Current_Windows_V2R11_STIG_Manual-xccdf.xml` (new)
+- Run: `.\tools\STIGPilot.cmd -Command packet -Old old.xml -New new.xml -OutDir output\chrome`
+
+The XCCDF file is the one that starts with your STIG name and ends in `xccdf.xml`.
+It is not the benchmark zip, the checklist file, or the SCAP content — just the
+file with `Manual-xccdf` in the name.
+
 ## Quick Start
 
 From the repository root:

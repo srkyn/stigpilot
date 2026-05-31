@@ -6,10 +6,10 @@ Python and third-party packages may not be approved. This script uses only
 built-in PowerShell/.NET XML, CSV, JSON, and file APIs.
 
 Examples:
-  .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov
-  .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov-windows -Impact high_priority_review -Owner "Endpoint/Windows Admin"
-  .\tools\STIGPilot-Gov.ps1 -Command parse -Input examples\sample_input\new.xml -Csv output\gov\controls.csv -Json output\gov\controls.json
-  .\tools\STIGPilot-Gov.ps1 -Command evidence -Input examples\sample_input\new.xml -OutDir output\gov
+  .\tools\STIGPilot-Gov.ps1 -Command packet -Old .\tools\..\examples\sample_input\old.xml -New .\tools\..\examples\sample_input\new.xml -OutDir output\gov
+  .\tools\STIGPilot-Gov.ps1 -Command packet -Old .\tools\..\examples\sample_input\old.xml -New .\tools\..\examples\sample_input\new.xml -OutDir output\gov-windows -Impact high_priority_review -Owner "Endpoint/Windows Admin"
+  .\tools\STIGPilot-Gov.ps1 -Command parse -Input .\tools\..\examples\sample_input\new.xml -Csv output\gov\controls.csv -Json output\gov\controls.json
+  .\tools\STIGPilot-Gov.ps1 -Command evidence -Input .\tools\..\examples\sample_input\new.xml -OutDir output\gov
 #>
 
 [CmdletBinding()]
@@ -32,6 +32,44 @@ param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = "Stop"
 
+$SampleInputDir = Join-Path $PSScriptRoot "..\examples\sample_input"
+$SampleOldPath = Join-Path $SampleInputDir "old.xml"
+$SampleNewPath = Join-Path $SampleInputDir "new.xml"
+
+if ($PSBoundParameters.Count -eq 0) {
+    Write-Host "STIGPilot Government Mode" -ForegroundColor Cyan
+    Write-Host "No-Python, no-install STIG change triage for Windows"
+    Write-Host ""
+    Write-Host "Usage:"
+    Write-Host "  .\STIGPilot-Gov.ps1 -Command packet -Old old.xml -New new.xml -OutDir output\packet"
+    Write-Host ""
+    Write-Host "Required files:"
+    Write-Host "  -Old    Path to your older STIG XCCDF XML file"
+    Write-Host "  -New    Path to your newer STIG XCCDF XML file"
+    Write-Host "  -OutDir Directory where output files will be written"
+    Write-Host ""
+    Write-Host "Getting your STIG files:"
+    Write-Host "  1. Go to https://public.cyber.mil/stigs/downloads/"
+    Write-Host "  2. Search for the STIG you need (e.g. `"Google Chrome`")"
+    Write-Host "  3. Download two versions - the older and the newer release"
+    Write-Host "  4. Extract each ZIP file"
+    Write-Host "  5. Find the file ending in _Manual-xccdf.xml inside each ZIP"
+    Write-Host "  6. That is your old.xml and new.xml"
+    Write-Host ""
+    Write-Host "Quick start with sample files (from the repo):"
+    Write-Host "  .\STIGPilot-Gov.ps1 -Command packet -Old ..\examples\sample_input\old.xml -New ..\examples\sample_input\new.xml -OutDir output\packet"
+    Write-Host ""
+    Write-Host "Execution policy note:"
+    Write-Host "  If you see `"execution of scripts is disabled`", run this first (process-scoped only):"
+    Write-Host "  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass"
+    exit 0
+}
+
+if ($Command -in @("packet", "diff") -and (-not $Old -or -not $New)) {
+    Write-Host "Error: -Old and -New are required for the packet and diff commands. Run without arguments to see usage." -ForegroundColor Red
+    exit 1
+}
+
 function Write-GovHelp {
     Write-Host ""
     Write-Host "STIGPilot Government Mode" -ForegroundColor Cyan
@@ -45,9 +83,9 @@ function Write-GovHelp {
     Write-Host "  packet    Generate change brief, backlog CSV, ticket exports, changes JSON, and evidence checklist"
     Write-Host ""
     Write-Host "Examples:"
-    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov"
-    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov-windows -Impact high_priority_review -Owner `"Endpoint/Windows Admin`""
-    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command parse -Input examples\sample_input\new.xml -Csv output\gov\controls.csv -Json output\gov\controls.json"
+    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old `"$SampleOldPath`" -New `"$SampleNewPath`" -OutDir output\gov"
+    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old `"$SampleOldPath`" -New `"$SampleNewPath`" -OutDir output\gov-windows -Impact high_priority_review -Owner `"Endpoint/Windows Admin`""
+    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command parse -Input `"$SampleNewPath`" -Csv output\gov\controls.csv -Json output\gov\controls.json"
     Write-Host ""
     Write-Host "Notes:"
     Write-Host "  - Uses only built-in PowerShell/.NET features."
