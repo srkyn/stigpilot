@@ -1,11 +1,15 @@
 [![STIGPilot banner](https://github.com/srkyn/stigpilot/raw/main/docs/assets/stigpilot-banner.png)](https://github.com/srkyn/stigpilot)
 
+![STIGPilot demo](https://github.com/srkyn/stigpilot/raw/main/docs/assets/demos/stigpilot-demo.gif)
+
+
 # STIGPilot
 
 STIGPilot is a local Python CLI for the messy part that happens after a DISA STIG update drops: figuring out what changed, what matters, who needs to look at it, and what evidence or tickets should be refreshed.
 
 [![Tests](https://github.com/srkyn/stigpilot/actions/workflows/tests.yml/badge.svg)](https://github.com/srkyn/stigpilot/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+[![PyPI](https://img.shields.io/pypi/v/stigpilot?style=flat-square&label=pypi)](https://pypi.org/project/stigpilot/)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Why this exists
@@ -102,6 +106,9 @@ Run the built-in sanitized Chrome workflow:
 ```bash
 stigpilot chrome-demo
 ```
+
+![STIGPilot Chrome STIG demo](https://github.com/srkyn/stigpilot/raw/main/docs/assets/demos/stigpilot-chrome-demo.gif)
+
 
 Generate a Chrome packet for only one team or impact category:
 
@@ -280,6 +287,9 @@ Generate a complete local workflow packet from two STIG files:
 ```bash
 stigpilot packet examples/sample_input/old.xml examples/sample_input/new.xml --out output/packet
 ```
+
+![STIGPilot packet generation — all output files in one command](https://github.com/srkyn/stigpilot/raw/main/docs/assets/demos/stigpilot-packet.gif)
+
 
 Generate workflow exports:
 

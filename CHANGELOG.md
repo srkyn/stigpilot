@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1
+
+2026-05-31
+
+- Added terminal demo GIFs to the README for `stigpilot demo`, `stigpilot chrome-demo`, and `stigpilot packet`.
+- Added a PyPI version badge to the README.
+- No tool behavior, output format, CSV, JSON, or Government Mode changes.
+
 ## 1.0.0
 
 2026-05-31
