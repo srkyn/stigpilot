@@ -1,4 +1,4 @@
-![STIGPilot banner](docs/assets/stigpilot-banner.svg)
+[![STIGPilot banner](https://github.com/srkyn/stigpilot/raw/main/docs/assets/stigpilot-banner.png)](https://github.com/srkyn/stigpilot)
 
 # STIGPilot
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.2
+
+2026-05-31
+
+- Replaced the README banner reference with a PNG asset so PyPI's image proxy renders it reliably.
+- No runtime changes.
+
 ## 0.9.1
 
 2026-05-31
