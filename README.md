@@ -2,7 +2,7 @@
 
 # STIGPilot
 
-STIGPilot is a local Python CLI that compares DISA STIG XCCDF releases and turns the changes into impact summaries, remediation backlogs, evidence checklists, manager summaries, and ticket-ready exports.
+STIGPilot is a local Python CLI for the messy part that happens after a DISA STIG update drops: figuring out what changed, what matters, who needs to look at it, and what evidence or tickets should be refreshed.
 
 [![Tests](https://github.com/srkyn/stigpilot/actions/workflows/tests.yml/badge.svg)](https://github.com/srkyn/stigpilot/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
@@ -10,7 +10,7 @@ STIGPilot is a local Python CLI that compares DISA STIG XCCDF releases and turns
 
 ## Why this exists
 
-Official tools are authoritative for viewing, scanning, checklist work, and formal compliance. STIGPilot focuses on the workflow gap after a new STIG release drops:
+Official tools are still the authority for viewing, scanning, checklist work, and formal compliance. STIGPilot sits beside them as a helper for the part that usually turns into spreadsheets, side notes, and "who owns this?" conversations:
 
 - What changed?
 - What matters?
@@ -20,7 +20,7 @@ Official tools are authoritative for viewing, scanning, checklist work, and form
 - What tickets should be created?
 - What should a manager know?
 
-I built this after learning about STIGs and asking a practical question: if someone is responsible for applying these controls or comparing releases, what would make their day easier? The answer was not another viewer or scanner. It was a fast local helper that turns a dense XML release into a short brief, a backlog, and evidence requests people can actually act on.
+I built this after learning about STIGs and asking a practical question: if someone is responsible for applying these controls or comparing releases, what would actually make their day easier? The answer was not another viewer or scanner. It was a fast local helper that turns a dense XML release into a short brief, a backlog, and evidence requests people can act on.
 
 ## 30-second demo
 
