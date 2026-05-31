@@ -4,130 +4,206 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>STIGPilot Change Brief</title>
+  <!-- Optional web font. Requires internet access; system font fallback is used offline. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      color-scheme: light;
-      --bg: #f8fafc;
-      --panel: #ffffff;
-      --ink: #0f172a;
-      --muted: #475569;
-      --line: #dbe3ef;
-      --blue: #0369a1;
-      --green: #15803d;
+      --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9; --ink: #0f172a; --ink-2: #334155; --ink-3: #64748b; --line: #e2e8f0; --line-2: #cbd5e1;
+      --blue-50: #eff6ff; --blue-100: #dbeafe; --blue-600: #2563eb; --blue-700: #1d4ed8; --blue-900: #1e3a5f;
+      --red-50: #fef2f2; --red-100: #fee2e2; --red-600: #dc2626; --red-700: #b91c1c; --red-900: #7f1d1d;
+      --amber-50: #fffbeb; --amber-100: #fef3c7; --amber-600: #d97706; --amber-700: #b45309; --amber-900: #78350f;
+      --green-50: #f0fdf4; --green-100: #dcfce7; --green-600: #16a34a; --green-900: #14532d;
+      --slate-50: #f8fafc; --slate-100: #f1f5f9; --slate-200: #e2e8f0; --slate-600: #475569; --slate-900: #0f172a;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a; --surface: #1e293b; --surface-2: #0f172a; --ink: #f1f5f9; --ink-2: #cbd5e1; --ink-3: #94a3b8; --line: #334155; --line-2: #475569;
+        --blue-50: #1e3a5f; --blue-100: #1e40af; --blue-600: #60a5fa; --blue-700: #93c5fd;
+        --red-50: #450a0a; --red-100: #7f1d1d; --red-600: #f87171; --red-700: #fca5a5;
+        --amber-50: #451a03; --amber-100: #78350f; --amber-600: #fbbf24; --amber-700: #fcd34d;
+        --green-50: #052e16; --green-100: #14532d; --green-600: #4ade80;
+        --slate-50: #1e293b; --slate-100: #334155; --slate-200: #475569; --slate-600: #94a3b8; --slate-900: #f1f5f9;
+      }
     }
     body {
       margin: 0;
       background: var(--bg);
       color: var(--ink);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       line-height: 1.5;
     }
+    .doc-nav { position: sticky; top: 0; background: var(--surface); border-bottom: 0.5px solid var(--line); padding: 10px 24px; display: flex; gap: 20px; align-items: center; font-size: 13px; z-index: 10; }
+    .doc-nav a { color: var(--blue-600); text-decoration: none; }
+    .doc-nav a:hover { text-decoration: underline; }
+    .nav-label { color: var(--ink-3); font-weight: 500; }
     main {
       max-width: 1120px;
       margin: 0 auto;
       padding: 40px 24px 64px;
     }
     header {
-      border-left: 6px solid var(--blue);
-      padding: 4px 0 4px 20px;
+      padding: 0 0 18px;
       margin-bottom: 28px;
     }
-    h1 { margin: 0 0 8px; font-size: 38px; }
-    h2 { margin-top: 34px; font-size: 23px; }
-    .meta, .summary { color: var(--muted); }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin: 22px 0;
-    }
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 16px;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-    }
-    .metric { font-size: 30px; font-weight: 700; color: var(--blue); }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 12px;
-    }
-    th, td {
-      border-bottom: 1px solid var(--line);
-      padding: 10px 12px;
-      text-align: left;
-      vertical-align: top;
-      font-size: 14px;
-    }
-    th { background: #eaf2fb; color: #123047; }
-    tr:last-child td { border-bottom: 0; }
-    ol.priority {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 16px 24px 16px 42px;
-    }
-    ol.priority li { margin: 0 0 14px; }
-    ol.priority span {
-      display: block;
-      color: var(--green);
-      font-weight: 700;
-      margin-top: 3px;
-    }
-    ol.priority p { margin: 4px 0 0; color: var(--muted); }
+    .header-eyebrow { color: var(--ink-3); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+    .header-title { margin: 8px 0; font-size: 34px; line-height: 1.15; font-weight: 600; }
+    .header-meta, .summary { color: var(--ink-3); }
+    .risk-bar { height: 4px; margin-top: 18px; background: var(--green-600); }
+    .risk-bar[data-risk="high"] { background: var(--red-600); }
+    .risk-bar[data-risk="medium"] { background: var(--amber-600); }
+    h2 { margin-top: 34px; font-size: 21px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 12px; margin: 22px 0; }
+    .card { background: var(--surface); border: 0.5px solid var(--line); border-radius: 10px; padding: 16px; }
+    .metric { font-size: 32px; font-weight: 600; color: var(--ink-2); }
+    .metric-label { font-size: 13px; color: var(--ink-3); }
+    .metric-high { border-left: 4px solid var(--red-100); } .metric-high .metric { color: var(--red-600); }
+    .metric-amber { border-left: 4px solid var(--amber-100); } .metric-amber .metric { color: var(--amber-600); }
+    .metric-blue { border-left: 4px solid var(--blue-100); } .metric-blue .metric { color: var(--blue-600); }
+    .metric-zero .metric { color: var(--ink-3); }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
+    .badge-high { background: var(--red-100); color: var(--red-900); } .badge-amber { background: var(--amber-100); color: var(--amber-900); }
+    .badge-blue { background: var(--blue-100); color: var(--blue-900); } .badge-low, .badge-muted { background: var(--slate-100); color: var(--slate-600); }
+    .badge-medium { background: var(--amber-100); color: var(--amber-900); } .badge-owner { background: var(--surface-2); color: var(--ink-2); border: 0.5px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border: 0.5px solid var(--line); border-radius: 10px; overflow: hidden; font-size: 13.5px; line-height: 1.5; }
+    th { background: var(--surface-2); color: var(--ink-2); font-weight: 500; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; padding: 10px 14px; border-bottom: 0.5px solid var(--line); text-align: left; }
+    td { padding: 11px 14px; border-bottom: 0.5px solid var(--line); color: var(--ink); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; } tr:hover td { background: var(--surface-2); }
+    .priority-card { border: 0.5px solid var(--line); border-radius: 10px; background: var(--surface); margin-bottom: 10px; overflow: hidden; }
+    .priority-card.priority-high { border-left: 4px solid var(--red-600); } .priority-card.priority-medium { border-left: 4px solid var(--amber-600); } .priority-card.priority-low { border-left: 4px solid var(--blue-600); }
+    .priority-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 0.5px solid var(--line); }
+    .priority-number { font-size: 13px; font-weight: 600; color: var(--ink-3); min-width: 20px; }
+    .priority-vuln-id { font-size: 11px; font-family: monospace; color: var(--ink-3); display: block; }
+    .priority-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+    .priority-badges { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
+    .priority-body { padding: 10px 16px 12px; font-size: 13.5px; color: var(--ink-2); line-height: 1.6; }
     footer {
       margin-top: 40px;
-      color: var(--muted);
+      color: var(--ink-3);
       font-size: 13px;
+    }
+    @media print {
+      .doc-nav { display: none; }
+      body { background: white; color: black; font-size: 11pt; }
+      main { max-width: 100%; padding: 0; }
+      .priority-card { box-shadow: none; border: 0.5px solid #ccc; page-break-inside: avoid; }
+      table { box-shadow: none; }
+      h2 { page-break-after: avoid; }
+      thead { display: table-header-group; }
+      .card { box-shadow: none; }
+      .risk-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
   </style>
 </head>
 <body>
+<nav class="doc-nav">
+  <span class="nav-label">Jump to</span>
+  <a href="#summary">Summary</a>
+  <a href="#priority-actions">Priority actions</a>
+  <a href="#owner-impact">Owner impact</a>
+  <a href="#categories">Categories</a>
+  <a href="#detailed-changes">All changes</a>
+</nav>
 <main>
   <header>
-    <h1>STIGPilot Change Brief</h1>
-    <div class="meta">Old: old.xml | New: new.xml</div>
-    <div class="meta">Old controls: 3 | New controls: 3</div>
+    <div class="header-eyebrow">STIGPilot Change Brief</div>
+    <h1 class="header-title">Synthetic Windows and Linux STIG — V1R1 → V1R2</h1>
+    <div class="header-meta">Generated locally · 6 controls reviewed · 3 priority actions</div>
+    <div class="risk-bar" data-risk="high"></div>
   </header>
-  <section class="card summary">4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The most affected owner group(s) are Database Admin, Endpoint/Windows Admin, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.</section>
+  <section id="summary" class="card summary">4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The most affected owner group(s) are Database Admin, Endpoint/Windows Admin, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.</section>
   <section class="grid">
-    <div class="card"><div class="metric">1</div><div>Added controls</div></div>
-<div class="card"><div class="metric">1</div><div>Removed controls</div></div>
-<div class="card"><div class="metric">2</div><div>Modified controls</div></div>
-<div class="card"><div class="metric">1</div><div>Severity changes</div></div>
-<div class="card"><div class="metric">2</div><div>High-priority review</div></div>
-<div class="card"><div class="metric">0</div><div>Implementation change likely</div></div>
-<div class="card"><div class="metric">1</div><div>Evidence update likely</div></div>
+    <div class="card metric-blue"><div class="metric">1</div><div class="metric-label">Added controls</div></div>
+<div class="card metric-amber"><div class="metric">1</div><div class="metric-label">Removed controls</div></div>
+<div class="card metric-zero"><div class="metric">2</div><div class="metric-label">Modified controls</div></div>
+<div class="card metric-amber"><div class="metric">1</div><div class="metric-label">Severity changes</div></div>
+<div class="card metric-high"><div class="metric">2</div><div class="metric-label">High-priority review</div></div>
+<div class="card metric-zero"><div class="metric">0</div><div class="metric-label">Implementation change likely</div></div>
+<div class="card metric-amber"><div class="metric">1</div><div class="metric-label">Evidence update likely</div></div>
   </section>
-  <h2>Priority Actions</h2>
-  <ol class="priority"><li><strong>V-100001 - Windows audit policy must be configured and reviewed</strong><span>High-priority review | Endpoint/Windows Admin</span><p>The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.</p></li><li><strong>V-100004 - Firewall management access must be restricted</strong><span>High-priority review | Network/Security Engineering</span><p>A new high-severity control was added, so it should be triaged before lower-risk backlog work.</p></li><li><strong>V-100002 - Linux SSH banner must be configured</strong><span>Evidence update likely | Linux Admin</span><p>The check procedure changed enough that evidence requests or validation steps may need to be refreshed.</p></li><li><strong>V-100003 - Removed database audit control</strong><span>Review recommended | Database Admin</span><p>The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.</p></li></ol>
-  <h2>Owner Impact</h2>
+  <h2 id="priority-actions">Priority Actions</h2>
+  
+<div class="priority-card priority-high">
+  <div class="priority-header">
+    <span class="priority-number">1</span>
+    <div class="priority-title-group">
+      <span class="priority-vuln-id">V-100001</span>
+      <span class="priority-title">Windows audit policy must be configured and reviewed</span>
+    </div>
+    <div class="priority-badges">
+      <span class="badge badge-high">High-priority review</span>
+      <span class="badge badge-owner">Endpoint/Windows Admin</span>
+    </div>
+  </div>
+  <div class="priority-body">The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.</div>
+</div>
+
+<div class="priority-card priority-high">
+  <div class="priority-header">
+    <span class="priority-number">2</span>
+    <div class="priority-title-group">
+      <span class="priority-vuln-id">V-100004</span>
+      <span class="priority-title">Firewall management access must be restricted</span>
+    </div>
+    <div class="priority-badges">
+      <span class="badge badge-high">High-priority review</span>
+      <span class="badge badge-owner">Network/Security Engineering</span>
+    </div>
+  </div>
+  <div class="priority-body">A new high-severity control was added, so it should be triaged before lower-risk backlog work.</div>
+</div>
+
+<div class="priority-card priority-medium">
+  <div class="priority-header">
+    <span class="priority-number">3</span>
+    <div class="priority-title-group">
+      <span class="priority-vuln-id">V-100002</span>
+      <span class="priority-title">Linux SSH banner must be configured</span>
+    </div>
+    <div class="priority-badges">
+      <span class="badge badge-amber">Evidence update likely</span>
+      <span class="badge badge-owner">Linux Admin</span>
+    </div>
+  </div>
+  <div class="priority-body">The check procedure changed enough that evidence requests or validation steps may need to be refreshed.</div>
+</div>
+
+<div class="priority-card priority-low">
+  <div class="priority-header">
+    <span class="priority-number">4</span>
+    <div class="priority-title-group">
+      <span class="priority-vuln-id">V-100003</span>
+      <span class="priority-title">Removed database audit control</span>
+    </div>
+    <div class="priority-badges">
+      <span class="badge badge-blue">Review recommended</span>
+      <span class="badge badge-owner">Database Admin</span>
+    </div>
+  </div>
+  <div class="priority-body">The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.</div>
+</div>
+
+  <h2 id="owner-impact">Owner Impact</h2>
   <table><thead><tr><th>Owner</th><th>Changes</th><th>High Priority</th><th>Implementation Likely</th><th>Evidence Updates</th></tr></thead><tbody><tr><td>Database Admin</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
 <tr><td>Endpoint/Windows Admin</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
 <tr><td>Linux Admin</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
 <tr><td>Network/Security Engineering</td><td>1</td><td>1</td><td>0</td><td>0</td></tr></tbody></table>
-  <h2>Change Categories</h2>
-  <table><thead><tr><th>Impact</th><th>Count</th><th>Meaning</th></tr></thead><tbody><tr><td>High-priority review</td><td>2</td><td>Review first because severity or new high-risk scope changed.</td></tr>
-<tr><td>Implementation change likely</td><td>0</td><td>Remediation steps may need updates before reusing old tickets.</td></tr>
-<tr><td>Evidence update likely</td><td>1</td><td>Check procedure changed enough that evidence requests may need refresh.</td></tr>
-<tr><td>Review recommended</td><td>1</td><td>Traceability, cleanup, or analyst review is recommended.</td></tr>
-<tr><td>No action likely</td><td>0</td><td>Likely wording or metadata only; keep awareness but avoid noisy tickets.</td></tr></tbody></table>
+  <h2 id="categories">Change Categories</h2>
+  <table><thead><tr><th>Impact</th><th>Count</th><th>Meaning</th></tr></thead><tbody><tr><td><span class="badge badge-high">High-priority review</span></td><td>2</td><td>Review first because severity or new high-risk scope changed.</td></tr>
+<tr><td><span class="badge badge-amber">Implementation change likely</span></td><td>0</td><td>Remediation steps may need updates before reusing old tickets.</td></tr>
+<tr><td><span class="badge badge-amber">Evidence update likely</span></td><td>1</td><td>Check procedure changed enough that evidence requests may need refresh.</td></tr>
+<tr><td><span class="badge badge-blue">Review recommended</span></td><td>1</td><td>Traceability, cleanup, or analyst review is recommended.</td></tr>
+<tr><td><span class="badge badge-muted">No action likely</span></td><td>0</td><td>Likely wording or metadata only; keep awareness but avoid noisy tickets.</td></tr></tbody></table>
   <h2>Top Changed Controls</h2>
-  <table><thead><tr><th>Impact</th><th>Severity</th><th>Vuln ID</th><th>Rule ID</th><th>Title</th><th>Owner</th><th>Why it matters</th></tr></thead><tbody><tr><td>High-priority review</td><td>high</td><td>V-100001</td><td>SV-100001r2_rule</td><td>Windows audit policy must be configured and reviewed</td><td>Endpoint/Windows Admin</td><td>The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.</td></tr>
-<tr><td>High-priority review</td><td>high</td><td>V-100004</td><td>SV-100004r1_rule</td><td>Firewall management access must be restricted</td><td>Network/Security Engineering</td><td>A new high-severity control was added, so it should be triaged before lower-risk backlog work.</td></tr>
-<tr><td>Evidence update likely</td><td>low</td><td>V-100002</td><td>SV-100002r2_rule</td><td>Linux SSH banner must be configured</td><td>Linux Admin</td><td>The check procedure changed enough that evidence requests or validation steps may need to be refreshed.</td></tr>
-<tr><td>Review recommended</td><td>medium</td><td>V-100003</td><td>SV-100003r1_rule</td><td>Removed database audit control</td><td>Database Admin</td><td>The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.</td></tr></tbody></table>
-  <h2>Detailed Changes</h2>
-  <table><thead><tr><th>Change Type</th><th>Impact</th><th>Severity</th><th>Vuln ID</th><th>Rule ID</th><th>Changed Fields</th><th>Owner</th><th>Why it matters</th></tr></thead><tbody><tr><td>added</td><td>High-priority review</td><td>high</td><td>V-100004</td><td>SV-100004r1_rule</td><td>-</td><td>Network/Security Engineering</td><td>A new high-severity control was added, so it should be triaged before lower-risk backlog work.</td></tr>
-<tr><td>removed</td><td>Review recommended</td><td>medium</td><td>V-100003</td><td>SV-100003r1_rule</td><td>-</td><td>Database Admin</td><td>The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.</td></tr>
-<tr><td>severity_increased</td><td>High-priority review</td><td>high</td><td>V-100001</td><td>SV-100001r2_rule</td><td>title, severity, check_text, fix_text, references</td><td>Endpoint/Windows Admin</td><td>The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.</td></tr>
-<tr><td>check_changed</td><td>Evidence update likely</td><td>low</td><td>V-100002</td><td>SV-100002r2_rule</td><td>check_text</td><td>Linux Admin</td><td>The check procedure changed enough that evidence requests or validation steps may need to be refreshed.</td></tr></tbody></table>
+  <table><thead><tr><th>Impact</th><th>Severity</th><th>Vuln ID</th><th>Rule ID</th><th>Title</th><th>Owner</th><th>Why it matters</th></tr></thead><tbody><tr><td><span class="badge badge-high">High-priority review</span></td><td><span class="badge badge-high">HIGH</span></td><td>V-100001</td><td>SV-100001r2_rule</td><td>Windows audit policy must be configured and reviewed</td><td>Endpoint/Windows Admin</td><td>The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.</td></tr>
+<tr><td><span class="badge badge-high">High-priority review</span></td><td><span class="badge badge-high">HIGH</span></td><td>V-100004</td><td>SV-100004r1_rule</td><td>Firewall management access must be restricted</td><td>Network/Security Engineering</td><td>A new high-severity control was added, so it should be triaged before lower-risk backlog work.</td></tr>
+<tr><td><span class="badge badge-amber">Evidence update likely</span></td><td><span class="badge badge-low">LOW</span></td><td>V-100002</td><td>SV-100002r2_rule</td><td>Linux SSH banner must be configured</td><td>Linux Admin</td><td>The check procedure changed enough that evidence requests or validation steps may need to be refreshed.</td></tr>
+<tr><td><span class="badge badge-blue">Review recommended</span></td><td><span class="badge badge-medium">MEDIUM</span></td><td>V-100003</td><td>SV-100003r1_rule</td><td>Removed database audit control</td><td>Database Admin</td><td>The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.</td></tr></tbody></table>
+  <h2 id="detailed-changes">Detailed Changes</h2>
+  <table><thead><tr><th>Change Type</th><th>Impact</th><th>Severity</th><th>Vuln ID</th><th>Rule ID</th><th>Changed Fields</th><th>Owner</th><th>Why it matters</th></tr></thead><tbody><tr><td>added</td><td><span class="badge badge-high">High-priority review</span></td><td><span class="badge badge-high">HIGH</span></td><td>V-100004</td><td>SV-100004r1_rule</td><td>-</td><td>Network/Security Engineering</td><td>A new high-severity control was added, so it should be triaged before lower-risk backlog work.</td></tr>
+<tr><td>removed</td><td><span class="badge badge-blue">Review recommended</span></td><td><span class="badge badge-medium">MEDIUM</span></td><td>V-100003</td><td>SV-100003r1_rule</td><td>-</td><td>Database Admin</td><td>The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.</td></tr>
+<tr><td>severity_increased</td><td><span class="badge badge-high">High-priority review</span></td><td><span class="badge badge-high">HIGH</span></td><td>V-100001</td><td>SV-100001r2_rule</td><td>title, severity, check_text, fix_text, references</td><td>Endpoint/Windows Admin</td><td>The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.</td></tr>
+<tr><td>check_changed</td><td><span class="badge badge-amber">Evidence update likely</span></td><td><span class="badge badge-low">LOW</span></td><td>V-100002</td><td>SV-100002r2_rule</td><td>check_text</td><td>Linux Admin</td><td>The check procedure changed enough that evidence requests or validation steps may need to be refreshed.</td></tr></tbody></table>
   <footer>
     Generated by STIGPilot. This is change triage and remediation planning support, not formal compliance validation.
   </footer>

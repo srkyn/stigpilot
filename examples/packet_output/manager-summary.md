@@ -29,9 +29,9 @@ New controls: 3
 
 ## Top Actions
 
-- V-100004: Firewall management access must be restricted (High-priority review; Network/Security Engineering)
-- V-100001: Windows audit policy must be configured and reviewed (High-priority review; Endpoint/Windows Admin)
-- V-100002: Linux SSH banner must be configured (Evidence update likely; Linux Admin)
+- V-100004: Firewall management access must be restricted (🔴 High-priority review; Network/Security Engineering)
+- V-100001: Windows audit policy must be configured and reviewed (🔴 High-priority review; Endpoint/Windows Admin)
+- V-100002: Linux SSH banner must be configured (🟡 Evidence update likely; Linux Admin)
 
 ## Recommended Next Steps
 

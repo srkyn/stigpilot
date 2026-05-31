@@ -27,9 +27,9 @@ New controls: 3
 
 ## Top Actions
 
-- V-CHROME-004: Chrome extension installation must be restricted (High-priority review; Endpoint/Windows Admin)
-- V-CHROME-001: Chrome Safe Browsing enhanced protection must be enabled (High-priority review; Endpoint/Windows Admin)
-- V-CHROME-002: Chrome password manager must be disabled (Evidence update likely; Endpoint/Windows Admin)
+- V-CHROME-004: Chrome extension installation must be restricted (🔴 High-priority review; Endpoint/Windows Admin)
+- V-CHROME-001: Chrome Safe Browsing enhanced protection must be enabled (🔴 High-priority review; Endpoint/Windows Admin)
+- V-CHROME-002: Chrome password manager must be disabled (🟡 Evidence update likely; Endpoint/Windows Admin)
 
 ## Recommended Next Steps
 

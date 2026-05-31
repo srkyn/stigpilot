@@ -9,9 +9,13 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+from rich.columns import Columns
 from rich.console import Console
+from rich.panel import Panel
+from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
+from . import __version__
 from .config import CONFIG_EXAMPLE, StigPilotConfig, load_config
 from .diff import compare_documents, duplicate_keys
 from .exporters import (
@@ -33,7 +37,8 @@ app = typer.Typer(
     help="Turn DISA STIG XCCDF release changes into briefs, backlogs, evidence checklists, and ticket-ready exports.",
     no_args_is_help=True,
 )
-console = Console()
+console = Console(no_color=not sys.stdout.isatty())
+_NO_COLOR = not sys.stdout.isatty()
 VALID_IMPACTS = {
     "high_priority_review",
     "implementation_change_likely",
@@ -41,6 +46,58 @@ VALID_IMPACTS = {
     "review_recommended",
     "no_action_likely",
 }
+SEVERITY_COLORS = {
+    "high": "bold red",
+    "HIGH": "bold red",
+    "high_priority_review": "bold red",
+    "High-priority review": "bold red",
+    "medium": "bold yellow",
+    "MEDIUM": "bold yellow",
+    "implementation_change_likely": "yellow",
+    "Implementation change likely": "yellow",
+    "evidence_update_likely": "yellow",
+    "Evidence update likely": "yellow",
+    "low": "dim cyan",
+    "LOW": "dim cyan",
+    "review_recommended": "cyan",
+    "Review recommended": "cyan",
+    "no_action_likely": "dim",
+    "No action likely": "dim",
+}
+
+
+@app.callback()
+def main(
+    ctx: typer.Context,
+    no_color: bool = typer.Option(False, "--no-color", help="Disable terminal colors and Rich styling."),
+) -> None:
+    """Configure global CLI display settings."""
+
+    global console, _NO_COLOR
+    _NO_COLOR = no_color or not sys.stdout.isatty()
+    console = Console(no_color=_NO_COLOR)
+    if ctx.invoked_subcommand and not ctx.resilient_parsing:
+        _print_header()
+
+
+def colorize_severity(text: object) -> str:
+    """Return a Rich markup string for severity or impact text."""
+
+    value = str(text or "")
+    style = SEVERITY_COLORS.get(value, "")
+    if not style:
+        style = SEVERITY_COLORS.get(value.lower(), "")
+    return f"[{style}]{value}[/{style}]" if style and not _NO_COLOR else value
+
+
+def _print_header() -> None:
+    console.print(
+        Panel(
+            f"[bold blue]STIGPilot[/bold blue]  [dim]v{__version__}[/dim]   [dim]STIG change intelligence[/dim]",
+            border_style="blue",
+            padding=(0, 2),
+        )
+    )
 
 
 def _load_config(config_path: Path | None) -> StigPilotConfig | None:
@@ -53,7 +110,24 @@ def _load_config(config_path: Path | None) -> StigPilotConfig | None:
 
 def _load(path: Path, config: StigPilotConfig | None = None):
     try:
-        document = parse_stig(path, config)
+        if sys.stdout.isatty() and not _NO_COLOR:
+            try:
+                total_count = max(1, len(re.findall(rb"<[^/!?][^>]*\bRule\b", path.read_bytes())))
+            except OSError:
+                total_count = 1
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[bold blue]{task.description}"),
+                BarColumn(bar_width=40),
+                TaskProgressColumn(),
+                TimeElapsedColumn(),
+                transient=True,
+                console=console,
+            ) as progress:
+                task = progress.add_task("Parsing STIG controls...", total=total_count)
+                document = parse_stig(path, config, progress_advance=lambda: progress.advance(task))
+        else:
+            document = parse_stig(path, config)
     except StigParseError as exc:
         console.print(f"[red]Error:[/red] {exc}")
         raise typer.Exit(1) from exc
@@ -84,25 +158,76 @@ def _warn_same_inputs(old_xml: Path, new_xml: Path, old_doc, new_doc) -> None:
 
 def _print_change_summary(changes, outputs: list[Path]) -> None:
     counts = change_summary_counts(changes)
-    table = Table(title="STIGPilot Diff Summary")
-    table.add_column("Metric")
-    table.add_column("Count", justify="right")
+    border_style = "red" if counts["high_priority_review"] else "yellow" if counts["implementation_change_likely"] or counts["evidence_update_likely"] else "green"
+    summary = (
+        f"[dim]{counts['total']} change(s) detected. "
+        f"{counts['high_priority_review']} high-priority, "
+        f"{counts['implementation_change_likely']} implementation-likely, "
+        f"{counts['evidence_update_likely']} evidence-update-likely.[/dim]"
+    )
+    console.print(Panel(summary, title="[bold]Change Summary[/bold]", border_style=border_style))
+    if _NO_COLOR:
+        console.print("-" * 72)
+    else:
+        console.rule(style="dim")
+    panels = []
     for label, key in (
-        ("Total changes", "total"),
+        ("Total", "total"),
         ("Added", "added"),
         ("Removed", "removed"),
         ("Modified", "modified"),
-        ("Severity changed", "severity_changed"),
-        ("High-priority review", "high_priority_review"),
-        ("Implementation change likely", "implementation_change_likely"),
-        ("Evidence update likely", "evidence_update_likely"),
+        ("Severity", "severity_changed"),
+        ("High", "high_priority_review"),
+        ("Impl", "implementation_change_likely"),
+        ("Evidence", "evidence_update_likely"),
     ):
-        table.add_row(label, str(counts[key]))
-    console.print(table)
+        count = counts[key]
+        count_text = _metric_count_markup(key, count)
+        panels.append(Panel(count_text, title=f"[dim]{label}[/dim]", width=22, border_style="dim"))
+    console.print(Columns(panels, equal=True, expand=True))
+    priority = [change for change in changes if change.impact in {"high_priority_review", "implementation_change_likely", "evidence_update_likely"}][:5]
+    if priority:
+        console.print("[bold blue]Priority actions[/bold blue]")
+        for change in priority:
+            control = change.current_control
+            title = f"{change.vuln_id or (control.vuln_id if control else '')} - {(control.title if control else '') or 'Untitled'}"
+            owner = suggested_owner(control)
+            body = f"[dim]{colorize_severity(_impact_label(change.impact))} · {owner}[/dim]\n{change.reason}"
+            console.print(Panel(body, title=f"[bold]{title}[/bold]", border_style=_impact_border(change.impact)))
     if outputs:
         console.print("[bold]Written files:[/bold]")
         for output in outputs:
             console.print(f"- {output}")
+
+
+def _metric_count_markup(key: str, count: int) -> str:
+    if count == 0:
+        return "[dim]0[/dim]" if not _NO_COLOR else "0"
+    if key == "high_priority_review":
+        return f"[bold red]{count}[/bold red]" if not _NO_COLOR else str(count)
+    if key in {"implementation_change_likely", "evidence_update_likely", "removed", "severity_changed"}:
+        return f"[bold yellow]{count}[/bold yellow]" if not _NO_COLOR else str(count)
+    if key == "added":
+        return f"[bold blue]{count}[/bold blue]" if not _NO_COLOR else str(count)
+    return f"[bold]{count}[/bold]" if not _NO_COLOR else str(count)
+
+
+def _impact_border(impact: str) -> str:
+    if impact == "high_priority_review":
+        return "red"
+    if impact in {"implementation_change_likely", "evidence_update_likely"}:
+        return "yellow"
+    return "cyan"
+
+
+def _impact_label(value: str) -> str:
+    return {
+        "high_priority_review": "High-priority review",
+        "implementation_change_likely": "Implementation change likely",
+        "evidence_update_likely": "Evidence update likely",
+        "review_recommended": "Review recommended",
+        "no_action_likely": "No action likely",
+    }.get(value, value.replace("_", " ").title())
 
 
 def _filter_changes(
@@ -256,7 +381,7 @@ def _portfolio_summary(
 
 
 def _print_outputs_table(title: str, outputs: dict[str, Path]) -> None:
-    table = Table(title=title)
+    table = Table(title=title, header_style="bold blue", border_style="dim", show_lines=False)
     table.add_column("Report")
     table.add_column("Path")
     for name, path in outputs.items():
@@ -562,7 +687,7 @@ def summary(
 
     config = _load_config(config_path)
     document = _load(input_xml, config)
-    table = Table(title=document.title or "STIG Summary")
+    table = Table(title=document.title or "STIG Summary", header_style="bold blue", border_style="dim", show_lines=False)
     table.add_column("Severity")
     table.add_column("Count", justify="right")
     counts: dict[str, int] = {}
@@ -570,13 +695,13 @@ def summary(
         key = control.severity or "unspecified"
         counts[key] = counts.get(key, 0) + 1
     for severity, count in sorted(counts.items()):
-        table.add_row(severity, str(count))
+        table.add_row(colorize_severity(severity), str(count))
     console.print(table)
     console.print(f"Source: {input_xml}")
     console.print(f"Version: {document.version or 'Unknown'} | Release: {document.release or 'Unknown'}")
     console.print(f"Controls: {len(document.controls)}")
 
-    owner_table = Table(title="Suggested Owner Summary")
+    owner_table = Table(title="Suggested Owner Summary", header_style="bold blue", border_style="dim", show_lines=False)
     owner_table.add_column("Owner")
     owner_table.add_column("Controls", justify="right")
     owners: dict[str, int] = {}
@@ -634,7 +759,7 @@ def demo(
     write_text_report(outputs["GitHub issues"], github_issue_markdown(changes, config))
     write_text_report(outputs["Remediation drafts"], remediation_draft_markdown(changes, config))
 
-    table = Table(title="Demo Reports Generated")
+    table = Table(title="Demo Reports Generated", header_style="bold blue", border_style="dim", show_lines=False)
     table.add_column("Report")
     table.add_column("Path")
     for name, path in outputs.items():
@@ -686,7 +811,7 @@ def chrome_demo(
     outputs = _write_comparison_packet(old_doc, new_doc, changes, out, config)
 
     counts = change_summary_counts(changes)
-    table = Table(title="Chrome STIG Demo")
+    table = Table(title="Chrome STIG Demo", header_style="bold blue", border_style="dim", show_lines=False)
     table.add_column("Metric")
     table.add_column("Value")
     table.add_row("Source", source_label)
@@ -753,7 +878,7 @@ def doctor() -> None:
     except StigParseError as exc:
         checks.append(("sample parse/diff", False, str(exc)))
 
-    table = Table(title="STIGPilot Doctor")
+    table = Table(title="STIGPilot Doctor", header_style="bold blue", border_style="dim", show_lines=False)
     table.add_column("Check")
     table.add_column("Status")
     table.add_column("Details")

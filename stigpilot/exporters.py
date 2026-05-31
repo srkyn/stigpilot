@@ -38,6 +38,14 @@ IMPACT_LABELS = {
     "no_action_likely": "No action likely",
 }
 CHANGES_JSON_SCHEMA_VERSION = "1.0"
+SEVERITY_EMOJI = {"high": "🔴", "medium": "🟡", "low": "🔵"}
+IMPACT_EMOJI = {
+    "high_priority_review": "🔴",
+    "implementation_change_likely": "🟡",
+    "evidence_update_likely": "🟡",
+    "review_recommended": "🔵",
+    "no_action_likely": "⚪",
+}
 
 
 def write_controls_csv(document: StigDocument, path: str | Path) -> None:
@@ -247,9 +255,9 @@ def github_issue_markdown(changes: Iterable[ControlChange], config: StigPilotCon
                 "",
                 "### Context",
                 "",
-                f"- Severity: {control.severity or 'unspecified'}",
+                f"- Severity: {_severity_display(control.severity)}",
                 f"- Suggested owner: {suggested_owner(control, config)}",
-                f"- Impact: {_impact_label(change.impact)} (`{change.impact}`)",
+                f"- Impact: {_impact_display(change.impact)} (`{change.impact}`)",
                 f"- Reason: {change.reason}",
                 f"- Changed fields: {', '.join(change.changed_fields) or change.change_type}",
                 "",
@@ -298,7 +306,7 @@ def remediation_draft_markdown(changes: Iterable[ControlChange], config: StigPil
                 f"## Draft {idx}: {control.vuln_id or change.vuln_id or control.rule_id or change.rule_id}",
                 "",
                 f"**Title:** {control.title or 'Untitled control'}",
-                f"**Impact:** {_impact_label(change.impact)} (`{change.impact or 'unclassified'}`)",
+                f"**Impact:** {_impact_display(change.impact)} (`{change.impact or 'unclassified'}`)",
                 f"**Suggested owner:** {suggested_owner(control, config)}",
                 f"**Change type:** {change.change_type}",
                 f"**Why it matters:** {change.reason or 'Review the changed control text before reusing prior implementation notes.'}",
@@ -387,6 +395,15 @@ def _priority(change: ControlChange) -> str:
 
 def _impact_label(value: str) -> str:
     return IMPACT_LABELS.get(value, value.replace("_", " ").title())
+
+
+def _impact_display(value: str) -> str:
+    return f"{IMPACT_EMOJI.get(value, '⚪')} {_impact_label(value)}"
+
+
+def _severity_display(value: str) -> str:
+    label = (value or "unspecified").upper()
+    return f"{SEVERITY_EMOJI.get((value or '').lower(), '⚪')} {label}"
 
 
 def _change_counts(changes: list[ControlChange]) -> dict[str, int]:

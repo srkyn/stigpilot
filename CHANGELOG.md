@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0
+
+2026-05-31
+
+- Remastered terminal, HTML, and Markdown reports with a meaning-driven visual system.
+- Added risk-first terminal summaries, metric panels, and severity-aware Rich table styling.
+- Added institutional HTML report styling with risk bars, semantic badges, priority cards, sticky navigation, dark mode, and print styles.
+- Added scan-friendly Markdown risk statements, emoji severity labels, section dividers, and linkable priority action headings.
+- No changes to CSV, JSON schemas, or Government Mode behavior.
+
 ## 0.9.3
 
 2026-05-31

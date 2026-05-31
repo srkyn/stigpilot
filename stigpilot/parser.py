@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 import re
 from xml.etree import ElementTree as ET
@@ -205,7 +206,11 @@ def _iter_group_rules(benchmark: ET.Element) -> list[tuple[ET.Element, ET.Elemen
     return [(benchmark, rule) for rule in _descendants(benchmark, "Rule")]
 
 
-def parse_stig(path: str | Path, config: StigPilotConfig | None = None) -> StigDocument:
+def parse_stig(
+    path: str | Path,
+    config: StigPilotConfig | None = None,
+    progress_advance: Callable[[], None] | None = None,
+) -> StigDocument:
     """Parse a STIG XCCDF/XML file into a normalized document model."""
 
     root = _parse_xml(path)
@@ -230,6 +235,8 @@ def parse_stig(path: str | Path, config: StigPilotConfig | None = None) -> StigD
         )
         control.tags = tags_for_control(control, config)
         controls.append(control)
+        if progress_advance:
+            progress_advance()
 
     return StigDocument(
         title=_first_text(benchmark, "title"),

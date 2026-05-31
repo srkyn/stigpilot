@@ -29,9 +29,10 @@ def test_change_brief_uses_readable_priority_actions_and_labels():
     report = change_brief(old, new, changes)
 
     assert "## Priority Actions" in report
-    assert "1. **" in report
-    assert "Impact: High-priority review" in report
-    assert "| High-priority review |" in report
+    assert "### 1." in report
+    assert "**Impact:** High-priority review" in report
+    assert "🔴 High-priority review" in report
+    assert "> **Risk level: HIGH**" in report
 
 
 def test_html_change_brief_is_self_contained_and_readable():
@@ -44,5 +45,7 @@ def test_html_change_brief_is_self_contained_and_readable():
     assert "<!doctype html>" in report
     assert "<style>" in report
     assert "STIGPilot Change Brief" in report
+    assert "risk-bar" in report
+    assert "priority-card" in report
     assert "High-priority review" in report
     assert "formal compliance validation" in report

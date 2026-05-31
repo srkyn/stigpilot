@@ -64,7 +64,8 @@ def test_cli_diff_writes_markdown_and_csv(tmp_path: Path):
     )
 
     assert result.exit_code == 0
-    assert "STIGPilot Diff Summary" in result.output
+    assert "Change Summary" in result.output
+    assert "High-priority" in result.output
     assert report.exists()
     assert backlog.exists()
     assert drafts.exists()
