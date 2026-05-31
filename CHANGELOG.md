@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1
+
+2026-05-31
+
+- Restored the package author contact email for clearer PyPI metadata.
+- Kept the PyPI trusted publishing workflow and runtime dependency split unchanged.
+
 ## 0.9.0
 
 2026-05-31
