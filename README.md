@@ -95,7 +95,7 @@ Useful sample artifacts:
 - [Chrome evidence checklist](examples/chrome_windows_output/evidence-checklist.md)
 - [Portfolio comparison summary](examples/portfolio_output/portfolio-summary.md)
 
-A complete pre-generated sample packet is available in [docs/sample-packet/](docs/sample-packet/) — open it directly without running anything to see what STIGPilot produces.
+A complete pre-generated sample packet is available in [docs/sample-packet/](docs/sample-packet/) - open it directly without running anything to see what STIGPilot produces.
 
 ## Real-world Chrome demo
 
@@ -208,7 +208,7 @@ Windows note: if `stigpilot` is not recognized after install, your Python Script
 Some government environments treat Python and pip packages as third-party software. STIGPilot includes a PowerShell-only fallback for restrictive Windows instances:
 
 **No execution policy change required system-wide.** If PowerShell says scripts are
-disabled, run this first — it only affects the current process and resets when you
+disabled, run this first - it only affects the current process and resets when you
 close the window:
 
 ```powershell
@@ -288,7 +288,7 @@ Generate a complete local workflow packet from two STIG files:
 stigpilot packet examples/sample_input/old.xml examples/sample_input/new.xml --out output/packet
 ```
 
-![STIGPilot packet generation — all output files in one command](https://github.com/srkyn/stigpilot/raw/main/docs/assets/demos/stigpilot-packet.gif)
+![STIGPilot packet generation - all output files in one command](https://github.com/srkyn/stigpilot/raw/main/docs/assets/demos/stigpilot-packet.gif)
 
 
 Generate workflow exports:
@@ -456,12 +456,12 @@ Use STIGPilot only with files you are authorized to process. Do not publish sens
 
 ## Roadmap
 
-- PyPI packaging and publish workflow
-- Better HTML packet/portfolio report coverage
+- Demo GIF in README showing terminal output
+- Better HTML packet and portfolio report coverage
 - More parser fixtures from official-but-user-supplied STIG variants
 - More detailed review-only remediation draft formats
-- Optional screenshot assets for README examples
 - Optional Streamlit dashboard after the CLI remains strong
+- Additional Government Mode commands matching Python CLI parity
 
 ## What this demonstrates
 
