@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.15
+
+2026-06-08
+
+- Added `stigpilot archive-output` to validate a packet and create a ZIP archive for local handoff.
+- Added archive regression tests for success, overwrite protection, and incomplete packet refusal.
+- Documented packet archiving in the README packet workflow.
+
 ## 1.0.14
 
 2026-06-08

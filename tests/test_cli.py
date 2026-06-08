@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import shutil
+import zipfile
 
 from typer.testing import CliRunner
 
@@ -191,6 +192,66 @@ def test_cli_inspect_output_accepts_government_mode_packet():
 
     assert result.exit_code == 0
     assert "Packet is handoff-ready" in result.output
+
+
+def test_cli_archive_output_writes_zip_after_inspection(tmp_path: Path):
+    out = tmp_path / "packet"
+    archive = tmp_path / "packet.zip"
+    packet_result = runner.invoke(
+        app,
+        [
+            "packet",
+            str(ROOT / "examples" / "sample_input" / "old.xml"),
+            str(ROOT / "examples" / "sample_input" / "new.xml"),
+            "--out",
+            str(out),
+        ],
+    )
+
+    archive_result = runner.invoke(app, ["archive-output", str(out), "--out", str(archive)])
+
+    assert packet_result.exit_code == 0
+    assert archive_result.exit_code == 0
+    assert "Wrote packet archive" in archive_result.output
+    assert archive.exists()
+    with zipfile.ZipFile(archive) as zip_file:
+        names = set(zip_file.namelist())
+    assert "packet/START_HERE.md" in names
+    assert "packet/change-brief.md" in names
+    assert "packet/remediation-backlog.csv" in names
+
+
+def test_cli_archive_output_rejects_existing_zip_without_force(tmp_path: Path):
+    out = tmp_path / "packet"
+    archive = tmp_path / "packet.zip"
+    packet_result = runner.invoke(
+        app,
+        [
+            "packet",
+            str(ROOT / "examples" / "sample_input" / "old.xml"),
+            str(ROOT / "examples" / "sample_input" / "new.xml"),
+            "--out",
+            str(out),
+        ],
+    )
+    archive.write_text("already here", encoding="utf-8")
+
+    archive_result = runner.invoke(app, ["archive-output", str(out), "--out", str(archive)])
+
+    assert packet_result.exit_code == 0
+    assert archive_result.exit_code == 1
+    assert "Archive already exists" in archive_result.output
+
+
+def test_cli_archive_output_rejects_incomplete_packet(tmp_path: Path):
+    out = tmp_path / "packet"
+    out.mkdir()
+    (out / "START_HERE.md").write_text("# Packet\n", encoding="utf-8")
+
+    result = runner.invoke(app, ["archive-output", str(out), "--out", str(tmp_path / "packet.zip")])
+
+    assert result.exit_code == 1
+    assert "Archive skipped because packet is incomplete" in result.output
 
 
 def test_cli_drafts_writes_review_only_markdown(tmp_path: Path):

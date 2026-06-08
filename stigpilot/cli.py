@@ -6,6 +6,7 @@ import importlib.util
 import json
 import re
 import sys
+import zipfile
 from pathlib import Path
 from typing import Optional
 
@@ -1025,28 +1026,24 @@ def config_example(
     _safe_write(lambda: out.write_text(CONFIG_EXAMPLE, encoding="utf-8"), out, "config example")
 
 
-@app.command("inspect-output")
-def inspect_output(
-    packet_dir: Path = typer.Argument(..., help="Generated STIGPilot packet directory to inspect."),
-) -> None:
-    """Check whether a generated packet is complete enough to hand off."""
-
-    if not packet_dir.exists():
-        console.print(f"[red]Packet directory not found:[/red] {packet_dir}")
-        raise typer.Exit(1)
-    if not packet_dir.is_dir():
-        console.print(f"[red]Packet path is not a directory:[/red] {packet_dir}")
-        raise typer.Exit(1)
-
+def _packet_expected_files(packet_dir: Path) -> list[str]:
     start_here = packet_dir / "START_HERE.md"
     start_here_text = start_here.read_text(encoding="utf-8", errors="replace") if start_here.exists() else ""
     expected_files = list(PACKET_COMMON_FILES)
     if any(filename in start_here_text for filename in PACKET_PYTHON_EXTRA_FILES):
         expected_files.extend(PACKET_PYTHON_EXTRA_FILES)
+    return expected_files
+
+
+def _inspect_packet(packet_dir: Path) -> tuple[list[tuple[str, bool, str]], dict[str, object]]:
+    if not packet_dir.exists():
+        return [("<packet directory>", False, "missing")], {}
+    if not packet_dir.is_dir():
+        return [("<packet directory>", False, "not a directory")], {}
 
     rows: list[tuple[str, bool, str]] = []
     change_summary: dict[str, object] = {}
-    for filename in expected_files:
+    for filename in _packet_expected_files(packet_dir):
         path = packet_dir / filename
         if not path.exists():
             rows.append((filename, False, "missing"))
@@ -1063,6 +1060,14 @@ def inspect_output(
                 rows.append((filename, False, f"invalid JSON: {exc}"))
         else:
             rows.append((filename, True, f"{path.stat().st_size} bytes"))
+    return rows, change_summary
+
+
+def _print_packet_inspection(packet_dir: Path, rows: list[tuple[str, bool, str]], change_summary: dict[str, object]) -> None:
+    if not packet_dir.exists():
+        console.print(f"[red]Packet directory not found:[/red] {packet_dir}")
+    elif not packet_dir.is_dir():
+        console.print(f"[red]Packet path is not a directory:[/red] {packet_dir}")
 
     table = Table(title="STIGPilot Packet Inspection", header_style="bold blue", border_style="dim", show_lines=False)
     table.add_column("File")
@@ -1081,12 +1086,52 @@ def inspect_output(
             f"{change_summary.get('evidence_update_likely', 0)} evidence-update-likely."
         )
 
+
+@app.command("inspect-output")
+def inspect_output(
+    packet_dir: Path = typer.Argument(..., help="Generated STIGPilot packet directory to inspect."),
+) -> None:
+    """Check whether a generated packet is complete enough to hand off."""
+
+    rows, change_summary = _inspect_packet(packet_dir)
+    _print_packet_inspection(packet_dir, rows, change_summary)
+
     if all(ok for _, ok, _ in rows):
         console.print(f"[green]Packet is handoff-ready:[/green] {packet_dir}")
         console.print(f"[bold]Start here:[/bold] {packet_dir / 'START_HERE.md'}")
     else:
         console.print(f"[red]Packet is incomplete:[/red] {packet_dir}")
         raise typer.Exit(1)
+
+
+@app.command("archive-output")
+def archive_output(
+    packet_dir: Path = typer.Argument(..., help="Generated STIGPilot packet directory to archive."),
+    out: Optional[Path] = typer.Option(None, "--out", help="ZIP path to write. Defaults to PACKET_DIR.zip."),
+    force: bool = typer.Option(False, "--force", help="Overwrite an existing ZIP file."),
+) -> None:
+    """Validate a packet and write a ZIP archive for local handoff."""
+
+    rows, change_summary = _inspect_packet(packet_dir)
+    _print_packet_inspection(packet_dir, rows, change_summary)
+    if not all(ok for _, ok, _ in rows):
+        console.print(f"[red]Archive skipped because packet is incomplete:[/red] {packet_dir}")
+        raise typer.Exit(1)
+
+    zip_path = out or packet_dir.with_suffix(".zip")
+    if zip_path.exists() and not force:
+        console.print(f"[red]Archive already exists:[/red] {zip_path}")
+        console.print("Use --force to overwrite it.")
+        raise typer.Exit(1)
+    zip_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(packet_dir.rglob("*")):
+            if path.is_file():
+                archive.write(path, path.relative_to(packet_dir.parent))
+
+    console.print(f"[green]Wrote packet archive:[/green] {zip_path}")
+    console.print(f"[bold]Archived folder:[/bold] {packet_dir}")
 
 
 @app.command()
