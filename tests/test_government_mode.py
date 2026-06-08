@@ -115,6 +115,7 @@ def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
     assert "### Acceptance Criteria" in issues
     assert "# STIGPilot Government Mode Packet" in start_here
     assert "Open These First" in start_here
+    assert "Next 15 Minutes" in start_here
     assert changes["source"]["old_file"] == str(Path("examples") / "sample_input" / "old.xml")
     assert changes["source"]["new_file"] == str(Path("examples") / "sample_input" / "new.xml")
 

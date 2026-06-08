@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.12
+
+2026-06-08
+
+- Added role-specific "Next 15 Minutes" guidance to generated Python and Government Mode packet indexes.
+- Updated tests so packet indexes must include the role-action section.
+
 ## 1.0.11
 
 2026-06-08

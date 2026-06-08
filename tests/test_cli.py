@@ -19,6 +19,7 @@ def test_cli_demo_writes_reports(tmp_path: Path):
     assert result.exit_code == 0
     assert "Start here" in result.output
     assert (out / "START_HERE.md").exists()
+    assert "Next 15 Minutes" in (out / "START_HERE.md").read_text(encoding="utf-8")
     assert (out / "change-brief.md").exists()
     assert (out / "change-brief.html").exists()
     assert (out / "changes.json").exists()
@@ -140,6 +141,7 @@ def test_cli_packet_generates_complete_packet(tmp_path: Path):
     assert result.exit_code == 0
     assert "Start here" in result.output
     assert (out / "START_HERE.md").exists()
+    assert "Next 15 Minutes" in (out / "START_HERE.md").read_text(encoding="utf-8")
     assert (out / "change-brief.md").exists()
     assert (out / "change-brief.html").exists()
     assert (out / "changes.json").exists()

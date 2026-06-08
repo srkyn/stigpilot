@@ -22,6 +22,15 @@ Start here if someone handed you this folder and you need to know what matters.
 3. `evidence-checklist.md` when validation steps or evidence requests need refresh.
 4. `github-issues.md` for copy-paste-ready issue drafts.
 
+## Next 15 Minutes
+
+| Role | Do this first |
+| --- | --- |
+| Security analyst | Read `change-brief.md`, then mark the high-priority and implementation-likely rows in `remediation-backlog.csv`. |
+| Sysadmin or engineer | Filter `remediation-backlog.csv` by your owner group, then review changed fix text before reusing old implementation notes. |
+| GRC or evidence owner | Open `evidence-checklist.md` and refresh requests for controls marked evidence update likely. |
+| Manager or lead | Use the summary counts and top actions to decide which team needs the first review block. |
+
 ## File Map
 
 | File | Use it for |
