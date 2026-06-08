@@ -225,6 +225,8 @@ directly. Place both files in the same folder. Run `STIGPilot.cmd` with your STI
 XML files as arguments.
 
 ```powershell
+.\tools\STIGPilot-Gov.ps1 -Command doctor
+
 .\tools\STIGPilot-Gov.ps1 -Command packet `
   -Old examples\sample_input\old.xml `
   -New examples\sample_input\new.xml `

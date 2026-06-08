@@ -14,7 +14,7 @@ Examples:
 
 [CmdletBinding()]
 param(
-    [ValidateSet("help", "parse", "diff", "evidence", "packet")]
+    [ValidateSet("help", "doctor", "parse", "diff", "evidence", "packet")]
     [string]$Command = "help",
 
     [Alias("Input")]
@@ -35,12 +35,15 @@ $ErrorActionPreference = "Stop"
 $SampleInputDir = Join-Path $PSScriptRoot "..\examples\sample_input"
 $SampleOldPath = Join-Path $SampleInputDir "old.xml"
 $SampleNewPath = Join-Path $SampleInputDir "new.xml"
+$SampleOldExample = "examples\sample_input\old.xml"
+$SampleNewExample = "examples\sample_input\new.xml"
 
 if ($PSBoundParameters.Count -eq 0) {
     Write-Host "STIGPilot Government Mode" -ForegroundColor Cyan
     Write-Host "No-Python, no-install STIG change triage for Windows"
     Write-Host ""
     Write-Host "Usage:"
+    Write-Host "  .\STIGPilot-Gov.ps1 -Command doctor"
     Write-Host "  .\STIGPilot-Gov.ps1 -Command packet -Old old.xml -New new.xml -OutDir output\packet"
     Write-Host ""
     Write-Host "Required files:"
@@ -77,15 +80,17 @@ function Write-GovHelp {
     Write-Host ""
     Write-Host "Commands:"
     Write-Host "  help      Show this help"
+    Write-Host "  doctor    Check PowerShell, sample files, parser, diff, and output writability"
     Write-Host "  parse     Parse one XCCDF/XML file to CSV and/or JSON"
     Write-Host "  diff      Compare old/new XCCDF/XML files and write a Markdown brief/backlog CSV"
     Write-Host "  evidence  Generate an evidence checklist from one XCCDF/XML file"
     Write-Host "  packet    Generate change brief, backlog CSV, ticket exports, changes JSON, and evidence checklist"
     Write-Host ""
     Write-Host "Examples:"
-    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old `"$SampleOldPath`" -New `"$SampleNewPath`" -OutDir output\gov"
-    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old `"$SampleOldPath`" -New `"$SampleNewPath`" -OutDir output\gov-windows -Impact high_priority_review -Owner `"Endpoint/Windows Admin`""
-    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command parse -Input `"$SampleNewPath`" -Csv output\gov\controls.csv -Json output\gov\controls.json"
+    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command doctor"
+    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old $SampleOldExample -New $SampleNewExample -OutDir output\gov"
+    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old $SampleOldExample -New $SampleNewExample -OutDir output\gov-windows -Impact high_priority_review -Owner `"Endpoint/Windows Admin`""
+    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command parse -Input $SampleNewExample -Csv output\gov\controls.csv -Json output\gov\controls.json"
     Write-Host ""
     Write-Host "Notes:"
     Write-Host "  - Uses only built-in PowerShell/.NET features."
@@ -818,6 +823,97 @@ function Write-GovSummaryRow {
     Write-Host ("{0,-32} {1}" -f $Label, $Value)
 }
 
+function Write-GovDoctorRow {
+    param(
+        [Parameter(Mandatory = $true)][string]$Check,
+        [Parameter(Mandatory = $true)][bool]$Passed,
+        [Parameter(Mandatory = $true)][string]$Details
+    )
+    $status = if ($Passed) { "PASS" } else { "FAIL" }
+    $color = if ($Passed) { "Green" } else { "Red" }
+    Write-Host ("{0,-28} " -f $Check) -NoNewline
+    Write-Host ("{0,-6}" -f $status) -ForegroundColor $color -NoNewline
+    Write-Host $Details
+}
+
+function Invoke-Doctor {
+    $failures = 0
+    Write-Host ""
+    Write-GovRule
+    Write-Host "STIGPilot Government Mode Doctor" -ForegroundColor Cyan
+    Write-GovRule
+
+    $psOk = $PSVersionTable.PSVersion.Major -ge 5
+    if (-not $psOk) { $failures += 1 }
+    Write-GovDoctorRow "PowerShell version" $psOk "$($PSVersionTable.PSVersion)"
+
+    $xmlOk = $false
+    try {
+        [void][System.Xml.XmlDocument]
+        $xmlOk = $true
+    }
+    catch {
+        $xmlOk = $false
+    }
+    if (-not $xmlOk) { $failures += 1 }
+    Write-GovDoctorRow ".NET XML support" $xmlOk "System.Xml.XmlDocument"
+
+    $oldExists = Test-Path -LiteralPath $SampleOldPath -PathType Leaf
+    $newExists = Test-Path -LiteralPath $SampleNewPath -PathType Leaf
+    if (-not $oldExists) { $failures += 1 }
+    if (-not $newExists) { $failures += 1 }
+    Write-GovDoctorRow "Sample old XML" $oldExists $SampleOldExample
+    Write-GovDoctorRow "Sample new XML" $newExists $SampleNewExample
+
+    $outputOk = $false
+    $doctorDir = Join-Path $PSScriptRoot "..\output\gov-doctor"
+    try {
+        Ensure-Directory $doctorDir
+        $probePath = Join-Path $doctorDir ".write-test"
+        "ok" | Set-Content -Encoding UTF8 -Path $probePath
+        Remove-Item -LiteralPath $probePath -Force
+        $outputOk = $true
+    }
+    catch {
+        $outputOk = $false
+    }
+    if (-not $outputOk) { $failures += 1 }
+    Write-GovDoctorRow "Output writable" $outputOk "output\gov-doctor"
+
+    $parseOk = $false
+    $diffOk = $false
+    if ($oldExists -and $newExists) {
+        try {
+            $oldDoc = Get-StigDocument $SampleOldPath
+            $newDoc = Get-StigDocument $SampleNewPath
+            $parseOk = ($oldDoc.controls.Count -gt 0 -and $newDoc.controls.Count -gt 0)
+            $changes = @(Compare-StigDocuments $oldDoc $newDoc)
+            $diffOk = ($changes.Count -ge 0)
+            $parseDetails = "$($oldDoc.controls.Count) old / $($newDoc.controls.Count) new controls"
+            $diffDetails = "$($changes.Count) change(s)"
+        }
+        catch {
+            $parseDetails = $_.Exception.Message
+            $diffDetails = $_.Exception.Message
+        }
+    }
+    else {
+        $parseDetails = "sample files missing"
+        $diffDetails = "sample files missing"
+    }
+    if (-not $parseOk) { $failures += 1 }
+    if (-not $diffOk) { $failures += 1 }
+    Write-GovDoctorRow "Sample parse" $parseOk $parseDetails
+    Write-GovDoctorRow "Sample diff" $diffOk $diffDetails
+    Write-GovRule
+
+    if ($failures -gt 0) {
+        Write-Host "Doctor found $failures issue(s). Fix the failed checks above before relying on Government Mode." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "Government Mode is ready. Start with: .\tools\STIGPilot-Gov.ps1 -Command packet -Old examples\sample_input\old.xml -New examples\sample_input\new.xml -OutDir output\gov" -ForegroundColor Green
+}
+
 function Write-ChangeBrief {
     param($OldDoc, $NewDoc, $Changes, [string]$PathValue)
     Ensure-ParentDirectory $PathValue
@@ -1043,6 +1139,7 @@ function Write-DiffSummary {
 try {
     switch ($Command) {
         "help" { Write-GovHelp }
+        "doctor" { Invoke-Doctor }
         "parse" { Invoke-Parse }
         "diff" { Invoke-Diff }
         "evidence" { Invoke-Evidence }

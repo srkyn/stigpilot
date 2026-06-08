@@ -60,6 +60,12 @@ file with `Manual-xccdf` in the name.
 From the repository root:
 
 ```powershell
+.\tools\STIGPilot-Gov.ps1 -Command doctor
+```
+
+The doctor command checks PowerShell, built-in XML support, sample files, parser behavior, diff behavior, and output writability.
+
+```powershell
 .\tools\STIGPilot-Gov.ps1 -Command packet `
   -Old examples\sample_input\old.xml `
   -New examples\sample_input\new.xml `

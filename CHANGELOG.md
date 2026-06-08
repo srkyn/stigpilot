@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.4
+
+2026-06-08
+
+- Added `doctor` to Government Mode for a no-Python health check.
+- Updated Government Mode help and docs so first-run users can verify PowerShell, sample XMLs, parser behavior, diff behavior, and output writability.
+- Kept Government Mode help examples repo-relative and copy-friendly.
+
 ## 1.0.3
 
 2026-06-08

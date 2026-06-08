@@ -51,6 +51,18 @@ def test_government_mode_help_runs():
     assert result.returncode == 0
     assert "STIGPilot Government Mode" in result.stdout
     assert "PowerShell-only" in result.stdout
+    assert "doctor" in result.stdout
+
+
+def test_government_mode_doctor_runs():
+    result = run_gov_mode("-Command", "doctor")
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "STIGPilot Government Mode Doctor" in result.stdout
+    assert "PowerShell version" in result.stdout
+    assert "Sample parse" in result.stdout
+    assert "Sample diff" in result.stdout
+    assert "Government Mode is ready" in result.stdout
 
 
 def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
