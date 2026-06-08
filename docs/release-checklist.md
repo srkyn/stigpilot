@@ -18,3 +18,4 @@ Run this before tagging a STIGPilot release:
 - [ ] Verify official-tool and compliance language does not imply endorsement or validation
 - [ ] Confirm generated artifacts stop at review/planning and do not apply system changes
 - [ ] Review generated Markdown in raw and rendered form
+- [ ] Keep public release notes user-facing: summarize changes and upgrade value, but do not include local validation commands, internal tooling, machine paths, or process details
