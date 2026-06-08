@@ -2,6 +2,16 @@
 
 Use these as quick starting points. Replace `old.xml` and `new.xml` with the XCCDF files from the older and newer STIG releases.
 
+Recommended local layout:
+
+```text
+stigs/<product>/<old-release>/*_Manual-xccdf.xml
+stigs/<product>/<new-release>/*_Manual-xccdf.xml
+output/<product>-<old-release>-to-<new-release>/
+```
+
+See [Where to Put STIG Files](where-to-put-stigs.md) if you are not sure which extracted file to use.
+
 ## Security Analyst
 
 Goal: understand what changed and what needs review first.

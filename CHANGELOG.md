@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.17
+
+2026-06-08
+
+- Added a local `stigs/` workspace README that explains where to keep official STIG XML inputs.
+- Added git ignore rules for downloaded STIG ZIP, XML, checklist, and XCCDF working files under `stigs/`.
+- Updated `stigpilot quickstart`, README, and workflow docs with clearer input and output folder conventions.
+
 ## 1.0.16
 
 2026-06-08

@@ -10,3 +10,10 @@ build/
 *.egg-info/
 output/
 .tmp/
+
+# Local official STIG downloads and extracted XMLs.
+# Keep sanitized examples in examples/, but do not commit downloaded vendor or DISA ZIP/XML files.
+stigs/**/*.zip
+stigs/**/*.xml
+stigs/**/*.ckl
+stigs/**/*.xccdf

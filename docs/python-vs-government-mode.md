@@ -42,7 +42,7 @@ stigpilot demo
 For real STIG files:
 
 ```bash
-stigpilot packet old.xml new.xml --out output/packet
+stigpilot packet stigs/chrome-windows/v2r10/old.xml stigs/chrome-windows/v2r11/new.xml --out output/chrome-review
 ```
 
 The Python CLI is the primary STIGPilot experience. It includes richer terminal output, HTML reports, Chrome demo support, batch portfolio comparison, config support, and the broadest test coverage.
@@ -53,19 +53,19 @@ Use this path when the environment needs built-in Windows tooling only:
 
 ```powershell
 .\tools\STIGPilot-Gov.ps1 -Command doctor
-.\tools\STIGPilot-Gov.ps1 -Command packet -Old old.xml -New new.xml -OutDir output\gov
+.\tools\STIGPilot-Gov.ps1 -Command packet -Old stigs\chrome-windows\v2r10\old.xml -New stigs\chrome-windows\v2r11\new.xml -OutDir output\chrome-gov
 ```
 
 Or use the launcher:
 
 ```powershell
-tools\STIGPilot.cmd -Command packet -Old old.xml -New new.xml -OutDir output\gov
+tools\STIGPilot.cmd -Command packet -Old stigs\chrome-windows\v2r10\old.xml -New stigs\chrome-windows\v2r11\new.xml -OutDir output\chrome-gov
 ```
 
 Government Mode is intentionally smaller. It focuses on the core workflow: parse, compare, summarize, build a backlog, prepare evidence requests, and create local ticket exports.
 
 ## Practical Recommendation
 
-Start with `stigpilot quickstart` on machines where Python is allowed. Start with `.\tools\STIGPilot-Gov.ps1 -Command doctor` on locked-down Windows machines.
+Start with `stigpilot quickstart` on machines where Python is allowed. Start with `.\tools\STIGPilot-Gov.ps1 -Command doctor` on locked-down Windows machines. For input folder guidance, see [Where to Put STIG Files](where-to-put-stigs.md).
 
 If both modes are available, use the Python CLI for the normal analyst workflow and keep Government Mode as the portable fallback for restricted hosts.

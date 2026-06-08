@@ -57,6 +57,19 @@ The XCCDF file is the one that starts with your STIG name and ends in `xccdf.xml
 It is not the benchmark zip, the checklist file, or the SCAP content. It is just the
 file with `Manual-xccdf` in the name.
 
+Recommended local folder layout:
+
+```text
+stigs/
+  chrome-windows/
+    v2r10/
+      U_Google_Chrome_Current_Windows_V2R10_STIG_Manual-xccdf.xml
+    v2r11/
+      U_Google_Chrome_Current_Windows_V2R11_STIG_Manual-xccdf.xml
+```
+
+Generated reports should go under `output/`, for example `output/chrome-windows-v2r10-to-v2r11/`.
+
 ## Quick Start
 
 From the repository root:

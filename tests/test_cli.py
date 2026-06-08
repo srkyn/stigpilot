@@ -356,8 +356,12 @@ def test_cli_quickstart_shows_python_and_government_paths():
     assert "Government Mode" in result.output
     assert 'python -m pip install -e ".[dev]"' in result.output
     assert "stigpilot demo" in result.output
+    assert "stigs/<product>/<release>/" in result.output
+    assert "docs/where-to-put-stigs.md" in result.output
+    assert "archive-output" in result.output
     assert "output/demo/START_HERE.md" in result.output
     assert "STIGPilot-Gov.ps1" in result.output
+    assert "chrome-gov.zip" in result.output
 
 
 def test_cli_config_example_writes_file(tmp_path: Path):

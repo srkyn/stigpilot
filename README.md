@@ -88,6 +88,33 @@ implementation work, or evidence refresh. Prioritize high-severity additions or
 severity increases, then review remediation text changes before reusing old tickets.
 ```
 
+## Where to keep STIG files
+
+Use `stigs/` as your local input workspace and `output/` for generated reports:
+
+```text
+stigs/
+  chrome-windows/
+    v2r10/
+      U_Google_Chrome_Current_Windows_V2R10_STIG_Manual-xccdf.xml
+    v2r11/
+      U_Google_Chrome_Current_Windows_V2R11_STIG_Manual-xccdf.xml
+
+output/
+  chrome-windows-v2r10-to-v2r11/
+```
+
+Then run:
+
+```bash
+stigpilot packet \
+  stigs/chrome-windows/v2r10/U_Google_Chrome_Current_Windows_V2R10_STIG_Manual-xccdf.xml \
+  stigs/chrome-windows/v2r11/U_Google_Chrome_Current_Windows_V2R11_STIG_Manual-xccdf.xml \
+  --out output/chrome-windows-v2r10-to-v2r11
+```
+
+Open `output/chrome-windows-v2r10-to-v2r11/START_HERE.md` first. See [Where to Put STIG Files](docs/where-to-put-stigs.md) for the full layout, Government Mode example, and git safety notes.
+
 ## Artifact preview
 
 STIGPilot is built around reviewable outputs, not hidden scoring. A typical packet answers four questions:
@@ -314,7 +341,7 @@ stigpilot diff examples/sample_input/old.xml examples/sample_input/new.xml --out
 Generate a complete local workflow packet from two STIG files:
 
 ```bash
-stigpilot packet examples/sample_input/old.xml examples/sample_input/new.xml --out output/packet
+stigpilot packet old.xml new.xml --out output/packet
 stigpilot inspect-output output/packet
 stigpilot archive-output output/packet --out output/packet.zip
 ```

@@ -516,6 +516,10 @@ def quickstart() -> None:
         return rich_escape(value)
 
     console.print("[bold]Pick the path that fits your environment.[/bold]")
+    console.print(
+        "Keep official STIG XMLs under [cyan]stigs/<product>/<release>/[/cyan] "
+        "and write reports under [cyan]output/<review-name>/[/cyan]."
+    )
     console.print("")
 
     python_table = Table(title="Python CLI", header_style="bold blue", border_style="dim", show_lines=False)
@@ -526,7 +530,11 @@ def quickstart() -> None:
     python_table.add_row("Generate demo packet", cmd("stigpilot demo"))
     python_table.add_row(
         "Compare two STIG files",
-        cmd("stigpilot packet old.xml new.xml --out output/packet"),
+        cmd("stigpilot packet stigs/chrome-windows/v2r10/old.xml stigs/chrome-windows/v2r11/new.xml --out output/chrome-review"),
+    )
+    python_table.add_row(
+        "Archive handoff packet",
+        cmd("stigpilot archive-output output/chrome-review --out output/chrome-review.zip"),
     )
 
     gov_table = Table(title="Government Mode", header_style="bold green", border_style="dim", show_lines=False)
@@ -535,16 +543,27 @@ def quickstart() -> None:
     gov_table.add_row("Check PowerShell setup", cmd(r".\tools\STIGPilot-Gov.ps1 -Command doctor"))
     gov_table.add_row(
         "Generate local packet",
-        cmd(r".\tools\STIGPilot-Gov.ps1 -Command packet -Old old.xml -New new.xml -OutDir output\gov"),
+        cmd(
+            r".\tools\STIGPilot-Gov.ps1 -Command packet -Old stigs\chrome-windows\v2r10\old.xml "
+            r"-New stigs\chrome-windows\v2r11\new.xml -OutDir output\chrome-gov"
+        ),
     )
     gov_table.add_row(
         "Use launcher",
-        cmd(r"tools\STIGPilot.cmd -Command packet -Old old.xml -New new.xml -OutDir output\gov"),
+        cmd(
+            r"tools\STIGPilot.cmd -Command packet -Old stigs\chrome-windows\v2r10\old.xml "
+            r"-New stigs\chrome-windows\v2r11\new.xml -OutDir output\chrome-gov"
+        ),
+    )
+    gov_table.add_row(
+        "Archive handoff packet",
+        cmd(r".\tools\STIGPilot-Gov.ps1 -Command archive -OutDir output\chrome-gov -Zip output\chrome-gov.zip"),
     )
 
     console.print(python_table)
     console.print(gov_table)
     console.print("[bold]Start here:[/bold] run [cyan]stigpilot demo[/cyan], then open [cyan]output/demo/START_HERE.md[/cyan].")
+    console.print("For real files, see [cyan]docs/where-to-put-stigs.md[/cyan].")
     console.print("Government Mode uses built-in PowerShell/.NET only and is intentionally smaller than the Python CLI.")
 
 
