@@ -44,6 +44,7 @@ stigpilot quickstart
 Generated files:
 
 ```text
+output/demo/START_HERE.md
 output/demo/change-brief.md
 output/demo/change-brief.html
 output/demo/changes.json
@@ -249,6 +250,7 @@ XML files as arguments.
 Generated files:
 
 ```text
+output/gov/START_HERE.md
 output/gov/change-brief.md
 output/gov/remediation-backlog.csv
 output/gov/changes.json

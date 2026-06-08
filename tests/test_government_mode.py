@@ -82,6 +82,7 @@ def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
     assert result.returncode == 0, result.stdout + result.stderr
     assert "STIGPilot Government Mode Diff Summary" in result.stdout
     assert "Start here" in result.stdout
+    assert (out / "START_HERE.md").exists()
     assert (out / "change-brief.md").exists()
     assert (out / "remediation-backlog.csv").exists()
     assert (out / "changes.json").exists()
@@ -96,6 +97,7 @@ def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
     jira = (out / "jira-import.csv").read_text(encoding="utf-8-sig")
     servicenow = (out / "servicenow-import.csv").read_text(encoding="utf-8-sig")
     issues = (out / "github-issues.md").read_text(encoding="utf-8")
+    start_here = (out / "START_HERE.md").read_text(encoding="utf-8")
     changes = json.loads((out / "changes.json").read_text(encoding="utf-8-sig"))
 
     assert "# STIGPilot Government Mode Change Brief" in brief
@@ -111,6 +113,8 @@ def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
     assert "assignment_group" in servicenow
     assert "# STIGPilot Government Mode GitHub Issue Drafts" in issues
     assert "### Acceptance Criteria" in issues
+    assert "# STIGPilot Government Mode Packet" in start_here
+    assert "Open These First" in start_here
     assert changes["source"]["old_file"] == str(Path("examples") / "sample_input" / "old.xml")
     assert changes["source"]["new_file"] == str(Path("examples") / "sample_input" / "new.xml")
 

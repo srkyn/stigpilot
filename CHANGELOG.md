@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.10
+
+2026-06-08
+
+- Added `START_HERE.md` to Python comparison packets, demo output, Chrome demo output, portfolio sub-packets, and Government Mode packets.
+- Updated tests so generated packets must include the packet index.
+- Regenerated committed sample outputs with the new packet index.
+
 ## 1.0.9
 
 2026-06-08

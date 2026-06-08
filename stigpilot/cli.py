@@ -31,7 +31,7 @@ from .exporters import (
     write_ticket_csv,
 )
 from .parser import StigParseError, parse_stig
-from .reports import change_brief, change_summary_counts, evidence_checklist, filter_by_severity, html_change_brief, manager_summary_report, single_stig_brief, write_text_report
+from .reports import change_brief, change_summary_counts, evidence_checklist, filter_by_severity, html_change_brief, impact_label, manager_summary_report, priority_changes, single_stig_brief, write_text_report
 from .taxonomy import suggested_owner
 
 app = typer.Typer(
@@ -266,9 +266,90 @@ def _filter_changes(
     return filtered
 
 
+def _packet_start_here(old_doc, new_doc, changes, outputs: dict[str, Path], config: StigPilotConfig | None = None) -> str:
+    counts = change_summary_counts(changes)
+    top_actions = priority_changes(changes)[:5]
+    output_dir = next(iter(outputs.values())).parent if outputs else Path(".")
+
+    lines = [
+        "# STIGPilot Packet",
+        "",
+        "Start here if someone handed you this folder and you need to know what matters.",
+        "",
+        "## Summary",
+        "",
+        f"- Old controls: {len(old_doc.controls)}",
+        f"- New controls: {len(new_doc.controls)}",
+        f"- Total changes: {counts['total']}",
+        f"- Added controls: {counts['added']}",
+        f"- Removed controls: {counts['removed']}",
+        f"- Modified controls: {counts['modified']}",
+        f"- Severity changes: {counts['severity_changed']}",
+        f"- High-priority review: {counts['high_priority_review']}",
+        f"- Implementation change likely: {counts['implementation_change_likely']}",
+        f"- Evidence update likely: {counts['evidence_update_likely']}",
+        "",
+        "## Open These First",
+        "",
+        "1. `change-brief.md` for analyst triage and priority actions.",
+        "2. `manager-summary.md` for a short leadership readout.",
+        "3. `remediation-backlog.csv` for backlog grooming or ticket prep.",
+        "4. `evidence-checklist.md` when validation steps or evidence requests need refresh.",
+        "",
+        "## File Map",
+        "",
+        "| File | Use it for |",
+        "| --- | --- |",
+    ]
+
+    file_purposes = {
+        "Change brief": "Analyst-ready change summary and detailed changed-control table.",
+        "HTML change brief": "Self-contained browser-friendly version of the change brief.",
+        "Changes JSON": "Machine-readable export for local automation or review.",
+        "Manager summary": "Short readout for managers and team leads.",
+        "Remediation backlog": "CSV backlog for triage, ownership, notes, and status tracking.",
+        "Evidence checklist": "Owner-grouped evidence requests and validation metadata.",
+        "Jira import": "Local CSV shaped for Jira import review.",
+        "ServiceNow import": "Local CSV shaped for ServiceNow import review.",
+        "GitHub issues": "Copy-paste-ready Markdown issue drafts.",
+        "Remediation drafts": "Review-only implementation notes. STIGPilot does not apply changes.",
+    }
+
+    for name, path in outputs.items():
+        try:
+            display_path = path.relative_to(output_dir).as_posix()
+        except ValueError:
+            display_path = path.name
+        lines.append(f"| `{display_path}` | {file_purposes.get(name, 'Generated STIGPilot artifact.')} |")
+
+    lines.extend(["", "## Top Actions", ""])
+    if not top_actions:
+        lines.append("- No changes were detected in this packet.")
+    else:
+        for index, change in enumerate(top_actions, start=1):
+            control = change.current_control
+            control_id = change.vuln_id or change.rule_id or (control.vuln_id if control else "") or (control.rule_id if control else "") or "unknown-control"
+            title = control.title if control else "Removed control"
+            owner = suggested_owner(control, config)
+            lines.append(
+                f"{index}. `{control_id}` - {title} ({impact_label(change.impact)}, {owner}): {change.reason}"
+            )
+
+    lines.extend(
+        [
+            "",
+            "## Reminder",
+            "",
+            "STIGPilot is a local workflow helper for change triage, remediation planning, evidence preparation, and ticket exports. It does not scan systems, validate compliance, or replace official DISA tooling.",
+        ]
+    )
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigPilotConfig | None = None) -> dict[str, Path]:
     out.mkdir(parents=True, exist_ok=True)
     outputs = {
+        "Start here": out / "START_HERE.md",
         "Change brief": out / "change-brief.md",
         "HTML change brief": out / "change-brief.html",
         "Changes JSON": out / "changes.json",
@@ -280,6 +361,7 @@ def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigP
         "GitHub issues": out / "github-issues.md",
         "Remediation drafts": out / "remediation-drafts.md",
     }
+    content_outputs = {name: path for name, path in outputs.items() if name != "Start here"}
     write_text_report(outputs["Change brief"], change_brief(old_doc, new_doc, changes, config))
     write_text_report(outputs["HTML change brief"], html_change_brief(old_doc, new_doc, changes, config))
     write_changes_json(changes, outputs["Changes JSON"], old_doc, new_doc, config)
@@ -290,6 +372,7 @@ def _write_comparison_packet(old_doc, new_doc, changes, out: Path, config: StigP
     write_servicenow_csv(changes, outputs["ServiceNow import"], config)
     write_text_report(outputs["GitHub issues"], github_issue_markdown(changes, config))
     write_text_report(outputs["Remediation drafts"], remediation_draft_markdown(changes, config))
+    write_text_report(outputs["Start here"], _packet_start_here(old_doc, new_doc, changes, content_outputs, config))
     return outputs
 
 
@@ -584,7 +667,7 @@ def packet(
     outputs = _write_comparison_packet(old_doc, new_doc, changes, out, config)
     _print_outputs_table("STIGPilot Packet Generated", outputs)
     _print_change_summary(changes, list(outputs.values()))
-    console.print(f"[bold]Start here:[/bold] {outputs['Change brief']}")
+    console.print(f"[bold]Start here:[/bold] {outputs['Start here']}")
 
 
 @app.command("html")
@@ -783,6 +866,7 @@ def demo(
     changes = compare_documents(old_doc, new_doc)
 
     outputs = {
+        "Start here": out / "START_HERE.md",
         "Controls CSV": out / "controls.csv",
         "Controls JSON": out / "controls.json",
         "Brief": out / "brief.md",
@@ -797,6 +881,23 @@ def demo(
         "GitHub issues": out / "github-issues.md",
         "Remediation drafts": out / "remediation-drafts.md",
     }
+    comparison_outputs = {
+        name: path
+        for name, path in outputs.items()
+        if name
+        in {
+            "Change brief",
+            "HTML change brief",
+            "Changes JSON",
+            "Manager summary",
+            "Remediation backlog",
+            "Evidence checklist",
+            "Jira import",
+            "ServiceNow import",
+            "GitHub issues",
+            "Remediation drafts",
+        }
+    }
     write_controls_csv(new_doc, outputs["Controls CSV"])
     write_controls_json(new_doc, outputs["Controls JSON"])
     write_text_report(outputs["Brief"], single_stig_brief(new_doc, config=config))
@@ -810,6 +911,7 @@ def demo(
     write_servicenow_csv(changes, outputs["ServiceNow import"], config)
     write_text_report(outputs["GitHub issues"], github_issue_markdown(changes, config))
     write_text_report(outputs["Remediation drafts"], remediation_draft_markdown(changes, config))
+    write_text_report(outputs["Start here"], _packet_start_here(old_doc, new_doc, changes, comparison_outputs, config))
 
     table = Table(title="Demo Reports Generated", header_style="bold blue", border_style="dim", show_lines=False)
     table.add_column("Report")
@@ -819,6 +921,7 @@ def demo(
     console.print(table)
     _print_change_summary(changes, [])
     console.print("[bold]Start here:[/bold]")
+    console.print(f"- Open {outputs['Start here']}")
     console.print(f"- Open {outputs['Change brief']}")
     console.print(f"- Open {outputs['Manager summary']}")
     console.print(f"- Open {outputs['Remediation backlog']}")
@@ -885,7 +988,7 @@ def chrome_demo(
     table.add_row("Output directory", str(out))
     console.print(table)
     _print_outputs_table("Chrome Reports Generated", outputs)
-    console.print(f"[bold]Start here:[/bold] {outputs['Change brief']}")
+    console.print(f"[bold]Start here:[/bold] {outputs['Start here']}")
 
 
 @app.command("config-example")

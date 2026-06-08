@@ -987,6 +987,65 @@ function Write-ChangeBrief {
     ($lines -join [Environment]::NewLine).TrimEnd() | Set-Content -Encoding UTF8 -Path $PathValue
 }
 
+function Write-PacketStartHere {
+    param($OldDoc, $NewDoc, $Changes, [string]$PathValue, $Files)
+    Ensure-ParentDirectory $PathValue
+    $counts = Get-ChangeCounts $Changes
+    $top = @($Changes | Select-Object -First 5)
+
+    $lines = @()
+    $lines += "# STIGPilot Government Mode Packet"
+    $lines += ""
+    $lines += "Start here if someone handed you this folder and you need to know what matters."
+    $lines += ""
+    $lines += "## Summary"
+    $lines += ""
+    $lines += "- Old controls: $($OldDoc.controls.Count)"
+    $lines += "- New controls: $($NewDoc.controls.Count)"
+    $lines += "- Total changes: $($counts.total)"
+    $lines += "- Added controls: $($counts.added)"
+    $lines += "- Removed controls: $($counts.removed)"
+    $lines += "- Modified controls: $($counts.modified)"
+    $lines += "- Severity increases: $($counts.severity_increased)"
+    $lines += "- High-priority review: $($counts.high_priority_review)"
+    $lines += "- Implementation change likely: $($counts.implementation_change_likely)"
+    $lines += "- Evidence update likely: $($counts.evidence_update_likely)"
+    $lines += ""
+    $lines += "## Open These First"
+    $lines += ""
+    $lines += "1. ``change-brief.md`` for analyst triage and priority actions."
+    $lines += "2. ``remediation-backlog.csv`` for backlog grooming or ticket prep."
+    $lines += "3. ``evidence-checklist.md`` when validation steps or evidence requests need refresh."
+    $lines += "4. ``github-issues.md`` for copy-paste-ready issue drafts."
+    $lines += ""
+    $lines += "## File Map"
+    $lines += ""
+    $lines += "| File | Use it for |"
+    $lines += "| --- | --- |"
+    foreach ($file in $Files) {
+        $lines += "| ``$($file.name)`` | $($file.purpose) |"
+    }
+    $lines += ""
+    $lines += "## Top Actions"
+    $lines += ""
+    if ($top.Count -eq 0) {
+        $lines += "- No changes were detected in this packet."
+    }
+    else {
+        $index = 1
+        foreach ($change in $top) {
+            $controlId = if ($change.vuln_id) { $change.vuln_id } else { $change.rule_id }
+            $lines += "$index. ``$controlId`` - $($change.title) ($($change.impact_label), $($change.owner)): $($change.reason)"
+            $index += 1
+        }
+    }
+    $lines += ""
+    $lines += "## Reminder"
+    $lines += ""
+    $lines += "STIGPilot Government Mode is a local workflow helper for change triage, remediation planning, evidence preparation, and ticket exports. It does not scan systems, validate compliance, or replace official DISA tooling."
+    ($lines -join [Environment]::NewLine).TrimEnd() | Set-Content -Encoding UTF8 -Path $PathValue
+}
+
 function Write-EvidenceChecklist {
     param($Controls, [string]$PathValue)
     Ensure-ParentDirectory $PathValue
@@ -1085,6 +1144,7 @@ function Invoke-Packet {
     $jiraPath = Join-Path $OutDir "jira-import.csv"
     $serviceNowPath = Join-Path $OutDir "servicenow-import.csv"
     $githubPath = Join-Path $OutDir "github-issues.md"
+    $startHerePath = Join-Path $OutDir "START_HERE.md"
 
     Write-ChangeBrief $oldDoc $newDoc $changes $briefPath
     Write-BacklogCsv $changes $backlogPath
@@ -1093,15 +1153,26 @@ function Invoke-Packet {
     Write-JiraCsv $changes $jiraPath
     Write-ServiceNowCsv $changes $serviceNowPath
     Write-GitHubIssuesMarkdown $changes $githubPath
+    $packetFiles = @(
+        @{ name = "change-brief.md"; purpose = "Analyst-ready change summary and detailed changed-control table." },
+        @{ name = "remediation-backlog.csv"; purpose = "CSV backlog for triage, ownership, notes, and status tracking." },
+        @{ name = "changes.json"; purpose = "Machine-readable export for local automation or review." },
+        @{ name = "evidence-checklist.md"; purpose = "Owner-grouped evidence requests and validation metadata." },
+        @{ name = "jira-import.csv"; purpose = "Local CSV shaped for Jira import review." },
+        @{ name = "servicenow-import.csv"; purpose = "Local CSV shaped for ServiceNow import review." },
+        @{ name = "github-issues.md"; purpose = "Copy-paste-ready Markdown issue drafts." }
+    )
+    Write-PacketStartHere $oldDoc $newDoc $changes $startHerePath $packetFiles
 
     Write-DiffSummary $oldDoc $newDoc $changes $briefPath $backlogPath $allChanges.Count
+    Write-Host "Start here index: $startHerePath" -ForegroundColor Green
     Write-Host "Changes JSON: $jsonPath" -ForegroundColor Green
     Write-Host "Evidence checklist: $evidencePath" -ForegroundColor Green
     Write-Host "Jira import CSV: $jiraPath" -ForegroundColor Green
     Write-Host "ServiceNow import CSV: $serviceNowPath" -ForegroundColor Green
     Write-Host "GitHub issue drafts: $githubPath" -ForegroundColor Green
     Write-Host ""
-    Write-Host "Start here: $briefPath" -ForegroundColor Cyan
+    Write-Host "Start here: $startHerePath" -ForegroundColor Cyan
 }
 
 function Write-DiffSummary {
