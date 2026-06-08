@@ -213,6 +213,8 @@ Windows note: if `stigpilot` is not recognized after install, your Python Script
 
 Some government environments treat Python and pip packages as third-party software. STIGPilot includes a PowerShell-only fallback for restrictive Windows instances:
 
+Not sure which path to use? See [Python CLI vs Government Mode](docs/python-vs-government-mode.md).
+
 **No execution policy change required system-wide.** If PowerShell says scripts are
 disabled, run this first - it only affects the current process and resets when you
 close the window:

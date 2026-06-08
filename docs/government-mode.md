@@ -2,6 +2,8 @@
 
 Some government and regulated environments treat Python, pip packages, and open-source dependencies as third-party software that require separate approval. STIGPilot's primary CLI is still the best experience, but the repository also includes a PowerShell-only fallback for Windows environments where built-in tools are easier to approve.
 
+If you are deciding which path to use, start with [Python CLI vs Government Mode](python-vs-government-mode.md).
+
 Government Mode is located at:
 
 ```text

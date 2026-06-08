@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.7
+
+2026-06-08
+
+- Added a Python CLI vs Government Mode decision guide for restricted Windows and government environments.
+- Linked the guide from the README and Government Mode documentation.
+
 ## 1.0.6
 
 2026-06-08
