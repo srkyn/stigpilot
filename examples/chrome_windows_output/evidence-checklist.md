@@ -7,7 +7,7 @@ Controls included: 3
 
 ### V-CHROME-001 - Chrome Safe Browsing enhanced protection must be enabled
 
-- Severity: 🔴 HIGH
+- Severity: HIGH
 - Rule ID: SV-CHROME-001r2_rule
 - Tags: IAM, Endpoint Security, GPO, Registry, Browser Security
 - Check summary: Review Chrome enterprise policy in GPO or registry and export evidence showing SafeBrowsingProtectionLevel is set to enhanced protection.
@@ -29,7 +29,7 @@ Evidence requested:
 
 ### V-CHROME-002 - Chrome password manager must be disabled
 
-- Severity: 🟡 MEDIUM
+- Severity: MEDIUM
 - Rule ID: SV-CHROME-002r2_rule
 - Tags: Password Policy, GPO, Registry, Browser Security
 - Check summary: Review Chrome enterprise policy in GPO or registry and export evidence showing PasswordManagerEnabled is disabled for managed users.
@@ -51,7 +51,7 @@ Evidence requested:
 
 ### V-CHROME-004 - Chrome extension installation must be restricted
 
-- Severity: 🔴 HIGH
+- Severity: HIGH
 - Rule ID: SV-CHROME-004r1_rule
 - Tags: GPO, Registry, Browser Security
 - Check summary: Review Chrome enterprise extension policy and confirm unapproved extension installation is blocked or allowlisted.

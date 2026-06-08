@@ -17,6 +17,6 @@ Controls included: 3
 
 | Severity | Vuln ID | Rule ID | Title | Owner | Tags |
 | --- | --- | --- | --- | --- | --- |
-| high | V-100001 | SV-100001r2_rule | Windows audit policy must be configured and reviewed | Endpoint/Windows Admin | Audit Logging, Endpoint Security, Windows, GPO |
-| low | V-100002 | SV-100002r2_rule | Linux SSH banner must be configured | Linux Admin | Remote Access, Linux |
-| high | V-100004 | SV-100004r1_rule | Firewall management access must be restricted | Network/Security Engineering | Network Security |
+| HIGH | V-100001 | SV-100001r2_rule | Windows audit policy must be configured and reviewed | Endpoint/Windows Admin | Audit Logging, Endpoint Security, Windows, GPO |
+| LOW | V-100002 | SV-100002r2_rule | Linux SSH banner must be configured | Linux Admin | Remote Access, Linux |
+| HIGH | V-100004 | SV-100004r1_rule | Firewall management access must be restricted | Network/Security Engineering | Network Security |

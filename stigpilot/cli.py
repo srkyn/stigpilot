@@ -136,6 +136,15 @@ def _load(path: Path, config: StigPilotConfig | None = None):
     return document
 
 
+def _prefer_repo_relative_source(document, repo_root: Path) -> None:
+    """Keep bundled demo metadata portable when sample outputs are regenerated."""
+
+    try:
+        document.source_file = str(Path(document.source_file).resolve().relative_to(repo_root))
+    except (OSError, ValueError):
+        return
+
+
 def _safe_write(action, output: Path, label: str) -> None:
     try:
         action()
@@ -728,6 +737,8 @@ def demo(
     config = _load_config(config_path)
     new_doc = _load(new_xml, config)
     old_doc = _load(old_xml, config)
+    _prefer_repo_relative_source(new_doc, root)
+    _prefer_repo_relative_source(old_doc, root)
     changes = compare_documents(old_doc, new_doc)
 
     outputs = {
@@ -806,6 +817,9 @@ def chrome_demo(
     config = _load_config(config_path)
     old_doc = _load(old_xml, config)
     new_doc = _load(new_xml, config)
+    if not using_official:
+        _prefer_repo_relative_source(old_doc, root)
+        _prefer_repo_relative_source(new_doc, root)
     all_changes = compare_documents(old_doc, new_doc)
     changes = _filter_changes(all_changes, impact_filter, owner_filter, config)
     outputs = _write_comparison_packet(old_doc, new_doc, changes, out, config)

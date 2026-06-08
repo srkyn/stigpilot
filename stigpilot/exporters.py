@@ -38,14 +38,6 @@ IMPACT_LABELS = {
     "no_action_likely": "No action likely",
 }
 CHANGES_JSON_SCHEMA_VERSION = "1.0"
-SEVERITY_EMOJI = {"high": "🔴", "medium": "🟡", "low": "🔵"}
-IMPACT_EMOJI = {
-    "high_priority_review": "🔴",
-    "implementation_change_likely": "🟡",
-    "evidence_update_likely": "🟡",
-    "review_recommended": "🔵",
-    "no_action_likely": "⚪",
-}
 
 
 def write_controls_csv(document: StigDocument, path: str | Path) -> None:
@@ -398,12 +390,11 @@ def _impact_label(value: str) -> str:
 
 
 def _impact_display(value: str) -> str:
-    return f"{IMPACT_EMOJI.get(value, '⚪')} {_impact_label(value)}"
+    return _impact_label(value)
 
 
 def _severity_display(value: str) -> str:
-    label = (value or "unspecified").upper()
-    return f"{SEVERITY_EMOJI.get((value or '').lower(), '⚪')} {label}"
+    return (value or "unspecified").upper()
 
 
 def _change_counts(changes: list[ControlChange]) -> dict[str, int]:

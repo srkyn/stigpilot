@@ -4,6 +4,9 @@ from stigpilot.diff import compare_documents
 from stigpilot.parser import parse_stig
 from stigpilot.reports import change_brief, html_change_brief, manager_summary_report
 
+EM_DASH = chr(0x2014)
+RED_CIRCLE = chr(0x1F534)
+
 
 def test_manager_summary_report_is_concise_and_actionable():
     old = parse_stig(Path(__file__).parent / "fixtures_old.xml")
@@ -31,8 +34,11 @@ def test_change_brief_uses_readable_priority_actions_and_labels():
     assert "## Priority Actions" in report
     assert "### 1." in report
     assert "**Impact:** High-priority review" in report
-    assert "🔴 High-priority review" in report
+    assert "High-priority review V-" in report
     assert "> **Risk level: HIGH**" in report
+    assert "owner group(s) with the most priority work are Endpoint/Windows Admin, Network/Security Engineering, Linux Admin" in report
+    assert EM_DASH not in report
+    assert RED_CIRCLE not in report
 
 
 def test_html_change_brief_is_self_contained_and_readable():
@@ -49,3 +55,5 @@ def test_html_change_brief_is_self_contained_and_readable():
     assert "priority-card" in report
     assert "High-priority review" in report
     assert "formal compliance validation" in report
+    assert "fonts.googleapis.com" not in report
+    assert EM_DASH not in report

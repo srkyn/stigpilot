@@ -7,7 +7,7 @@ Use these drafts to prepare owner review, change-control notes, implementation t
 ## Draft 1: V-CHROME-004
 
 **Title:** Chrome extension installation must be restricted
-**Impact:** 🔴 High-priority review (`high_priority_review`)
+**Impact:** High-priority review (`high_priority_review`)
 **Suggested owner:** Endpoint/Windows Admin
 **Change type:** added
 **Why it matters:** A new high-severity control was added, so it should be triaged before lower-risk backlog work.
@@ -40,7 +40,7 @@ Configure Chrome ExtensionInstallBlocklist and ExtensionInstallAllowlist policie
 ## Draft 2: V-CHROME-003
 
 **Title:** Deprecated Chrome cleanup policy must be reviewed
-**Impact:** 🔵 Review recommended (`review_recommended`)
+**Impact:** Review recommended (`review_recommended`)
 **Suggested owner:** Security/GRC Analyst
 **Change type:** removed
 **Why it matters:** The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
@@ -72,7 +72,7 @@ The control was removed from the compared release. Review downstream tickets, ev
 ## Draft 3: V-CHROME-001
 
 **Title:** Chrome Safe Browsing enhanced protection must be enabled
-**Impact:** 🔴 High-priority review (`high_priority_review`)
+**Impact:** High-priority review (`high_priority_review`)
 **Suggested owner:** Endpoint/Windows Admin
 **Change type:** severity_increased
 **Why it matters:** The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.
@@ -105,7 +105,7 @@ Configure Chrome Safe Browsing enhanced protection through Group Policy or the r
 ## Draft 4: V-CHROME-002
 
 **Title:** Chrome password manager must be disabled
-**Impact:** 🟡 Evidence update likely (`evidence_update_likely`)
+**Impact:** Evidence update likely (`evidence_update_likely`)
 **Suggested owner:** Endpoint/Windows Admin
 **Change type:** check_changed
 **Why it matters:** The check procedure changed enough that evidence requests or validation steps may need to be refreshed.

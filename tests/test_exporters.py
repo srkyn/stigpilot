@@ -3,12 +3,15 @@ import json
 from pathlib import Path
 
 from stigpilot.diff import compare_documents
-from stigpilot.exporters import remediation_draft_markdown, write_changes_json, write_jira_csv, write_servicenow_csv
+from stigpilot.exporters import github_issue_markdown, remediation_draft_markdown, write_changes_json, write_jira_csv, write_servicenow_csv
 from stigpilot.parser import parse_stig
 from stigpilot.reports import evidence_checklist
 
 
 ROOT = Path(__file__).parents[1]
+RED_CIRCLE = chr(0x1F534)
+YELLOW_CIRCLE = chr(0x1F7E1)
+BLUE_CIRCLE = chr(0x1F535)
 
 
 def _changes():
@@ -89,3 +92,17 @@ def test_remediation_draft_markdown_is_review_only():
     assert "Review Before Action" in report
     assert "The control was removed from the compared release" in report
     assert "Do not remove a local control solely because it disappeared" in report
+    assert RED_CIRCLE not in report
+    assert YELLOW_CIRCLE not in report
+    assert BLUE_CIRCLE not in report
+
+
+def test_github_issue_markdown_uses_plain_text_labels():
+    report = github_issue_markdown(_changes())
+
+    assert "## Issue 1" in report
+    assert "- Severity: HIGH" in report
+    assert "- Impact: High-priority review" in report
+    assert RED_CIRCLE not in report
+    assert YELLOW_CIRCLE not in report
+    assert BLUE_CIRCLE not in report

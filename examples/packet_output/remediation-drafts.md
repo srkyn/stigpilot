@@ -7,7 +7,7 @@ Use these drafts to prepare owner review, change-control notes, implementation t
 ## Draft 1: V-100004
 
 **Title:** Firewall management access must be restricted
-**Impact:** 🔴 High-priority review (`high_priority_review`)
+**Impact:** High-priority review (`high_priority_review`)
 **Suggested owner:** Network/Security Engineering
 **Change type:** added
 **Why it matters:** A new high-severity control was added, so it should be triaged before lower-risk backlog work.
@@ -40,7 +40,7 @@ Restrict firewall management access to approved networks.
 ## Draft 2: V-100003
 
 **Title:** Removed database audit control
-**Impact:** 🔵 Review recommended (`review_recommended`)
+**Impact:** Review recommended (`review_recommended`)
 **Suggested owner:** Database Admin
 **Change type:** removed
 **Why it matters:** The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
@@ -73,7 +73,7 @@ The control was removed from the compared release. Review downstream tickets, ev
 ## Draft 3: V-100001
 
 **Title:** Windows audit policy must be configured and reviewed
-**Impact:** 🔴 High-priority review (`high_priority_review`)
+**Impact:** High-priority review (`high_priority_review`)
 **Suggested owner:** Endpoint/Windows Admin
 **Change type:** severity_increased
 **Why it matters:** The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.
@@ -106,7 +106,7 @@ Configure Windows audit policy through GPO and document the applied baseline.
 ## Draft 4: V-100002
 
 **Title:** Linux SSH banner must be configured
-**Impact:** 🟡 Evidence update likely (`evidence_update_likely`)
+**Impact:** Evidence update likely (`evidence_update_likely`)
 **Suggested owner:** Linux Admin
 **Change type:** check_changed
 **Why it matters:** The check procedure changed enough that evidence requests or validation steps may need to be refreshed.

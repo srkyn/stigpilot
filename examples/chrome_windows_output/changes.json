@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "schema": "docs/schemas/changes.schema.json",
   "source": {
-    "old_file": "C:\\Users\\Admin\\Documents\\CSProjects\\stigpilot\\examples\\chrome_windows_sample\\old.xml",
-    "new_file": "C:\\Users\\Admin\\Documents\\CSProjects\\stigpilot\\examples\\chrome_windows_sample\\new.xml",
+    "old_file": "examples\\chrome_windows_sample\\old.xml",
+    "new_file": "examples\\chrome_windows_sample\\new.xml",
     "old_title": "Sanitized Chrome for Windows STIG-Style Example",
     "new_title": "Sanitized Chrome for Windows STIG-Style Example",
     "old_version": "Sample V1R1",

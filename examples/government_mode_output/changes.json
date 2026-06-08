@@ -2,8 +2,8 @@
     "mode":  "government_powershell",
     "generated_by":  "tools/STIGPilot-Gov.ps1",
     "source":  {
-                   "old_file":  "C:\\Users\\Admin\\Documents\\CSProjects\\stigpilot\\examples\\sample_input\\old.xml",
-                   "new_file":  "C:\\Users\\Admin\\Documents\\CSProjects\\stigpilot\\examples\\sample_input\\new.xml",
+                   "old_file":  "examples\\sample_input\\old.xml",
+                   "new_file":  "examples\\sample_input\\new.xml",
                    "old_title":  "Synthetic Windows and Linux STIG",
                    "new_title":  "Synthetic Windows and Linux STIG",
                    "old_control_count":  3,

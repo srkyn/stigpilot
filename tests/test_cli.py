@@ -24,6 +24,10 @@ def test_cli_demo_writes_reports(tmp_path: Path):
     assert (out / "manager-summary.md").exists()
     assert (out / "remediation-backlog.csv").exists()
     assert (out / "remediation-drafts.md").exists()
+    controls = json.loads((out / "controls.json").read_text(encoding="utf-8"))
+    changes = json.loads((out / "changes.json").read_text(encoding="utf-8"))
+    assert controls["source_file"] == str(Path("examples") / "sample_input" / "new.xml")
+    assert changes["source"]["old_file"] == str(Path("examples") / "sample_input" / "old.xml")
 
 
 def test_cli_parse_writes_csv_and_json(tmp_path: Path):

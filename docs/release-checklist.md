@@ -4,6 +4,7 @@ Run this before tagging a STIGPilot release:
 
 - [ ] `python -m pip install -e ".[dev]"`
 - [ ] `python -m pytest`
+- [ ] `python -m pytest tests/test_output_quality.py`
 - [ ] `stigpilot doctor`
 - [ ] `stigpilot demo`
 - [ ] `stigpilot chrome-demo`
@@ -13,6 +14,7 @@ Run this before tagging a STIGPilot release:
 - [ ] Regenerate `examples/government_mode_output/`
 - [ ] Verify README commands are accurate
 - [ ] Verify no personal local paths are present
+- [ ] Verify committed sample outputs avoid local paths, emoji severity markers, em dashes, and remote HTML assets
 - [ ] Verify no sensitive files are committed
 - [ ] Verify official-tool and compliance language does not imply endorsement or validation
 - [ ] Confirm generated artifacts stop at review/planning and do not apply system changes

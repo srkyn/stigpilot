@@ -7,7 +7,7 @@ New controls: 3
 
 ## Executive Readout
 
-4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The most affected owner group(s) are Database Admin, Endpoint/Windows Admin, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.
+4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The owner group(s) with the most priority work are Endpoint/Windows Admin, Network/Security Engineering, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.
 
 ## Workload Snapshot
 
@@ -29,9 +29,9 @@ New controls: 3
 
 ## Top Actions
 
-- V-100004: Firewall management access must be restricted (🔴 High-priority review; Network/Security Engineering)
-- V-100001: Windows audit policy must be configured and reviewed (🔴 High-priority review; Endpoint/Windows Admin)
-- V-100002: Linux SSH banner must be configured (🟡 Evidence update likely; Linux Admin)
+- V-100004: Firewall management access must be restricted (High-priority review; Network/Security Engineering)
+- V-100001: Windows audit policy must be configured and reviewed (High-priority review; Endpoint/Windows Admin)
+- V-100002: Linux SSH banner must be configured (Evidence update likely; Linux Admin)
 
 ## Recommended Next Steps
 

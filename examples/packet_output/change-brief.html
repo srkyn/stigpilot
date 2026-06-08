@@ -4,9 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>STIGPilot Change Brief</title>
-  <!-- Optional web font. Requires internet access; system font fallback is used offline. -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9; --ink: #0f172a; --ink-2: #334155; --ink-3: #64748b; --line: #e2e8f0; --line-2: #cbd5e1;
@@ -30,7 +27,7 @@
       margin: 0;
       background: var(--bg);
       color: var(--ink);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
       line-height: 1.5;
     }
     .doc-nav { position: sticky; top: 0; background: var(--surface); border-bottom: 0.5px solid var(--line); padding: 10px 24px; display: flex; gap: 20px; align-items: center; font-size: 13px; z-index: 10; }
@@ -107,11 +104,11 @@
 <main>
   <header>
     <div class="header-eyebrow">STIGPilot Change Brief</div>
-    <h1 class="header-title">Synthetic Windows and Linux STIG — V1R1 → V1R2</h1>
-    <div class="header-meta">Generated locally · 6 controls reviewed · 3 priority actions</div>
+    <h1 class="header-title">Synthetic Windows and Linux STIG: V1R1 to V1R2</h1>
+    <div class="header-meta">Generated locally | 6 controls reviewed | 3 priority actions</div>
     <div class="risk-bar" data-risk="high"></div>
   </header>
-  <section id="summary" class="card summary">4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The most affected owner group(s) are Database Admin, Endpoint/Windows Admin, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.</section>
+  <section id="summary" class="card summary">4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The owner group(s) with the most priority work are Endpoint/Windows Admin, Network/Security Engineering, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.</section>
   <section class="grid">
     <div class="card metric-blue"><div class="metric">1</div><div class="metric-label">Added controls</div></div>
 <div class="card metric-amber"><div class="metric">1</div><div class="metric-label">Removed controls</div></div>

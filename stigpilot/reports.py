@@ -30,26 +30,6 @@ IMPACT_MEANINGS = {
     "review_recommended": "Traceability, cleanup, or analyst review is recommended.",
     "no_action_likely": "Likely wording or metadata only; keep awareness but avoid noisy tickets.",
 }
-SEVERITY_EMOJI = {
-    "high": "🔴",
-    "HIGH": "🔴",
-    "medium": "🟡",
-    "MEDIUM": "🟡",
-    "low": "🔵",
-    "LOW": "🔵",
-}
-IMPACT_EMOJI = {
-    "high_priority_review": "🔴",
-    "High-priority review": "🔴",
-    "implementation_change_likely": "🟡",
-    "Implementation change likely": "🟡",
-    "evidence_update_likely": "🟡",
-    "Evidence update likely": "🟡",
-    "review_recommended": "🔵",
-    "Review recommended": "🔵",
-    "no_action_likely": "⚪",
-    "No action likely": "⚪",
-}
 SEVERITY_BADGES = {
     "high": '<span class="badge badge-high">HIGH</span>',
     "medium": '<span class="badge badge-medium">MEDIUM</span>',
@@ -155,9 +135,9 @@ def change_brief(
         control = change.current_control or StigControl()
         owner = suggested_owner(control, config)
         control_id = control.vuln_id or control.rule_id or "Control"
-        lines.append(f"### {idx}. {impact_display(change.impact)} {control_id} — {control.title or 'Untitled'}")
+        lines.append(f"### {idx}. {impact_display(change.impact)} {control_id}: {control.title or 'Untitled'}")
         lines.append("")
-        lines.append(f"**Impact:** {impact_label(change.impact)} · **Owner:** {owner}")
+        lines.append(f"**Impact:** {impact_label(change.impact)} | **Owner:** {owner}")
         lines.append("")
         lines.append(change.reason)
         lines.append("")
@@ -292,9 +272,6 @@ def html_change_brief(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>STIGPilot Change Brief</title>
-  <!-- Optional web font. Requires internet access; system font fallback is used offline. -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {{
       --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9; --ink: #0f172a; --ink-2: #334155; --ink-3: #64748b; --line: #e2e8f0; --line-2: #cbd5e1;
@@ -318,7 +295,7 @@ def html_change_brief(
       margin: 0;
       background: var(--bg);
       color: var(--ink);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
       line-height: 1.5;
     }}
     .doc-nav {{ position: sticky; top: 0; background: var(--surface); border-bottom: 0.5px solid var(--line); padding: 10px 24px; display: flex; gap: 20px; align-items: center; font-size: 13px; z-index: 10; }}
@@ -395,8 +372,8 @@ def html_change_brief(
 <main>
   <header>
     <div class="header-eyebrow">STIGPilot Change Brief</div>
-    <h1 class="header-title">{escape(stig_name)} — {escape(old_doc.version or 'old')} → {escape(new_doc.version or 'new')}</h1>
-    <div class="header-meta">Generated locally · {len(old_doc.controls) + len(new_doc.controls)} controls reviewed · {priority_count} priority actions</div>
+    <h1 class="header-title">{escape(stig_name)}: {escape(old_doc.version or 'old')} to {escape(new_doc.version or 'new')}</h1>
+    <div class="header-meta">Generated locally | {len(old_doc.controls) + len(new_doc.controls)} controls reviewed | {priority_count} priority actions</div>
     <div class="risk-bar" data-risk="{doc_risk}"></div>
   </header>
   <section id="summary" class="card summary">{escape(executive_summary(changes, config))}</section>
@@ -426,13 +403,12 @@ def executive_summary(changes: list[ControlChange], config: StigPilotConfig | No
     if not changes:
         return "No STIG control changes were detected between the compared files. No remediation or evidence refresh work is suggested by this comparison."
     impacts = Counter(change.impact for change in changes)
-    owners = owner_groups(changes, config)
-    owner_phrase = ", ".join(list(owners.keys())[:3]) if owners else "no owner group"
+    owner_phrase = ", ".join(priority_owner_names(changes, config)[:3]) or "no owner group"
     action_count = impacts.get("high_priority_review", 0) + impacts.get("implementation_change_likely", 0) + impacts.get("evidence_update_likely", 0)
     return (
         f"{len(changes)} control change(s) were detected. "
         f"{action_count} change(s) are likely to require priority review, implementation work, or evidence refresh. "
-        f"The most affected owner group(s) are {owner_phrase}. "
+        f"The owner group(s) with the most priority work are {owner_phrase}. "
         "Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets."
     )
 
@@ -447,6 +423,25 @@ def owner_groups(changes: list[ControlChange], config: StigPilotConfig | None = 
     for change in changes:
         grouped[suggested_owner(change.current_control, config)].append(change)
     return dict(sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0])))
+
+
+def priority_owner_names(changes: list[ControlChange], config: StigPilotConfig | None = None) -> list[str]:
+    owner_scores: dict[str, Counter[str]] = defaultdict(Counter)
+    for change in changes:
+        owner = suggested_owner(change.current_control, config)
+        owner_scores[owner]["total"] += 1
+        owner_scores[owner][change.impact] += 1
+    ranked = sorted(
+        owner_scores,
+        key=lambda owner: (
+            -owner_scores[owner]["high_priority_review"],
+            -owner_scores[owner]["implementation_change_likely"],
+            -owner_scores[owner]["evidence_update_likely"],
+            -owner_scores[owner]["total"],
+            owner,
+        ),
+    )
+    return ranked
 
 
 def change_summary_counts(changes: list[ControlChange]) -> dict[str, int]:
@@ -619,14 +614,11 @@ def impact_label(value: str) -> str:
 
 def severity_display(value: str) -> str:
     label = (value or "unspecified").upper()
-    emoji = SEVERITY_EMOJI.get(value, SEVERITY_EMOJI.get(label, "⚪"))
-    return f"{emoji} {label}"
+    return label
 
 
 def impact_display(value: str) -> str:
-    label = impact_label(value)
-    emoji = IMPACT_EMOJI.get(value, IMPACT_EMOJI.get(label, "⚪"))
-    return f"{emoji} {label}"
+    return impact_label(value)
 
 
 def risk_level(changes: list[ControlChange]) -> str:
@@ -643,10 +635,10 @@ def risk_statement(changes: list[ControlChange]) -> str:
     high = impacts.get("high_priority_review", 0)
     medium = impacts.get("implementation_change_likely", 0) + impacts.get("evidence_update_likely", 0)
     if high:
-        return f"> **Risk level: HIGH** — {high} control(s) require immediate review before reusing existing tickets or evidence."
+        return f"> **Risk level: HIGH**: {high} control(s) require immediate review before reusing existing tickets or evidence."
     if medium:
-        return f"> **Risk level: MEDIUM** — {medium} control(s) require implementation review or evidence refresh before the next audit cycle."
-    return "> **Risk level: LOW** — No high-priority changes detected. Standard review cycle applies."
+        return f"> **Risk level: MEDIUM**: {medium} control(s) require implementation review or evidence refresh before the next audit cycle."
+    return "> **Risk level: LOW**: No high-priority changes detected. Standard review cycle applies."
 
 
 def html_severity_badge(severity: str) -> str:
