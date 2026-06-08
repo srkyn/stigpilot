@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.8
+
+2026-06-08
+
+- Added a documentation link regression test so local README, docs, and example Markdown links point to real files.
+
 ## 1.0.7
 
 2026-06-08
