@@ -518,7 +518,7 @@ def quickstart() -> None:
 
     console.print(python_table)
     console.print(gov_table)
-    console.print("[bold]Start here:[/bold] run [cyan]stigpilot demo[/cyan], then open [cyan]output/demo/change-brief.md[/cyan].")
+    console.print("[bold]Start here:[/bold] run [cyan]stigpilot demo[/cyan], then open [cyan]output/demo/START_HERE.md[/cyan].")
     console.print("Government Mode uses built-in PowerShell/.NET only and is intentionally smaller than the Python CLI.")
 
 

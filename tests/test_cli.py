@@ -253,6 +253,7 @@ def test_cli_quickstart_shows_python_and_government_paths():
     assert "Government Mode" in result.output
     assert 'python -m pip install -e ".[dev]"' in result.output
     assert "stigpilot demo" in result.output
+    assert "output/demo/START_HERE.md" in result.output
     assert "STIGPilot-Gov.ps1" in result.output
 
 

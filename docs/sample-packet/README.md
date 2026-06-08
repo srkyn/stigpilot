@@ -10,6 +10,7 @@ what STIGPilot produces before running it in your environment.
 
 | File | What it is |
 |---|---|
+| `START_HERE.md` | Packet index that explains what to open first and why |
 | `change-brief.md` | Analyst-facing summary of what changed and what likely needs attention |
 | `manager-summary.md` | Non-technical summary for managers and stakeholders |
 | `remediation-backlog.csv` | Backlog of controls that likely need remediation work, importable to Excel |

@@ -61,9 +61,15 @@ Example terminal output:
 
 ```text
 Demo Reports Generated
+Start here           output/demo/START_HERE.md
 Change brief          output/demo/change-brief.md
 Manager summary       output/demo/manager-summary.md
 Remediation backlog   output/demo/remediation-backlog.csv
+
+Start here:
+- Open output/demo/START_HERE.md
+- Open output/demo/change-brief.md
+- Open output/demo/manager-summary.md
 
 STIGPilot Diff Summary
 Total changes                     4

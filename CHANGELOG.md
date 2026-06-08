@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.11
+
+2026-06-08
+
+- Updated quickstart and README demo guidance to point users at `START_HERE.md` first.
+- Added `START_HERE.md` to the sample packet file map.
+
 ## 1.0.10
 
 2026-06-08
