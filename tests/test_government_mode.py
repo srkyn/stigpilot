@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -83,6 +84,7 @@ def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
     jira = (out / "jira-import.csv").read_text(encoding="utf-8-sig")
     servicenow = (out / "servicenow-import.csv").read_text(encoding="utf-8-sig")
     issues = (out / "github-issues.md").read_text(encoding="utf-8")
+    changes = json.loads((out / "changes.json").read_text(encoding="utf-8-sig"))
 
     assert "# STIGPilot Government Mode Change Brief" in brief
     assert "## At-a-Glance" in brief
@@ -94,6 +96,8 @@ def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
     assert "assignment_group" in servicenow
     assert "# STIGPilot Government Mode GitHub Issue Drafts" in issues
     assert "### Acceptance Criteria" in issues
+    assert changes["source"]["old_file"] == str(Path("examples") / "sample_input" / "old.xml")
+    assert changes["source"]["new_file"] == str(Path("examples") / "sample_input" / "new.xml")
 
 
 def test_government_mode_parse_writes_csv_and_json(tmp_path: Path):
@@ -115,6 +119,8 @@ def test_government_mode_parse_writes_csv_and_json(tmp_path: Path):
     assert csv_out.exists()
     assert json_out.exists()
     assert "Vuln ID" in csv_out.read_text(encoding="utf-8-sig")
+    document = json.loads(json_out.read_text(encoding="utf-8-sig"))
+    assert document["source_file"] == str(Path("examples") / "sample_input" / "new.xml")
 
 
 def test_government_mode_packet_can_filter_by_impact_and_owner(tmp_path: Path):

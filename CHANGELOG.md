@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.2
+
+2026-06-08
+
+- Hardened generated Markdown and ticket-draft outputs with plain analyst-friendly labels.
+- Removed remote font loading from self-contained HTML change briefs.
+- Fixed built-in Python demo metadata so committed sample JSON keeps repo-relative paths.
+- Fixed Government Mode metadata so sample `changes.json` and parse JSON do not leak local machine paths.
+- Added output-quality regression tests for committed sample packets, local path leakage, long dash punctuation, emoji status markers, and remote HTML assets.
+- Regenerated committed sample outputs.
+
 ## 1.0.1
 
 2026-05-31

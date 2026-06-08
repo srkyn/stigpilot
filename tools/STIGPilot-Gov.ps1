@@ -132,6 +132,22 @@ function Resolve-ExistingPath {
     return (Resolve-Path -LiteralPath $PathValue).Path
 }
 
+function Get-DisplayPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$OriginalPath,
+        [Parameter(Mandatory = $true)][string]$ResolvedPath
+    )
+
+    $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path.TrimEnd("\", "/")
+    if ($ResolvedPath.StartsWith($repoRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $ResolvedPath.Substring($repoRoot.Length).TrimStart("\", "/")
+    }
+    if (-not [System.IO.Path]::IsPathRooted($OriginalPath)) {
+        return $OriginalPath
+    }
+    return $ResolvedPath
+}
+
 function Ensure-ParentDirectory {
     param([Parameter(Mandatory = $true)][string]$PathValue)
     $parent = Split-Path -Parent $PathValue
@@ -275,7 +291,7 @@ function Get-StigDocument {
         title       = $docTitle
         version     = $docVersion
         release     = $docRelease
-        source_file = $resolved
+        source_file = Get-DisplayPath -OriginalPath $PathValue -ResolvedPath $resolved
         controls    = $controls
     }
 }
