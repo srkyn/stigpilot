@@ -120,6 +120,39 @@ def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
     assert changes["source"]["new_file"] == str(Path("examples") / "sample_input" / "new.xml")
 
 
+def test_government_mode_inspect_accepts_complete_packet(tmp_path: Path):
+    out = tmp_path / "gov"
+    packet = run_gov_mode(
+        "-Command",
+        "packet",
+        "-Old",
+        str(ROOT / "examples" / "sample_input" / "old.xml"),
+        "-New",
+        str(ROOT / "examples" / "sample_input" / "new.xml"),
+        "-OutDir",
+        str(out),
+    )
+
+    result = run_gov_mode("-Command", "inspect", "-OutDir", str(out))
+
+    assert packet.returncode == 0, packet.stdout + packet.stderr
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Packet Inspection" in result.stdout
+    assert "Packet is handoff-ready" in result.stdout
+
+
+def test_government_mode_inspect_rejects_incomplete_packet(tmp_path: Path):
+    out = tmp_path / "gov"
+    out.mkdir()
+    (out / "START_HERE.md").write_text("# Packet\n", encoding="utf-8")
+
+    result = run_gov_mode("-Command", "inspect", "-OutDir", str(out))
+
+    assert result.returncode == 1
+    assert "Packet is incomplete" in result.stdout
+    assert "change-brief.md" in result.stdout
+
+
 def test_government_mode_parse_writes_csv_and_json(tmp_path: Path):
     csv_out = tmp_path / "controls.csv"
     json_out = tmp_path / "controls.json"

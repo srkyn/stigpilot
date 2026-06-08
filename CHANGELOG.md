@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.14
+
+2026-06-08
+
+- Added Government Mode `inspect` to check generated packet folders before handoff.
+- Added Government Mode regression tests for complete and incomplete packet inspection.
+- Documented Government Mode packet inspection in the README.
+
 ## 1.0.13
 
 2026-06-08

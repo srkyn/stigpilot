@@ -251,6 +251,8 @@ XML files as arguments.
   -Old examples\sample_input\old.xml `
   -New examples\sample_input\new.xml `
   -OutDir output\gov
+
+.\tools\STIGPilot-Gov.ps1 -Command inspect -OutDir output\gov
 ```
 
 Generated files:
