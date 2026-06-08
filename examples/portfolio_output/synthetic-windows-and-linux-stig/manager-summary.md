@@ -7,7 +7,7 @@ New controls: 3
 
 ## Executive Readout
 
-4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The most affected owner group(s) are Database Admin, Endpoint/Windows Admin, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.
+4 control change(s) were detected. 3 change(s) are likely to require priority review, implementation work, or evidence refresh. The owner group(s) with the most priority work are Endpoint/Windows Admin, Network/Security Engineering, Linux Admin. Prioritize high-severity additions or severity increases, then review remediation text changes before reusing old tickets.
 
 ## Workload Snapshot
 

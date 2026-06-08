@@ -381,7 +381,7 @@ def html_change_brief(
     {_metric_cards(metric_rows)}
   </section>
   <h2 id="priority-actions">Priority Actions</h2>
-  {priority_items}
+{priority_items}
   <h2 id="owner-impact">Owner Impact</h2>
   {_html_table(["Owner", "Changes", "High Priority", "Implementation Likely", "Evidence Updates"], owner_rows)}
   <h2 id="categories">Change Categories</h2>

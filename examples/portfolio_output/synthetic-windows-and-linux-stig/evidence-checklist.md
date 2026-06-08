@@ -7,7 +7,7 @@ Controls included: 3
 
 ### V-100001 - Windows audit policy must be configured and reviewed
 
-- Severity: high
+- Severity: HIGH
 - Rule ID: SV-100001r2_rule
 - Tags: Audit Logging, Endpoint Security, Windows, GPO
 - Check summary: Review Windows audit policy settings in Local Security Policy and export applied GPO evidence.
@@ -31,7 +31,7 @@ Evidence requested:
 
 ### V-100002 - Linux SSH banner must be configured
 
-- Severity: low
+- Severity: LOW
 - Rule ID: SV-100002r2_rule
 - Tags: Remote Access, Linux
 - Check summary: Run sshd -T and review the banner setting and file permissions.
@@ -56,7 +56,7 @@ Evidence requested:
 
 ### V-100004 - Firewall management access must be restricted
 
-- Severity: high
+- Severity: HIGH
 - Rule ID: SV-100004r1_rule
 - Tags: Network Security
 - Check summary: Review firewall management network restrictions and approved admin source ranges.

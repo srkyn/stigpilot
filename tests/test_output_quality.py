@@ -68,3 +68,22 @@ def test_committed_html_reports_are_self_contained():
                 offenders.append(f"{path.relative_to(ROOT)} contains {needle}")
 
     assert offenders == []
+
+
+def test_regenerate_examples_script_covers_committed_output_packets():
+    script = ROOT / "tools" / "regenerate-examples.ps1"
+    text = script.read_text(encoding="utf-8")
+
+    expected_paths = [
+        "examples/sample_output",
+        "examples/packet_output",
+        "docs/sample-packet",
+        "examples/html_output/change-brief.html",
+        "examples/portfolio_output",
+        "examples/chrome_windows_output",
+        "examples/government_mode_output",
+    ]
+
+    assert script.exists()
+    for expected_path in expected_paths:
+        assert expected_path in text

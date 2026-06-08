@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.5
+
+2026-06-08
+
+- Added `tools/regenerate-examples.ps1` to refresh all committed demo and sample output packets with one command.
+- Updated development docs so release prep does not depend on copying a long list of CLI commands by hand.
+- Removed trailing whitespace from generated HTML change briefs.
+
 ## 1.0.4
 
 2026-06-08

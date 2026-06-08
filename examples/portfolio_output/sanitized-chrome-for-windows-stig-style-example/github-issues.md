@@ -8,7 +8,7 @@ Labels: `stigpilot`, `high_priority_review`, `GPO`, `Registry`, `Browser Securit
 
 ### Context
 
-- Severity: high
+- Severity: HIGH
 - Suggested owner: Endpoint/Windows Admin
 - Impact: High-priority review (`high_priority_review`)
 - Reason: A new high-severity control was added, so it should be triaged before lower-risk backlog work.
@@ -41,7 +41,7 @@ Labels: `stigpilot`, `review_recommended`, `Browser Security`
 
 ### Context
 
-- Severity: low
+- Severity: LOW
 - Suggested owner: Security/GRC Analyst
 - Impact: Review recommended (`review_recommended`)
 - Reason: The control was removed, so downstream tickets, evidence requests, or mappings may need cleanup.
@@ -73,7 +73,7 @@ Labels: `stigpilot`, `high_priority_review`, `IAM`, `Endpoint Security`, `GPO`, 
 
 ### Context
 
-- Severity: high
+- Severity: HIGH
 - Suggested owner: Endpoint/Windows Admin
 - Impact: High-priority review (`high_priority_review`)
 - Reason: The severity increased to high and the remediation text changed, so old tickets or implementation notes should not be reused without review.
@@ -106,7 +106,7 @@ Labels: `stigpilot`, `evidence_update_likely`, `Password Policy`, `GPO`, `Regist
 
 ### Context
 
-- Severity: medium
+- Severity: MEDIUM
 - Suggested owner: Endpoint/Windows Admin
 - Impact: Evidence update likely (`evidence_update_likely`)
 - Reason: The check procedure changed enough that evidence requests or validation steps may need to be refreshed.

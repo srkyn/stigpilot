@@ -485,11 +485,10 @@ python -m pytest
 
 Regenerate sample outputs:
 
-```bash
-python -m stigpilot.cli diff examples/sample_input/old.xml examples/sample_input/new.xml --out examples/sample_output/change-brief.md --csv examples/sample_output/remediation-backlog.csv --jira-csv examples/sample_output/jira-import.csv --servicenow-csv examples/sample_output/servicenow-import.csv --github-md examples/sample_output/github-issues.md --drafts-md examples/sample_output/remediation-drafts.md
-python -m stigpilot.cli manager examples/sample_input/old.xml examples/sample_input/new.xml --out examples/sample_output/manager-summary.md
-python -m stigpilot.cli parse examples/sample_input/new.xml --csv examples/sample_output/controls.csv --json examples/sample_output/controls.json
-python -m stigpilot.cli tickets examples/sample_input/new.xml --out examples/sample_output/tickets.csv
-python -m stigpilot.cli evidence examples/sample_input/new.xml --out examples/sample_output/evidence-checklist.md
-python -m stigpilot.cli chrome-demo --out examples/chrome_windows_output --input-dir examples/chrome_windows_input
+```powershell
+.\tools\regenerate-examples.ps1
 ```
+
+The script refreshes the Python CLI examples, packet output, Chrome sample
+packet, portfolio packet, docs sample packet, HTML report, and Government Mode
+output.
