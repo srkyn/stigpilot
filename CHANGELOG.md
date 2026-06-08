@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.16
+
+2026-06-08
+
+- Added Government Mode `archive` to inspect a packet and create a ZIP archive with built-in PowerShell.
+- Added Government Mode archive regression tests for success, overwrite protection, and incomplete packet refusal.
+- Documented Government Mode packet archiving in the README.
+
 ## 1.0.15
 
 2026-06-08

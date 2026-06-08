@@ -8,6 +8,7 @@ built-in PowerShell/.NET XML, CSV, JSON, and file APIs.
 Examples:
   .\tools\STIGPilot-Gov.ps1 -Command packet -Old .\tools\..\examples\sample_input\old.xml -New .\tools\..\examples\sample_input\new.xml -OutDir output\gov
   .\tools\STIGPilot-Gov.ps1 -Command inspect -OutDir output\gov
+  .\tools\STIGPilot-Gov.ps1 -Command archive -OutDir output\gov -Zip output\gov.zip
   .\tools\STIGPilot-Gov.ps1 -Command packet -Old .\tools\..\examples\sample_input\old.xml -New .\tools\..\examples\sample_input\new.xml -OutDir output\gov-windows -Impact high_priority_review -Owner "Endpoint/Windows Admin"
   .\tools\STIGPilot-Gov.ps1 -Command parse -Input .\tools\..\examples\sample_input\new.xml -Csv output\gov\controls.csv -Json output\gov\controls.json
   .\tools\STIGPilot-Gov.ps1 -Command evidence -Input .\tools\..\examples\sample_input\new.xml -OutDir output\gov
@@ -15,7 +16,7 @@ Examples:
 
 [CmdletBinding()]
 param(
-    [ValidateSet("help", "doctor", "parse", "diff", "evidence", "packet", "inspect")]
+    [ValidateSet("help", "doctor", "parse", "diff", "evidence", "packet", "inspect", "archive")]
     [string]$Command = "help",
 
     [Alias("Input")]
@@ -27,7 +28,9 @@ param(
     [string]$Json,
     [string]$Markdown,
     [string]$Impact,
-    [string]$Owner
+    [string]$Owner,
+    [string]$Zip,
+    [switch]$Force
 )
 
 Set-StrictMode -Version 2.0
@@ -47,6 +50,7 @@ if ($PSBoundParameters.Count -eq 0) {
     Write-Host "  .\STIGPilot-Gov.ps1 -Command doctor"
     Write-Host "  .\STIGPilot-Gov.ps1 -Command packet -Old old.xml -New new.xml -OutDir output\packet"
     Write-Host "  .\STIGPilot-Gov.ps1 -Command inspect -OutDir output\packet"
+    Write-Host "  .\STIGPilot-Gov.ps1 -Command archive -OutDir output\packet -Zip output\packet.zip"
     Write-Host ""
     Write-Host "Required files:"
     Write-Host "  -Old    Path to your older STIG XCCDF XML file"
@@ -88,11 +92,13 @@ function Write-GovHelp {
     Write-Host "  evidence  Generate an evidence checklist from one XCCDF/XML file"
     Write-Host "  packet    Generate change brief, backlog CSV, ticket exports, changes JSON, and evidence checklist"
     Write-Host "  inspect   Check whether a generated packet is complete enough to hand off"
+    Write-Host "  archive   Inspect a generated packet, then create a ZIP archive for handoff"
     Write-Host ""
     Write-Host "Examples:"
     Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command doctor"
     Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old $SampleOldExample -New $SampleNewExample -OutDir output\gov"
     Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command inspect -OutDir output\gov"
+    Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command archive -OutDir output\gov -Zip output\gov.zip"
     Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command packet -Old $SampleOldExample -New $SampleNewExample -OutDir output\gov-windows -Impact high_priority_review -Owner `"Endpoint/Windows Admin`""
     Write-Host "  .\tools\STIGPilot-Gov.ps1 -Command parse -Input $SampleNewExample -Csv output\gov\controls.csv -Json output\gov\controls.json"
     Write-Host ""
@@ -1188,7 +1194,7 @@ function Invoke-Packet {
     Write-Host "Start here: $startHerePath" -ForegroundColor Cyan
 }
 
-function Invoke-InspectOutput {
+function Get-PacketInspection {
     if (-not (Test-Path -LiteralPath $OutDir)) {
         throw "Packet directory not found: $OutDir"
     }
@@ -1261,32 +1267,75 @@ function Invoke-InspectOutput {
         }
     }
 
+    return [pscustomobject]@{
+        Rows = $rows
+        Ok = $okAll
+        ChangeSummary = $changeSummary
+        StartHerePath = $startHerePath
+    }
+}
+
+function Write-PacketInspection {
+    param($Inspection)
+
     Write-Host ""
     Write-GovRule
     Write-Host "STIGPilot Government Mode Packet Inspection" -ForegroundColor Cyan
     Write-GovRule
-    foreach ($row in $rows) {
+    foreach ($row in $Inspection.Rows) {
         $color = if ($row.Status -eq "PASS") { "Green" } else { "Red" }
         Write-Host ("{0,-28} {1,-6} {2}" -f $row.File, $row.Status, $row.Details) -ForegroundColor $color
     }
     Write-GovRule
 
-    if ($changeSummary) {
+    if ($Inspection.ChangeSummary) {
         Write-Host ("Change summary: {0} total, {1} high-priority, {2} implementation-likely, {3} evidence-update-likely." -f `
-            $changeSummary.total, `
-            $changeSummary.high_priority_review, `
-            $changeSummary.implementation_change_likely, `
-            $changeSummary.evidence_update_likely)
+            $Inspection.ChangeSummary.total, `
+            $Inspection.ChangeSummary.high_priority_review, `
+            $Inspection.ChangeSummary.implementation_change_likely, `
+            $Inspection.ChangeSummary.evidence_update_likely)
     }
+}
 
-    if ($okAll) {
+function Invoke-InspectOutput {
+    $inspection = Get-PacketInspection
+    Write-PacketInspection $inspection
+
+    if ($inspection.Ok) {
         Write-Host "Packet is handoff-ready: $OutDir" -ForegroundColor Green
-        Write-Host "Start here: $startHerePath" -ForegroundColor Cyan
+        Write-Host "Start here: $($inspection.StartHerePath)" -ForegroundColor Cyan
     }
     else {
         Write-Host "Packet is incomplete: $OutDir" -ForegroundColor Red
         exit 1
     }
+}
+
+function Invoke-ArchiveOutput {
+    $inspection = Get-PacketInspection
+    Write-PacketInspection $inspection
+
+    if (-not $inspection.Ok) {
+        Write-Host "Archive skipped because packet is incomplete: $OutDir" -ForegroundColor Red
+        exit 1
+    }
+
+    $zipPath = if ($Zip) { $Zip } else { "$OutDir.zip" }
+    if ((Test-Path -LiteralPath $zipPath) -and (-not $Force)) {
+        throw "Archive already exists: $zipPath. Use -Force to overwrite it."
+    }
+
+    $zipParent = Split-Path -Parent $zipPath
+    if ($zipParent) {
+        Ensure-Directory $zipParent
+    }
+    if (Test-Path -LiteralPath $zipPath) {
+        Remove-Item -LiteralPath $zipPath -Force
+    }
+
+    Compress-Archive -Path (Join-Path $OutDir "*") -DestinationPath $zipPath -CompressionLevel Optimal
+    Write-Host "Wrote packet archive: $zipPath" -ForegroundColor Green
+    Write-Host "Archived folder: $OutDir" -ForegroundColor Cyan
 }
 
 function Write-DiffSummary {
@@ -1330,6 +1379,7 @@ try {
         "evidence" { Invoke-Evidence }
         "packet" { Invoke-Packet }
         "inspect" { Invoke-InspectOutput }
+        "archive" { Invoke-ArchiveOutput }
     }
 }
 catch {

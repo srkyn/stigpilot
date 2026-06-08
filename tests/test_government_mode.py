@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -151,6 +152,66 @@ def test_government_mode_inspect_rejects_incomplete_packet(tmp_path: Path):
     assert result.returncode == 1
     assert "Packet is incomplete" in result.stdout
     assert "change-brief.md" in result.stdout
+
+
+def test_government_mode_archive_writes_zip_after_inspection(tmp_path: Path):
+    out = tmp_path / "gov"
+    archive = tmp_path / "gov.zip"
+    packet = run_gov_mode(
+        "-Command",
+        "packet",
+        "-Old",
+        str(ROOT / "examples" / "sample_input" / "old.xml"),
+        "-New",
+        str(ROOT / "examples" / "sample_input" / "new.xml"),
+        "-OutDir",
+        str(out),
+    )
+
+    result = run_gov_mode("-Command", "archive", "-OutDir", str(out), "-Zip", str(archive))
+
+    assert packet.returncode == 0, packet.stdout + packet.stderr
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "Wrote packet archive" in result.stdout
+    assert archive.exists()
+    with zipfile.ZipFile(archive) as zip_file:
+        names = set(zip_file.namelist())
+    assert "START_HERE.md" in names
+    assert "change-brief.md" in names
+    assert "remediation-backlog.csv" in names
+
+
+def test_government_mode_archive_rejects_existing_zip_without_force(tmp_path: Path):
+    out = tmp_path / "gov"
+    archive = tmp_path / "gov.zip"
+    packet = run_gov_mode(
+        "-Command",
+        "packet",
+        "-Old",
+        str(ROOT / "examples" / "sample_input" / "old.xml"),
+        "-New",
+        str(ROOT / "examples" / "sample_input" / "new.xml"),
+        "-OutDir",
+        str(out),
+    )
+    archive.write_text("already here", encoding="utf-8")
+
+    result = run_gov_mode("-Command", "archive", "-OutDir", str(out), "-Zip", str(archive))
+
+    assert packet.returncode == 0, packet.stdout + packet.stderr
+    assert result.returncode == 1
+    assert "Archive already exists" in result.stdout
+
+
+def test_government_mode_archive_rejects_incomplete_packet(tmp_path: Path):
+    out = tmp_path / "gov"
+    out.mkdir()
+    (out / "START_HERE.md").write_text("# Packet\n", encoding="utf-8")
+
+    result = run_gov_mode("-Command", "archive", "-OutDir", str(out), "-Zip", str(tmp_path / "gov.zip"))
+
+    assert result.returncode == 1
+    assert "Archive skipped because packet is incomplete" in result.stdout
 
 
 def test_government_mode_parse_writes_csv_and_json(tmp_path: Path):

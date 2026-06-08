@@ -253,6 +253,7 @@ XML files as arguments.
   -OutDir output\gov
 
 .\tools\STIGPilot-Gov.ps1 -Command inspect -OutDir output\gov
+.\tools\STIGPilot-Gov.ps1 -Command archive -OutDir output\gov -Zip output\gov.zip
 ```
 
 Generated files:
