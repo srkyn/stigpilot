@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.9
+
+2026-06-08
+
+- Added role-based copy-paste workflows for analysts, sysadmins, GRC evidence owners, managers, ticket import prep, and Government Mode.
+- Linked the workflow guide from the README.
+
 ## 1.0.8
 
 2026-06-08

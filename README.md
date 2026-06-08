@@ -178,6 +178,8 @@ STIGPilot intentionally stops at the remediation-planning boundary. See [docs/re
 - A sysadmin team needs owner-focused remediation work.
 - A manager needs a short update without reading hundreds of controls.
 
+Need role-based commands? Start with [copy-paste workflows](docs/copy-paste-workflows.md).
+
 ## Install
 
 From a clone:
@@ -270,6 +272,8 @@ Generate a focused Government Mode packet for one impact category or owner:
 ```
 
 ## CLI usage
+
+For role-based command recipes, see [copy-paste workflows](docs/copy-paste-workflows.md).
 
 Health check:
 
