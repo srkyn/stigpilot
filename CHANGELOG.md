@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Updated the PyPI publish workflow to use current GitHub Actions versions and the existing development build dependency.
+
 ## 1.0.2
 
 2026-06-08
