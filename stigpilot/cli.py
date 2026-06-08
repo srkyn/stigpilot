@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 import sys
 from pathlib import Path
@@ -47,6 +48,21 @@ VALID_IMPACTS = {
     "review_recommended",
     "no_action_likely",
 }
+PACKET_COMMON_FILES = (
+    "START_HERE.md",
+    "change-brief.md",
+    "changes.json",
+    "remediation-backlog.csv",
+    "evidence-checklist.md",
+    "jira-import.csv",
+    "servicenow-import.csv",
+    "github-issues.md",
+)
+PACKET_PYTHON_EXTRA_FILES = (
+    "change-brief.html",
+    "manager-summary.md",
+    "remediation-drafts.md",
+)
 SEVERITY_COLORS = {
     "high": "bold red",
     "HIGH": "bold red",
@@ -1007,6 +1023,70 @@ def config_example(
     """Write an example local owner/tag mapping config."""
 
     _safe_write(lambda: out.write_text(CONFIG_EXAMPLE, encoding="utf-8"), out, "config example")
+
+
+@app.command("inspect-output")
+def inspect_output(
+    packet_dir: Path = typer.Argument(..., help="Generated STIGPilot packet directory to inspect."),
+) -> None:
+    """Check whether a generated packet is complete enough to hand off."""
+
+    if not packet_dir.exists():
+        console.print(f"[red]Packet directory not found:[/red] {packet_dir}")
+        raise typer.Exit(1)
+    if not packet_dir.is_dir():
+        console.print(f"[red]Packet path is not a directory:[/red] {packet_dir}")
+        raise typer.Exit(1)
+
+    start_here = packet_dir / "START_HERE.md"
+    start_here_text = start_here.read_text(encoding="utf-8", errors="replace") if start_here.exists() else ""
+    expected_files = list(PACKET_COMMON_FILES)
+    if any(filename in start_here_text for filename in PACKET_PYTHON_EXTRA_FILES):
+        expected_files.extend(PACKET_PYTHON_EXTRA_FILES)
+
+    rows: list[tuple[str, bool, str]] = []
+    change_summary: dict[str, object] = {}
+    for filename in expected_files:
+        path = packet_dir / filename
+        if not path.exists():
+            rows.append((filename, False, "missing"))
+        elif path.stat().st_size == 0:
+            rows.append((filename, False, "empty"))
+        elif filename == "changes.json":
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8-sig"))
+                summary = payload.get("summary", {})
+                if isinstance(summary, dict):
+                    change_summary = summary
+                rows.append((filename, True, f"{path.stat().st_size} bytes"))
+            except (json.JSONDecodeError, OSError) as exc:
+                rows.append((filename, False, f"invalid JSON: {exc}"))
+        else:
+            rows.append((filename, True, f"{path.stat().st_size} bytes"))
+
+    table = Table(title="STIGPilot Packet Inspection", header_style="bold blue", border_style="dim", show_lines=False)
+    table.add_column("File")
+    table.add_column("Status")
+    table.add_column("Details")
+    for filename, ok, detail in rows:
+        table.add_row(filename, "[green]PASS[/green]" if ok else "[red]FAIL[/red]", detail)
+    console.print(table)
+
+    if change_summary:
+        console.print(
+            "[bold]Change summary:[/bold] "
+            f"{change_summary.get('total', 0)} total, "
+            f"{change_summary.get('high_priority_review', 0)} high-priority, "
+            f"{change_summary.get('implementation_change_likely', 0)} implementation-likely, "
+            f"{change_summary.get('evidence_update_likely', 0)} evidence-update-likely."
+        )
+
+    if all(ok for _, ok, _ in rows):
+        console.print(f"[green]Packet is handoff-ready:[/green] {packet_dir}")
+        console.print(f"[bold]Start here:[/bold] {packet_dir / 'START_HERE.md'}")
+    else:
+        console.print(f"[red]Packet is incomplete:[/red] {packet_dir}")
+        raise typer.Exit(1)
 
 
 @app.command()

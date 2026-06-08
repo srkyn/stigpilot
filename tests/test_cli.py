@@ -153,6 +153,46 @@ def test_cli_packet_generates_complete_packet(tmp_path: Path):
     assert (out / "remediation-drafts.md").exists()
 
 
+def test_cli_inspect_output_accepts_complete_packet(tmp_path: Path):
+    out = tmp_path / "packet"
+    packet_result = runner.invoke(
+        app,
+        [
+            "packet",
+            str(ROOT / "examples" / "sample_input" / "old.xml"),
+            str(ROOT / "examples" / "sample_input" / "new.xml"),
+            "--out",
+            str(out),
+        ],
+    )
+
+    inspect_result = runner.invoke(app, ["inspect-output", str(out)])
+
+    assert packet_result.exit_code == 0
+    assert inspect_result.exit_code == 0
+    assert "Packet is handoff-ready" in inspect_result.output
+    assert "Change summary" in inspect_result.output
+
+
+def test_cli_inspect_output_rejects_incomplete_packet(tmp_path: Path):
+    out = tmp_path / "packet"
+    out.mkdir()
+    (out / "START_HERE.md").write_text("# Packet\n", encoding="utf-8")
+
+    result = runner.invoke(app, ["inspect-output", str(out)])
+
+    assert result.exit_code == 1
+    assert "Packet is incomplete" in result.output
+    assert "change-brief.md" in result.output
+
+
+def test_cli_inspect_output_accepts_government_mode_packet():
+    result = runner.invoke(app, ["inspect-output", str(ROOT / "examples" / "government_mode_output")])
+
+    assert result.exit_code == 0
+    assert "Packet is handoff-ready" in result.output
+
+
 def test_cli_drafts_writes_review_only_markdown(tmp_path: Path):
     out = tmp_path / "remediation-drafts.md"
 

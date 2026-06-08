@@ -312,6 +312,7 @@ Generate a complete local workflow packet from two STIG files:
 
 ```bash
 stigpilot packet examples/sample_input/old.xml examples/sample_input/new.xml --out output/packet
+stigpilot inspect-output output/packet
 ```
 
 ![STIGPilot packet generation - all output files in one command](https://github.com/srkyn/stigpilot/raw/main/docs/assets/demos/stigpilot-packet.gif)

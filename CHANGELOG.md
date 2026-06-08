@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.13
+
+2026-06-08
+
+- Added `stigpilot inspect-output` to check generated packet folders before handoff.
+- Added CLI regression tests for complete and incomplete packet inspection.
+- Documented packet inspection in the README packet workflow.
+
 ## 1.0.12
 
 2026-06-08
