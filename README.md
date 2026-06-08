@@ -35,6 +35,12 @@ python -m pip install -e ".[dev]"
 stigpilot demo
 ```
 
+Need the shortest path after install?
+
+```bash
+stigpilot quickstart
+```
+
 Generated files:
 
 ```text
@@ -216,7 +222,10 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
 **Or use the included `.cmd` launcher** which handles this automatically:
+
+```powershell
 tools\STIGPilot.cmd -Command packet -Old old.xml -New new.xml -OutDir output\packet
+```
 
 **No git required.** If you cannot clone the repository, download
 [`STIGPilot-Gov.ps1`](https://github.com/srkyn/stigpilot/raw/main/tools/STIGPilot-Gov.ps1)
@@ -263,6 +272,7 @@ Generate a focused Government Mode packet for one impact category or owner:
 Health check:
 
 ```bash
+stigpilot quickstart
 stigpilot doctor
 ```
 

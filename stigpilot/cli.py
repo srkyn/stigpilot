@@ -11,6 +11,7 @@ from typing import Optional
 import typer
 from rich.columns import Columns
 from rich.console import Console
+from rich.markup import escape as rich_escape
 from rich.panel import Panel
 from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
@@ -396,6 +397,46 @@ def _print_outputs_table(title: str, outputs: dict[str, Path]) -> None:
     for name, path in outputs.items():
         table.add_row(name, str(path))
     console.print(table)
+
+
+@app.command()
+def quickstart() -> None:
+    """Show the fastest useful paths for Python and Government Mode."""
+
+    def cmd(value: str) -> str:
+        return rich_escape(value)
+
+    console.print("[bold]Pick the path that fits your environment.[/bold]")
+    console.print("")
+
+    python_table = Table(title="Python CLI", header_style="bold blue", border_style="dim", show_lines=False)
+    python_table.add_column("Goal")
+    python_table.add_column("Command")
+    python_table.add_row("Install for development", cmd('python -m pip install -e ".[dev]"'))
+    python_table.add_row("Check local setup", cmd("stigpilot doctor"))
+    python_table.add_row("Generate demo packet", cmd("stigpilot demo"))
+    python_table.add_row(
+        "Compare two STIG files",
+        cmd("stigpilot packet old.xml new.xml --out output/packet"),
+    )
+
+    gov_table = Table(title="Government Mode", header_style="bold green", border_style="dim", show_lines=False)
+    gov_table.add_column("Goal")
+    gov_table.add_column("Command")
+    gov_table.add_row("Check PowerShell setup", cmd(r".\tools\STIGPilot-Gov.ps1 -Command doctor"))
+    gov_table.add_row(
+        "Generate local packet",
+        cmd(r".\tools\STIGPilot-Gov.ps1 -Command packet -Old old.xml -New new.xml -OutDir output\gov"),
+    )
+    gov_table.add_row(
+        "Use launcher",
+        cmd(r"tools\STIGPilot.cmd -Command packet -Old old.xml -New new.xml -OutDir output\gov"),
+    )
+
+    console.print(python_table)
+    console.print(gov_table)
+    console.print("[bold]Start here:[/bold] run [cyan]stigpilot demo[/cyan], then open [cyan]output/demo/change-brief.md[/cyan].")
+    console.print("Government Mode uses built-in PowerShell/.NET only and is intentionally smaller than the Python CLI.")
 
 
 def _print_chrome_missing_message(input_dir: Path, sample_old: Path, sample_new: Path) -> None:

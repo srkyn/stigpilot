@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.6
+
+2026-06-08
+
+- Added `stigpilot quickstart` with side-by-side Python CLI and Government Mode first-run commands.
+- Updated README first-use docs with the quickstart command and a fenced Government Mode launcher example.
+- Updated the release checklist to include quickstart, Government Mode doctor, and the one-command sample output regeneration script.
+
 ## 1.0.5
 
 2026-06-08

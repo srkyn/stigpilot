@@ -242,6 +242,17 @@ def test_cli_doctor_runs():
     assert "STIGPilot Doctor" in result.output
 
 
+def test_cli_quickstart_shows_python_and_government_paths():
+    result = runner.invoke(app, ["quickstart"])
+
+    assert result.exit_code == 0
+    assert "Python CLI" in result.output
+    assert "Government Mode" in result.output
+    assert 'python -m pip install -e ".[dev]"' in result.output
+    assert "stigpilot demo" in result.output
+    assert "STIGPilot-Gov.ps1" in result.output
+
+
 def test_cli_config_example_writes_file(tmp_path: Path):
     out = tmp_path / "stigpilot.toml"
 
