@@ -12,11 +12,11 @@ Use this checklist to prepare evidence requests. This helper does not validate c
 
 Validation metadata:
 
-- Asset/System:
-- Environment:
-- Validated by:
-- Date:
-- Notes:
+- [ ] Asset/System:
+- [ ] Environment:
+- [ ] Validated by:
+- [ ] Date:
+- [ ] Notes:
 
 Evidence requests:
 - [ ] Screenshot or export of the relevant setting
@@ -35,11 +35,11 @@ Evidence requests:
 
 Validation metadata:
 
-- Asset/System:
-- Environment:
-- Validated by:
-- Date:
-- Notes:
+- [ ] Asset/System:
+- [ ] Environment:
+- [ ] Validated by:
+- [ ] Date:
+- [ ] Notes:
 
 Evidence requests:
 - [ ] Screenshot or export of the relevant setting
@@ -58,11 +58,11 @@ Evidence requests:
 
 Validation metadata:
 
-- Asset/System:
-- Environment:
-- Validated by:
-- Date:
-- Notes:
+- [ ] Asset/System:
+- [ ] Environment:
+- [ ] Validated by:
+- [ ] Date:
+- [ ] Notes:
 
 Evidence requests:
 - [ ] Screenshot or export of the relevant setting

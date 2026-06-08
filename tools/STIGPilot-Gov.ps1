@@ -784,15 +784,49 @@ function Get-ChangeCounts {
     }
 }
 
+function Get-OwnerImpactRows {
+    param($Changes)
+
+    $rows = @()
+    foreach ($group in ($Changes | Group-Object owner)) {
+        $groupChanges = @($group.Group)
+        $rows += [PSCustomObject]@{
+            owner = $group.Name
+            changes = $group.Count
+            high_priority = @($groupChanges | Where-Object { $_.impact -eq "high_priority_review" }).Count
+            implementation = @($groupChanges | Where-Object { $_.impact -eq "implementation_change_likely" }).Count
+            evidence = @($groupChanges | Where-Object { $_.impact -eq "evidence_update_likely" }).Count
+        }
+    }
+    return @($rows | Sort-Object `
+        @{Expression = "high_priority"; Descending = $true},
+        @{Expression = "implementation"; Descending = $true},
+        @{Expression = "evidence"; Descending = $true},
+        @{Expression = "changes"; Descending = $true},
+        @{Expression = "owner"; Descending = $false})
+}
+
+function Write-GovRule {
+    Write-Host ("-" * 72) -ForegroundColor DarkGray
+}
+
+function Write-GovSummaryRow {
+    param(
+        [Parameter(Mandatory = $true)][string]$Label,
+        [Parameter(Mandatory = $true)][object]$Value
+    )
+    Write-Host ("{0,-32} {1}" -f $Label, $Value)
+}
+
 function Write-ChangeBrief {
     param($OldDoc, $NewDoc, $Changes, [string]$PathValue)
     Ensure-ParentDirectory $PathValue
     $counts = Get-ChangeCounts $Changes
-    $ownerGroups = $Changes | Group-Object owner | Sort-Object Count -Descending
+    $ownerRows = @(Get-OwnerImpactRows $Changes)
     $top = @($Changes | Select-Object -First 10)
     $topOwner = "No owner group"
-    if (@($ownerGroups).Count -gt 0) {
-        $topOwner = (@($ownerGroups)[0]).Name
+    if ($ownerRows.Count -gt 0) {
+        $topOwner = (@($ownerRows | Select-Object -First 3).owner) -join ", "
     }
 
     $lines = @()
@@ -800,7 +834,7 @@ function Write-ChangeBrief {
     $lines += ""
     $lines += "## Executive Summary"
     $lines += ""
-    $lines += "$($counts.total) control change(s) were detected between the supplied XCCDF files. $($counts.high_priority_review) change(s) need high-priority review, $($counts.implementation_change_likely) likely require implementation review, and $($counts.evidence_update_likely) likely require refreshed evidence. The most affected owner group is $topOwner. Use this as local triage support; it does not scan systems or validate compliance."
+    $lines += "$($counts.total) control change(s) were detected between the supplied XCCDF files. $($counts.high_priority_review) change(s) need high-priority review, $($counts.implementation_change_likely) likely require implementation review, and $($counts.evidence_update_likely) likely require refreshed evidence. The owner group(s) with the most priority work are $topOwner. Use this as local triage support; it does not scan systems or validate compliance."
     $lines += ""
     $lines += "## Source Files"
     $lines += ""
@@ -841,9 +875,8 @@ function Write-ChangeBrief {
     $lines += ""
     $lines += "| Owner | Changes | High Priority | Implementation Likely | Evidence Updates |"
     $lines += "| --- | ---: | ---: | ---: | ---: |"
-    foreach ($group in $ownerGroups) {
-        $groupChanges = @($group.Group)
-        $lines += "| $($group.Name) | $($group.Count) | $(@($groupChanges | Where-Object { $_.impact -eq 'high_priority_review' }).Count) | $(@($groupChanges | Where-Object { $_.impact -eq 'implementation_change_likely' }).Count) | $(@($groupChanges | Where-Object { $_.impact -eq 'evidence_update_likely' }).Count) |"
+    foreach ($row in $ownerRows) {
+        $lines += "| $($row.owner) | $($row.changes) | $($row.high_priority) | $($row.implementation) | $($row.evidence) |"
     }
     $lines += ""
     $lines += "## Detailed Changes"
@@ -880,11 +913,11 @@ function Write-EvidenceChecklist {
             $lines += ""
             $lines += "Validation metadata:"
             $lines += ""
-            $lines += "- Asset/System:"
-            $lines += "- Environment:"
-            $lines += "- Validated by:"
-            $lines += "- Date:"
-            $lines += "- Notes:"
+            $lines += "- [ ] Asset/System:"
+            $lines += "- [ ] Environment:"
+            $lines += "- [ ] Validated by:"
+            $lines += "- [ ] Date:"
+            $lines += "- [ ] Notes:"
             $lines += ""
             $lines += "Evidence requests:"
             foreach ($item in (Get-EvidenceRequests $control)) {
@@ -979,26 +1012,29 @@ function Write-DiffSummary {
     param($OldDoc, $NewDoc, $Changes, [string]$BriefPath, [string]$BacklogPath, [int]$UnfilteredCount = -1)
     $counts = Get-ChangeCounts $Changes
     Write-Host ""
+    Write-GovRule
     Write-Host "STIGPilot Government Mode Diff Summary" -ForegroundColor Cyan
-    Write-Host ("Old controls:                 {0}" -f $OldDoc.controls.Count)
-    Write-Host ("New controls:                 {0}" -f $NewDoc.controls.Count)
+    Write-GovRule
+    Write-GovSummaryRow "Old controls" $OldDoc.controls.Count
+    Write-GovSummaryRow "New controls" $NewDoc.controls.Count
     if ($UnfilteredCount -ge 0 -and (($Impact) -or ($Owner))) {
-        Write-Host ("Unfiltered changes:           {0}" -f $UnfilteredCount)
+        Write-GovSummaryRow "Unfiltered changes" $UnfilteredCount
         if ($Impact) {
-            Write-Host ("Impact filter:                {0}" -f $Impact)
+            Write-GovSummaryRow "Impact filter" $Impact
         }
         if ($Owner) {
-            Write-Host ("Owner filter:                 {0}" -f $Owner)
+            Write-GovSummaryRow "Owner filter" $Owner
         }
     }
-    Write-Host ("Total changes:                {0}" -f $counts.total)
-    Write-Host ("Added:                        {0}" -f $counts.added)
-    Write-Host ("Removed:                      {0}" -f $counts.removed)
-    Write-Host ("Modified:                     {0}" -f $counts.modified)
-    Write-Host ("Severity increased:           {0}" -f $counts.severity_increased)
-    Write-Host ("High-priority review:         {0}" -f $counts.high_priority_review)
-    Write-Host ("Implementation change likely: {0}" -f $counts.implementation_change_likely)
-    Write-Host ("Evidence update likely:       {0}" -f $counts.evidence_update_likely)
+    Write-GovSummaryRow "Total changes" $counts.total
+    Write-GovSummaryRow "Added" $counts.added
+    Write-GovSummaryRow "Removed" $counts.removed
+    Write-GovSummaryRow "Modified" $counts.modified
+    Write-GovSummaryRow "Severity increased" $counts.severity_increased
+    Write-GovSummaryRow "High-priority review" $counts.high_priority_review
+    Write-GovSummaryRow "Implementation change likely" $counts.implementation_change_likely
+    Write-GovSummaryRow "Evidence update likely" $counts.evidence_update_likely
+    Write-GovRule
     Write-Host ""
     Write-Host "Change brief: $BriefPath" -ForegroundColor Green
     Write-Host "Backlog CSV:   $BacklogPath" -ForegroundColor Green

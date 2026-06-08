@@ -88,7 +88,10 @@ def test_government_mode_packet_writes_core_outputs(tmp_path: Path):
 
     assert "# STIGPilot Government Mode Change Brief" in brief
     assert "## At-a-Glance" in brief
+    assert "owner group(s) with the most priority work are Endpoint/Windows Admin, Network/Security Engineering, Linux Admin" in brief
     assert "- [ ]" in checklist
+    assert "- [ ] Asset/System:" in checklist
+    assert "- [ ] Environment:" in checklist
     assert "Suggested Owner" in backlog
     assert "Summary" in jira
     assert "Issue Type" in jira

@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-4 control change(s) were detected between the supplied XCCDF files. 2 change(s) need high-priority review, 0 likely require implementation review, and 1 likely require refreshed evidence. The most affected owner group is Linux Admin. Use this as local triage support; it does not scan systems or validate compliance.
+4 control change(s) were detected between the supplied XCCDF files. 2 change(s) need high-priority review, 0 likely require implementation review, and 1 likely require refreshed evidence. The owner group(s) with the most priority work are Endpoint/Windows Admin, Network/Security Engineering, Linux Admin. Use this as local triage support; it does not scan systems or validate compliance.
 
 ## Source Files
 
@@ -46,10 +46,10 @@
 
 | Owner | Changes | High Priority | Implementation Likely | Evidence Updates |
 | --- | ---: | ---: | ---: | ---: |
-| Linux Admin | 1 | 0 | 0 | 1 |
-| Database Admin | 1 | 0 | 0 | 0 |
 | Endpoint/Windows Admin | 1 | 1 | 0 | 0 |
 | Network/Security Engineering | 1 | 1 | 0 | 0 |
+| Linux Admin | 1 | 0 | 0 | 1 |
+| Database Admin | 1 | 0 | 0 | 0 |
 
 ## Detailed Changes
 

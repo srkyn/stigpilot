@@ -1,8 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.0.3
+
+2026-06-08
 
 - Updated the PyPI publish workflow to use current GitHub Actions versions and the existing development build dependency.
+- Improved Government Mode terminal summaries with cleaner visual separation and aligned metrics.
+- Fixed Government Mode change briefs so owner summaries prioritize high-priority and evidence-update work instead of arbitrary tie order.
+- Improved Government Mode evidence checklists with checkbox metadata fields.
 
 ## 1.0.2
 
