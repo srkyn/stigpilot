@@ -106,11 +106,14 @@ def _extract_stig_id(rule: ET.Element) -> str:
     version = _first_text(rule, "version")
     if version:
         return version
-    for ident in _descendants(rule, "ident"):
-        system = clean_text(ident.attrib.get("system", "")).lower()
-        text = clean_text("".join(ident.itertext()))
+    idents = [
+        (clean_text(ident.attrib.get("system", "")).lower(), clean_text("".join(ident.itertext())))
+        for ident in _descendants(rule, "ident")
+    ]
+    for system, text in idents:
         if "stigid" in system or "stig" in system:
             return text
+    for _system, text in idents:
         if text and not text.upper().startswith(("CCI-", "V-")):
             return text
     return ""

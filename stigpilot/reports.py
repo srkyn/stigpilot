@@ -467,7 +467,10 @@ def manager_summary_report(
     """Generate a concise manager-facing Markdown report."""
 
     impacts = Counter(change.impact for change in changes)
-    owners = Counter(suggested_owner(change.current_control, config) for change in changes)
+    owner_change_map: dict[str, list[ControlChange]] = defaultdict(list)
+    for change in changes:
+        owner_change_map[suggested_owner(change.current_control, config)].append(change)
+    owners: Counter[str] = Counter({k: len(v) for k, v in owner_change_map.items()})
     priority_changes = [
         change
         for change in changes
@@ -501,8 +504,7 @@ def manager_summary_report(
     ]
     if owners:
         for owner, count in owners.most_common():
-            owner_changes = [change for change in changes if suggested_owner(change.current_control, config) == owner]
-            owner_impacts = Counter(change.impact for change in owner_changes)
+            owner_impacts = Counter(change.impact for change in owner_change_map[owner])
             lines.append(
                 f"| {_md(owner)} | {count} | {owner_impacts.get('high_priority_review', 0)} | "
                 f"{owner_impacts.get('implementation_change_likely', 0)} | {owner_impacts.get('evidence_update_likely', 0)} |"

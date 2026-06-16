@@ -219,7 +219,7 @@ def _print_change_summary(changes, outputs: list[Path]) -> None:
             control = change.current_control
             title = f"{change.vuln_id or (control.vuln_id if control else '')} - {(control.title if control else '') or 'Untitled'}"
             owner = suggested_owner(control)
-            body = f"[dim]{colorize_severity(_impact_label(change.impact))} · {owner}[/dim]\n{change.reason}"
+            body = f"[dim]{colorize_severity(impact_label(change.impact))} · {owner}[/dim]\n{change.reason}"
             console.print(Panel(body, title=f"[bold]{title}[/bold]", border_style=_impact_border(change.impact)))
     if outputs:
         console.print("[bold]Written files:[/bold]")
@@ -247,14 +247,6 @@ def _impact_border(impact: str) -> str:
     return "cyan"
 
 
-def _impact_label(value: str) -> str:
-    return {
-        "high_priority_review": "High-priority review",
-        "implementation_change_likely": "Implementation change likely",
-        "evidence_update_likely": "Evidence update likely",
-        "review_recommended": "Review recommended",
-        "no_action_likely": "No action likely",
-    }.get(value, value.replace("_", " ").title())
 
 
 def _filter_changes(

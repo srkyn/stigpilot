@@ -11,6 +11,7 @@ from typing import Iterable
 from .config import StigPilotConfig
 from .impact import evidence_requests
 from .models import ControlChange, StigControl, StigDocument
+from .reports import IMPACT_LABELS
 from .taxonomy import suggested_owner
 from .utils import ensure_parent, summarize
 
@@ -30,13 +31,6 @@ CONTROL_FIELDS = [
     "Raw ID",
 ]
 
-IMPACT_LABELS = {
-    "high_priority_review": "High-priority review",
-    "implementation_change_likely": "Implementation change likely",
-    "evidence_update_likely": "Evidence update likely",
-    "review_recommended": "Review recommended",
-    "no_action_likely": "No action likely",
-}
 CHANGES_JSON_SCHEMA_VERSION = "1.0"
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import re
 
 from .config import StigPilotConfig
@@ -94,8 +95,14 @@ def has_config_terms(value: str) -> bool:
     return _contains_any(value.lower(), CONFIG_TERMS)
 
 
+@functools.lru_cache(maxsize=256)
+def _compile_terms(terms: tuple[str, ...]) -> re.Pattern[str]:
+    pattern = "|".join(rf"(?<![a-z0-9]){re.escape(t)}(?![a-z0-9])" for t in terms)
+    return re.compile(pattern)
+
+
 def _contains_any(value: str, terms: tuple[str, ...]) -> bool:
-    return any(re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", value) for term in terms)
+    return bool(_compile_terms(terms).search(value))
 
 
 def _tag_rules(config: StigPilotConfig | None) -> dict[str, tuple[str, ...]]:
